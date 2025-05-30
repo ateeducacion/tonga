@@ -1,0 +1,15 @@
+Abeja_negra.png
+Arana.png
+Avispa.png
+Cochinilla.png
+Escarabajo_rinoceronte.png
+Esfinge_canaria_de_las_tabaibas.png
+Libelula_roja.png
+Libelula.png
+Mantis_religiosa.png
+Manto_de_las_Canarias.png
+Mariposa_Monarca.png
+Mariposa_Tigre.png
+Mariposa_Vanessa_vulcania.png
+Saltamontes.png
+Tijereta.png

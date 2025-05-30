@@ -1,0 +1,15 @@
+Mapa-America.png||tongaappfondo
+Mapa-America_BN.png||tongaappfondo
+Mapa-Atlantico.png||tongaappfondo
+Mapa-CentralAmerica.png||tongaappfondo
+Mapa-Europa_Asia_Africa_Oceania.png||tongaappfondo
+Mapa-Europa_Asia_Africa_Oceania_BN.png||tongaappfondo
+Mapa-Europa_Asia_Africa_Oceania_coordenadas.png||tongaappfondo
+Mapa-Grecia_BN.png||tongaappfondo
+Mapa-Islas_Canarias.png||tongaappfondo
+Mapa-Italia_BN.png||tongaappfondo
+Mapa-Londres_turismo.png||tongaappfondo
+Mapamundi.png||tongaappfondo
+Mapamundi_BN.png||tongaappfondo
+Mapamundi_coordenadas.png||tongaappfondo
+Mapa-Sudeste_Asiatico_coordenadas.png||tongaappfondo

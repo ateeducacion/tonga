@@ -1,0 +1,6 @@
+carabela_santa_maria.png
+corbeta.png
+fragata.png
+galeon.png
+nao_victoria.png
+navio_algeciras.png

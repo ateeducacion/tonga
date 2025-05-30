@@ -1,0 +1,71 @@
+tongaappcabecera|Fauna
+aves|Aves
+faunamarina|Fauna Marina
+faunaterrestre|Fauna Terrestre
+insectos|Insectos
+
+tongaappcabecera|Flora
+floracanaria|Flora Canaria
+florageneral|Flora General
+pisosvegetacion|Pisos Vegetacion
+espaciosnaturales|Espacios Naturales
+
+tongaappcabecera|Ciencia
+laboratorio|Laboratorio
+insectario|Insectario
+sistemasolar|Sistema Solar
+clima|Clima
+aguaenergia|Agua y Energia
+
+tongaappcabecera|Espacios creativos
+personajes|Personajes
+espaciosCreativos|Espacios creativos
+instrumentos|Instrumentos
+vestuario|Vestuario
+comic|Comic
+emojis|Emojis
+recortables|Recortables
+
+tongaappcabecera|Sociedad
+antiguoscanarios|Antiguos Canarios
+etnografia|Etnografía
+arquitectura|Arquitectura
+alimentoscanarios|Alimentos Canarios
+alimentos|Alimentos
+personajescanarios|Personajes Canarios
+hogar|Hogar
+escuela|Escuela
+comercios|Comercios
+navio|Navios
+granjahuerto|Granja - Huerto
+londres|Londres
+transportes|Transportes
+
+tongaappcabecera|Iconos
+tenerife|Tenerife
+lapalma|La Palma
+elhierro|El Hierro
+fuerteventura|Fuerteventura
+grancanaria|Gran Canaria
+lagomera|La Gomera
+lanzarote|Lanzarote
+lagraciosa|La Graciosa
+marina|Fauna Marina
+terrestre|Fauna Terrestre
+dispositivosElectronicos|Dispositivos electrónicos
+vegetacion|Vegetación
+gastronomia|Gastronomía
+
+
+
+
+tongaappcabecera|Fondos
+fondosvarios|Fondos Varios
+escenarios|Espacios creativos
+cartastableros|Cartas - Tableros
+lineasdetiempo|Líneas de tiempo
+mapas|Mapas
+mapasislascanarias|Mapas Islas Canarias
+laberintos|Laberintos
+mandalas|Mandalas
+paisajes|Paisajes

@@ -1,0 +1,16 @@
+﻿agustin_espinosa.png
+alfredo_kraus.png
+alonso_quesada.png
+angel_guimera.png
+benito_perez_galdos.png
+camilo_saint_saens.png
+cesar_manrique.png
+fernando_leon_y_castillo.png
+gregorio_chill_y_naranjo.png
+jose_de_vieira_y_clavijo.png
+juan_leon_y_castillo.png
+maria_rosa_alonso.png
+oscar_dominguez.png
+pedro_garcia_cabrera.png
+ramon_gil_roldan.png
+tomas_morales.png

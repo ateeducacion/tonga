@@ -1,0 +1,10 @@
+Jupiter.png
+Marte.png
+Mercurio.png
+Neptuno.png
+Pluto.png
+Saturno.png
+Sistema_solar.png||tongaappfondo
+Tierra.png
+Urano.png
+Venus.png

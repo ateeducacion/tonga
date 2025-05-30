@@ -1,0 +1,13 @@
+﻿arcoiris.png
+atmosfera.png
+granizo.png
+huracan.png
+lluvia.png
+marejada.png
+nieve.png
+nube.png
+panza_de_burro.png
+rayo.png
+sol.png
+tierra.png
+viento.png

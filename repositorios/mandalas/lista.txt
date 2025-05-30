@@ -1,0 +1,12 @@
+﻿mandalas_01.png||tongaappfondo
+mandalas_02.png||tongaappfondo
+mandalas_03.png||tongaappfondo
+mandalas_04.png||tongaappfondo
+mandalas_05.png||tongaappfondo
+mandalas_06.png||tongaappfondo
+mandalas_07.png||tongaappfondo
+mandalas_08.png||tongaappfondo
+mandalas_09.png||tongaappfondo
+mandalas_10.png||tongaappfondo
+mandalas_11.png||tongaappfondo
+mandalas_12.png||tongaappfondo

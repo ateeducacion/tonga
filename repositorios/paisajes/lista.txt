@@ -1,0 +1,13 @@
+pisos_vegetacion_v1.png|Pisos Vegetación 01|tongaappfondo
+pisos_vegetacion_v2.png|Pisos Vegetación 01|tongaappfondo
+Campo_01_fondo.png|Campo 01|tongaappfondo
+Campo_02.png|Campo 02|tongaappfondo
+Campo_03.png|Campo 03|tongaappfondo
+Fondo_Paisaje_01.png|Paisaje 01|tongaappfondo
+Fondo_Paisaje_02.png|Paisaje 02|tongaappfondo
+Fondo_Paisaje_03.png|Paisaje 03|tongaappfondo
+Playa_fondo.png|Playa 01|tongaappfondo
+Playa_01.png|Playa 02|tongaappfondo
+Playa_02.png|Playa 03|tongaappfondo
+Ciudad_fondo.png|Ciudad 01|tongaappfondo
+Granja_Huerto_01.png|Huerto|tongaappfondo

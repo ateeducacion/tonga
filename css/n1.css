@@ -1,0 +1,355 @@
+*:focus {
+  outline-color: #D4D700;
+}
+/************************************************************************/
+/* .ntx-interface */
+/************************************************************************/
+.ntx-interface-581-001 .ntx-interface-bar {
+  background-color: #D4D700;
+}
+
+.ntx-interface-581-001 .ntx-interface-info svg path,.ntx-interface-581-001 .ntx-interface-link-index svg path {
+  fill: #3F5E65;
+}
+
+.ntx-interface-581-001 .ntx-interface-text .ntx-title1,.ntx-interface-581-001 .ntx-interface-text .ntx-title2,.ntx-interface-581-001 .ntx-interface-text .ntx-title1 p,.ntx-interface-581-001 .ntx-interface-text .ntx-title2 p {
+  color: #3F5E65;
+}
+/************************************************************************/
+/* .ntx-popupSingle */
+/************************************************************************/
+.ntx-popupSingle-581-001 .ntx-popupSingle-header {
+  background-color: #3F5E65;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-header:after {
+  background-color: #D4D700;
+}
+
+.ntx-popupSingle-581-001 a.ntx-popupSingle-close svg path {
+  fill: #D4D700;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-container {
+  border-color: #D4D700;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-header p {
+  color: #D4D700;
+}
+/************************************************************************/
+/* .ntx-ntx-tooltip */
+/************************************************************************/
+.ntx-tooltip-icon {
+  border-bottom-color: #3F5E65;
+}
+
+.ntx-tooltip-581-001 .ntx-tooltip-header {
+  background-color: #3F5E65;
+}
+
+.ntx-tooltip-581-001 .ntx-tooltip-content-wrap {
+  background-color: #D4D700;
+}
+/************************************************************************/
+/*.ntx-table-573-001-look_001*/
+/************************************************************************/
+.ntx-table-573-001-look_001 table thead tr,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > thead > tr,.ntx-table-573-001-look_001 table tbody th,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tbody > th,.ntx-table-573-001-look_001 table thead tr.even,.ntx-table-573-001-look_001 table thead tr.alt,.ntx-table-573-001-look_001 table thead tr:nth-of-type(2n) {
+  background: #D4D700;
+  ;
+}
+
+.ntx-table-573-001-look_001 table,.ntx-table-573-001-look_001 table thead tr th,.ntx-table-573-001-look_001 table tbody tr td,.ntx-table-573-001-look_001 table tbody tr th,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tr > td,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tr > th,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tbody > tr > td,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tbody > tr > th,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > thead > tr > td,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > thead > tr > th,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tfoot > tr > td,.ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tfoot > tr > th {
+  border-color: #D4D700;
+}/* Estilos de los presets */.ntx-table-573-001-look_001 table.ntx-colorBackground > tbody > tr:nth-child(even),.ntx-table-573-001-look_001 table.ntx-colorBackground > tbody > tr:nth-child(even) > td,.ntx-table-573-001-look_001 table > tbody > tr.ntx-subtitle-row {
+  background-color: rgb(246, 247, 204);
+}
+
+.ntx-table-573-001-look_001 table.ntx-first-column-color > tbody > tr td:first-child {
+  background-color: rgb(246, 247, 204);
+}
+
+.ntx-print-enable .ntx-table-573-001-look_001 table thead tr,.ntx-print-enable .ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > thead > tr,.ntx-print-enable .ntx-table-573-001-look_001 table tbody th,.ntx-print-enable .ntx-table-573-001-look_001 .cke_show_borders table.cke_show_border > tbody > th {
+  background: #D4D700;
+}
+/************************************************************************/
+/*.ntx-table-573-001-look_002*/
+/************************************************************************/
+.ntx-table-573-001-look_002 table thead tr,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > thead > tr,.ntx-table-573-001-look_002 table tbody th,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tbody > th,.ntx-table-573-001-look_002 table thead tr.even,.ntx-table-573-001-look_002 table thead tr.alt,.ntx-table-573-001-look_002 table thead tr:nth-of-type(2n) {
+  background: #3F5E65;
+}
+
+.ntx-table-573-001-look_002 table,.ntx-table-573-001-look_002 table thead tr th,.ntx-table-573-001-look_002 table tbody tr th,.ntx-table-573-001-look_002 table tbody tr td,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tr > td,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tr > th,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tbody > tr > td,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tbody > tr > th,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > thead > tr > td,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > thead > tr > th,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tfoot > tr > td,.ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tfoot > tr > th {
+  border-color: #3F5E65;
+}/* Estilos de los presets */.ntx-table-573-001-look_002 table.ntx-colorBackground > tbody > tr:nth-child(even),.ntx-table-573-001-look_002 table.ntx-colorBackground > tbody > tr:nth-child(even) > td,.ntx-table-573-001-look_002 table > tbody > tr.ntx-subtitle-row {
+  background-color: rgb(217, 223, 224);
+}
+
+.ntx-table-573-001-look_002 table.ntx-first-column-color > tbody > tr td:first-child {
+  background-color: rgb(217, 223, 224);
+}
+
+.ntx-print-enable .ntx-table-573-001-look_002 table thead tr,.ntx-print-enable .ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > thead > tr,.ntx-print-enable .ntx-table-573-001-look_002 table tbody th,.ntx-print-enable .ntx-table-573-001-look_002 .cke_show_borders table.cke_show_border > tbody > th {
+  background: #3F5E65;
+}
+/************************************************************************/
+/*.ntx-table-573-002-look_001*/
+/************************************************************************/
+.ntx-table-573-002-look_001 table thead tr,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > thead > tr,.ntx-table-573-002-look_001 table tbody th,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tbody > th,.ntx-table-573-002-look_001 table thead tr.even,.ntx-table-573-002-look_001 table thead tr.alt,.ntx-table-573-002-look_001 table thead tr:nth-of-type(2n) {
+  background: #D4D700;
+  ;
+}
+
+.ntx-table-573-002-look_001 table,.ntx-table-573-002-look_001 table thead tr th,.ntx-table-573-002-look_001 table tbody tr td,.ntx-table-573-002-look_001 table tbody tr th,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tr > td,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tr > th,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tbody > tr > td,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tbody > tr > th,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > thead > tr > td,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > thead > tr > th,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tfoot > tr > td,.ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tfoot > tr > th {
+  border-color: #D4D700;
+}/* Estilos de los presets */.ntx-table-573-002-look_001 table.ntx-colorBackground > tbody > tr:nth-child(even),.ntx-table-573-002-look_001 table.ntx-colorBackground > tbody > tr:nth-child(even) > td,.ntx-table-573-002-look_001 table > tbody > tr.ntx-subtitle-row {
+  background-color: rgb(246, 247, 204);
+}
+
+.ntx-table-573-002-look_001 table.ntx-first-column-color > tbody > tr td:first-child {
+  background-color: rgb(246, 247, 204);
+}
+
+.ntx-print-enable .ntx-table-573-002-look_001 table thead tr,.ntx-print-enable .ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > thead > tr,.ntx-print-enable .ntx-table-573-002-look_001 table tbody th,.ntx-print-enable .ntx-table-573-002-look_001 .cke_show_borders table.cke_show_border > tbody > th {
+  background: #D4D700;
+}
+/************************************************************************/
+/* .allTypeVideo_view_573-001 */
+/************************************************************************/
+.ntx-allTypeVideo-573-001 .netex-video-button-play-pause-restart.netex-video-button-play .big-play path,.ntx-allTypeVideo-573-001 .netex-video-button-play-pause-restart.netex-video-button-restart .big-play path {
+  fill: #3F5E65;
+}
+
+.ntx-allTypeVideo-573-001 .netex-video-progress-bar {
+  background-color: #D4D700;
+}
+
+.ntx-allTypeVideo-573-001 .netex-video-progress-bar-inner {
+  background-color: rgb(234, 235, 128);
+}
+
+.ntx-allTypeVideo-573-001 .netex-video-controls {
+  background-color: #3F5E65;
+}
+/************************************************************************/
+/* .ntx-audio-573-001, .ntx-audio-573-002 */
+/************************************************************************/
+.ntx-audio-573-001 .netex-audio-controls .netex-audio-button-play-pause-restart .border-svg,.ntx-audio-573-001 .netex-audio-controls .netex-audio-button-play-pause-restart line {
+  stroke: #3F5E65;
+}
+
+.ntx-audio-573-001 .netex-audio-controls .netex-audio-button-play-pause-restart path {
+  fill: #3F5E65;
+}
+
+.ntx-audio-573-001 .netex-audio-controls .netex-audio-button-play-pause-restart .progress {
+  stroke: #D4D700;
+}
+
+.ntx-audio-573-002 .netex-audio-controls {
+  background-color: #3F5E65;
+}
+
+.ntx-audio-573-002 .netex-audio-progress-bar {
+  background-color: #D4D700;
+}
+
+.ntx-audio-573-002 .netex-audio-progress-bar-inner {
+  background-color: rgb(234, 235, 128);
+}
+/************************************************************************/
+/* .ntx-imageGallery-573-001 */
+/************************************************************************/
+.ntx-imageGallery-573-001 .ntx-imageGallery-btn-goto circle {
+  fill: #D4D700;
+}
+
+.ntx-imageGallery-573-001 .ntx-imageGallery-btn-goto a.ntx-current circle {
+  fill: #3F5E65;
+}
+
+.ntx-image-573-002 .content-thumbs .item-thumb.ntx-current {
+  border-color: #D4D700;
+}
+/************************************************************************/
+/* .ntx-accordion-573-001 */
+/************************************************************************/
+.ntx-accordion-573-001 .ntx-accordionItem-573-001 .ntx-accordionItem-header {
+  background-color: #D4D700;
+}
+
+.ntx-accordion-573-001 .ntx-accordionItem-573-001 .ntx-accordionItem-header:hover,.ntx-accordion-573-001 .ntx-accordionItem-573-001.ntx-current .ntx-accordionItem-header {
+  background-color: #3F5E65;
+}
+
+.ntx-print-enable .ntx-accordion-573-001 .ntx-accordionItem-573-001 .ntx-accordionItem-header,.ntx-print-enable .ntx-accordion-573-001 .ntx-accordionItem-573-001 .ntx-accordionItem-header:hover,.ntx-print-enable .ntx-accordion-573-001 .ntx-accordionItem-573-001.ntx-current .ntx-accordionItem-header {
+  background-color: #FFF;
+}
+/************************************************************************/
+/* .ntx-tabs-573-001 */
+/************************************************************************/
+.ntx-tabs-573-001 .ntx-tabsItem-header-title {
+  background-color: #D4D700;
+}
+
+.ntx-tabs-573-001 .ntx-current .ntx-tabsItem-header-title {
+  background-color: #3F5E65;
+}
+
+.ntx-print-enable .ntx-tabs-573-001 .ntx-tabsItem-573-001 .ntx-tabsItem-header,.ntx-print-enable .ntx-tabs-573-001 .ntx-tabsItem-573-001 .ntx-tabsItem-content,.ntx-print-enable .ntx-tabs-573-001 .ntx-tabsItem-header-title {
+  background-color: #FFF;
+}
+/************************************************************************/
+/* .ntx-figCaption */
+/************************************************************************/
+.ntx-figCaption-573-001 {
+  border-left-color: #D4D700;
+}
+/************************************************************************/
+/* .ntx-quiz */
+/************************************************************************/
+.ntx-quiz-573-001 .ntx-quiz-introduction-title .color-icon {
+  fill: #D4D700;
+}
+
+.ntx-quiz-573-001 .ntx-quiz-center {
+  border-top-color: #D4D700;
+}
+
+
+
+
+.nf-cplb{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+
+.ntx-popupSingle-581-001 {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 11;
+    overflow: hidden;
+    max-height: 100vh;
+    max-width: 100%;
+}
+
+.no-csscalc .ntx-popupSingle-581-001 {
+    position: fixed;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-bg-overlay {
+    background-color: #000;
+    opacity: 0.89;
+    background-position: right top;
+    background-repeat: no-repeat;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    height: 100vh;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-container-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -o-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-height: 100%;
+    padding: 3.75rem 0.625rem;
+    overflow: hidden;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-container {
+    z-index: 1;
+    background-color: #FFF;
+    border-bottom: 0.625rem solid green;
+    padding: 0 0 2.5rem 0;
+    position: relative;
+    overflow-y: auto;
+    max-height: 100%;
+    max-width: 49.375rem;
+    -webkit-box-shadow: 0px 0px 0.5rem 0.25rem rgba(0,0,0,0.4);
+    box-shadow: 0px 0px 0.5rem 0.25rem rgba(0,0,0,0.4);
+    margin-right: auto;
+    margin-left: auto;
+    -ms-transition: max-width 0.4s ease 0s;
+    -webkit-transition: max-width 0.4s ease 0s;
+    transition: max-width 0.4s ease 0s;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-header {
+    width: 100%;
+    height: 3.75rem;
+    background-color: #008FBE;
+    position: relative;
+    text-align: center;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-header:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 0.625rem;
+    bottom: -0.625rem;
+    background-color: green;
+}
+
+.ntx-popupSingle-581-001 a.ntx-popupSingle-close {
+    position: absolute;
+    z-index: 4;
+    top: 0.625rem;
+    right: 1.25rem;
+    font-size: 0;
+}
+
+.ntx-popupSingle-581-001 a.ntx-popupSingle-close svg {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-header p {
+    margin: 0;
+    padding: 0 5rem 0 1.25rem;
+    font-size: 1.875rem;
+    line-height: 3.75rem;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-content-wrap {
+    overflow: auto;
+    margin-top: 3.125rem;
+}
+
+.ntx-popupSingle-581-001 .ntx-popupSingle-content {
+    height: auto;
+    max-height: 50vh;
+    padding: 0 2.5rem 0 3.125rem;
+}
+
+@media only screen and (max-width: 48rem){
+    .ntx-popupSingle-581-001 {
+        width: 100%;
+    }
+    .ntx-popupSingle-581-001 .ntx-popupSingle-header{
+        text-align: left;
+        margin-left: 3.125rem;
+    }
+    .ntx-popupSingle-581-001 .ntx-popupSingle-content{
+        padding-left: 3.125rem;
+        padding-right: 3.125rem;
+    }
+    .ntx-popupSingle-581-001 .ntx-popupSingle-container-wrap{
+        padding: 3.75rem 0px;
+    }
+}
