@@ -20,6 +20,6 @@
     "jspdf": "^3.0.1",
     "tui-code-snippet": "^2.3.3",
     "tui-color-picker": "^2.2.8",
-    "xml2json": "^0.12.0"
+    "xml2json": "^0.7.1"
   }
 }

@@ -8,7 +8,8 @@ up:
 	npm run start
 
 ## Copy vendor libraries from node_modules to js folder
-vendor:
+update:
+        npm update
 	cp node_modules/axios/dist/axios.min.js js/axios.min.js
 	cp node_modules/fabric/dist/fabric.min.js js/fabric.min.js
 	cp node_modules/file-saver/dist/FileSaver.min.js js/FileSaver.min.js
