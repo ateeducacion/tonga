@@ -1,0 +1,25 @@
+{
+  "name": "tonga",
+  "version": "1.1.3",
+  "description": "Static drawing application Tonga",
+  "private": true,
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "http-server -p 8000 -c-1"
+  },
+  "devDependencies": {
+    "axios": "^1.9.0",
+    "fabric": "^6.6.6",
+    "file-saver": "^2.0.5",
+    "http-server": "^14.1.1",
+    "jquery": "^3.7.1",
+    "jquery-ui-dist": "^1.13.3",
+    "jspdf": "^3.0.1",
+    "tui-code-snippet": "^2.3.3",
+    "tui-color-picker": "^2.2.8",
+    "xml2json": "^0.12.0"
+  }
+}
