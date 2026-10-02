@@ -56,7 +56,8 @@
         </div>
         <span class="spacer"></span>
         <button type="button" class="btn icon-only" data-action="theme" data-icon="sunMoon" aria-label="Cambiar tema claro u oscuro" aria-pressed="false" title="Tema"></button>
-        <button type="button" class="btn icon-only" data-action="help" data-icon="circleHelp" aria-label="Ayuda, licencias y aviso legal" title="Ayuda, licencias y aviso legal"></button>
+        <button type="button" class="btn icon-only" data-action="help" data-icon="circleHelp" aria-label="Ayuda y atajos" title="Ayuda"></button>
+        <button type="button" class="btn icon-only" data-action="about" data-icon="info" aria-label="Información, licencias y aviso legal" title="Información"></button>
         <button type="button" class="btn primary" data-action="export" data-icon="download"><span class="label">Exportar</span></button>
       </nav>
     </header>
@@ -197,62 +198,60 @@
       </form>
     </dialog>
 
-    <!-- Help, about, licences and legal (one place, nothing fixed on screen) -->
-    <dialog id="dlg-help" class="dialog dialog-help" aria-labelledby="dlg-help-title">
+    <!-- Help -->
+    <dialog id="dlg-help" class="dialog" aria-labelledby="dlg-help-title">
       <div class="dialog-body">
-        <header class="dialog-head">
-          <h2 id="dlg-help-title">Ayuda</h2>
-          <button type="button" class="btn icon-only" data-close data-icon="x" aria-label="Cerrar la ayuda"></button>
-        </header>
+        <h2 id="dlg-help-title">Ayuda</h2>
         <p>Crea un dibujo, añade textos, formas e imágenes de la biblioteca, y exporta el resultado. Tonga funciona en tu navegador: <strong>nada sale de tu equipo</strong>. Para continuar otro día, usa <em>Guardar</em> (fichero <code>.tonga</code>).</p>
+        <h3>Atajos de teclado</h3>
+        <table class="shortcuts">
+          <tbody>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd></th><td>Deshacer</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> · <kbd>Ctrl</kbd> + <kbd>Y</kbd></th><td>Rehacer</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>C</kbd> / <kbd>V</kbd></th><td>Copiar / pegar</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>D</kbd></th><td>Duplicar</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>A</kbd></th><td>Seleccionar todo</td></tr>
+            <tr><th scope="row"><kbd>Supr</kbd> · <kbd>Retroceso</kbd></th><td>Borrar la selección</td></tr>
+            <tr><th scope="row"><kbd>Esc</kbd></th><td>Quitar la selección</td></tr>
+            <tr><th scope="row">Flechas · <kbd>Shift</kbd> + flechas</th><td>Mover 1 px · 10 px</td></tr>
+            <tr><th scope="row"><kbd>+</kbd> / <kbd>-</kbd> · <kbd>0</kbd> · <kbd>1</kbd></th><td>Zoom · ajustar · 100 %</td></tr>
+            <tr><th scope="row"><kbd>V</kbd> <kbd>H</kbd> <kbd>B</kbd></th><td>Seleccionar · mover la vista · dibujo libre</td></tr>
+            <tr><th scope="row"><kbd>T</kbd> <kbd>R</kbd> <kbd>E</kbd> <kbd>L</kbd> <kbd>I</kbd> <kbd>K</kbd></th><td>Texto · rectángulo · elipse · línea · imagen · biblioteca</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">Los atajos no actúan mientras escribes en un campo de texto. Con el teclado, el panel <em>Capas</em> permite elegir cada objeto, y <em>Propiedades</em>, cambiar su posición, tamaño, giro, colores, recorte y ajustes de imagen. El dibujo libre necesita ratón, lápiz o dedo.</p>
+        <div class="dialog-actions"><span class="spacer"></span><button type="button" class="btn primary" data-close>Cerrar</button></div>
+      </div>
+    </dialog>
+
+    <!-- Information: about, source code, licences, legal -->
+    <dialog id="dlg-about" class="dialog" aria-labelledby="dlg-about-title">
+      <div class="dialog-body">
+        <h2 id="dlg-about-title">Acerca de Tonga</h2>
+        <p>Versión <span id="about-version"></span>. Aplicación de dibujo para el aula promovida por el Gobierno de Canarias. Desarrollo original de Altia; mantenimiento y versión 2 del Área de Tecnología Educativa (ATE).</p>
+        <p>Tonga es software libre. No usa analítica, cookies ni servicios externos: tus dibujos se procesan y se guardan solo en este navegador.</p>
         <p class="help-links">
           <a class="btn link-btn" data-icon="github" href="https://github.com/ateeducacion/tonga" rel="noopener noreferrer" target="_blank">Código fuente en GitHub<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+          <button type="button" class="btn link-btn" data-action="licences" data-icon="fileText">Licencias</button>
         </p>
-
-        <details class="help-section" open>
-          <summary><h3>Atajos de teclado</h3></summary>
-          <table class="shortcuts">
-            <tbody>
-              <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd></th><td>Deshacer</td></tr>
-              <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> · <kbd>Ctrl</kbd> + <kbd>Y</kbd></th><td>Rehacer</td></tr>
-              <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>C</kbd> / <kbd>V</kbd></th><td>Copiar / pegar</td></tr>
-              <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>D</kbd></th><td>Duplicar</td></tr>
-              <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>A</kbd></th><td>Seleccionar todo</td></tr>
-              <tr><th scope="row"><kbd>Supr</kbd> · <kbd>Retroceso</kbd></th><td>Borrar la selección</td></tr>
-              <tr><th scope="row"><kbd>Esc</kbd></th><td>Quitar la selección</td></tr>
-              <tr><th scope="row">Flechas · <kbd>Shift</kbd> + flechas</th><td>Mover 1 px · 10 px</td></tr>
-              <tr><th scope="row"><kbd>+</kbd> / <kbd>-</kbd> · <kbd>0</kbd> · <kbd>1</kbd></th><td>Zoom · ajustar · 100 %</td></tr>
-              <tr><th scope="row"><kbd>V</kbd> <kbd>H</kbd> <kbd>B</kbd></th><td>Seleccionar · mover la vista · dibujo libre</td></tr>
-              <tr><th scope="row"><kbd>T</kbd> <kbd>R</kbd> <kbd>E</kbd> <kbd>L</kbd> <kbd>I</kbd> <kbd>K</kbd></th><td>Texto · rectángulo · elipse · línea · imagen · biblioteca</td></tr>
-            </tbody>
-          </table>
-          <p class="muted">Los atajos no actúan mientras escribes en un campo de texto. Con el teclado, el panel <em>Capas</em> permite elegir cada objeto, y <em>Propiedades</em>, cambiar su posición, tamaño, giro, colores, recorte y ajustes de imagen. El dibujo libre necesita ratón, lápiz o dedo.</p>
-        </details>
-
-        <details class="help-section">
-          <summary><h3>Acerca de Tonga</h3></summary>
-          <p>Versión <span id="about-version"></span>. Aplicación de dibujo para el aula promovida por el Gobierno de Canarias. Desarrollo original de Altia; mantenimiento y versión 2 del Área de Tecnología Educativa (ATE).</p>
-        </details>
-
-        <details class="help-section">
-          <summary><h3>Licencias</h3></summary>
-          <ul class="license-list">
-            <li><strong>Software:</strong> GNU Affero General Public License, versión 3 o posterior (AGPL-3.0-or-later). <a href="https://github.com/ateeducacion/tonga/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">Texto de la licencia</a>.</li>
-            <li><strong>Imágenes de la biblioteca:</strong> © Gobierno de Canarias, Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional (<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" rel="noopener noreferrer" target="_blank">CC BY-NC-SA 4.0</a>): puedes usarlas y compartirlas citando la fuente, con la misma licencia y sin fines comerciales.</li>
-            <li><strong>Componentes de terceros:</strong> Fabric.js (MIT), iconos Lucide (ISC; parte de Feather, MIT) e icono de GitHub de Primer Octicons (MIT). <a href="https://github.com/ateeducacion/tonga/blob/main/THIRD_PARTY_NOTICES.md" rel="noopener noreferrer" target="_blank">Avisos de terceros</a>.</li>
-          </ul>
-        </details>
-
-        <details class="help-section">
-          <summary><h3>Aviso legal y privacidad</h3></summary>
-          <p>Tonga no usa analítica, cookies ni servicios externos. Tus dibujos se procesan y se guardan solo en este navegador.</p>
-          <p class="help-links">
-            <a class="btn link-btn" data-icon="scale" href="https://www.gobiernodecanarias.org/principal/avisolegal.html" rel="noopener noreferrer" target="_blank">Aviso legal<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
-            <a class="btn link-btn" data-icon="shieldCheck" href="https://www.gobiernodecanarias.org/eucd/politica_privacidad/" rel="noopener noreferrer" target="_blank">Política de privacidad<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
-          </p>
-        </details>
-
+        <p class="help-links">
+          <a class="btn link-btn" data-icon="scale" href="https://www.gobiernodecanarias.org/principal/avisolegal.html" rel="noopener noreferrer" target="_blank">Aviso legal<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+          <a class="btn link-btn" data-icon="shieldCheck" href="https://www.gobiernodecanarias.org/eucd/politica_privacidad/" rel="noopener noreferrer" target="_blank">Política de privacidad<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+        </p>
         <div class="dialog-actions"><span class="spacer"></span><button type="button" class="btn primary" data-close>Cerrar</button></div>
+      </div>
+    </dialog>
+
+    <!-- Licences (opened from «Acerca de»; closing returns there) -->
+    <dialog id="dlg-licences" class="dialog" aria-labelledby="dlg-licences-title">
+      <div class="dialog-body">
+        <h2 id="dlg-licences-title">Licencias</h2>
+        <ul class="license-list">
+          <li><strong>Software:</strong> GNU Affero General Public License, versión 3 o posterior (AGPL-3.0-or-later). <a href="https://github.com/ateeducacion/tonga/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">Texto de la licencia</a>.</li>
+          <li><strong>Imágenes de la biblioteca:</strong> © Gobierno de Canarias, Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional (<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" rel="noopener noreferrer" target="_blank">CC BY-NC-SA 4.0</a>): puedes usarlas y compartirlas citando la fuente, con la misma licencia y sin fines comerciales.</li>
+          <li><strong>Componentes de terceros:</strong> Fabric.js (MIT), iconos Lucide (ISC; parte de Feather, MIT) e icono de GitHub de Primer Octicons (MIT). <a href="https://github.com/ateeducacion/tonga/blob/main/THIRD_PARTY_NOTICES.md" rel="noopener noreferrer" target="_blank">Avisos de terceros</a>.</li>
+        </ul>
+        <div class="dialog-actions"><span class="spacer"></span><button type="button" class="btn primary" data-close>Volver</button></div>
       </div>
     </dialog>
 

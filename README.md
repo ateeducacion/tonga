@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/ateeducacion/tonga/actions/workflows/ci.yml/badge.svg)](https://github.com/ateeducacion/tonga/actions/workflows/ci.yml)
 [![Pages](https://github.com/ateeducacion/tonga/actions/workflows/pages.yml/badge.svg)](https://ateeducacion.github.io/tonga/)
+[![codecov](https://codecov.io/gh/ateeducacion/tonga/graph/badge.svg)](https://codecov.io/gh/ateeducacion/tonga)
 [![REUSE](https://img.shields.io/badge/REUSE-conforme-green)](docs/LICENSING.md)
 
 **Tonga** es una aplicación de dibujo para el aula que funciona en el navegador. Permite crear un lienzo, añadir textos, formas, dibujo libre e imágenes de una biblioteca de más de 1.600 ilustraciones educativas, y exportar el resultado a PNG, JPEG, SVG o PDF.

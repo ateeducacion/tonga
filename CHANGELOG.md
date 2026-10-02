@@ -11,7 +11,8 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 ### Cambiado
 
 - Licencia del software declarada como `AGPL-3.0-or-later` (GNU AGPL v3 o posterior).
-- La Ayuda reúne los atajos, «Acerca de», las licencias, el aviso legal, la privacidad y el enlace al código en GitHub. Desaparece el pie fijo con los enlaces legales, que quitaba sitio en móvil.
+- «Ayuda» muestra solo la explicación y los atajos. El botón Información abre «Acerca de» con el enlace al código en GitHub, el aviso legal, la privacidad y un enlace que abre el panel de Licencias. Desaparece el pie fijo con los enlaces legales, que quitaba sitio en móvil.
+- La cobertura de tests se publica en Codecov (badge en el README).
 - Las descripciones para compartir dicen «software libre» en lugar de «gratis».
 
 ## [2.1.0] - 2026-10-02

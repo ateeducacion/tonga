@@ -325,6 +325,8 @@ export class App {
       'zoom-fit': () => this.zoomFit(),
       theme: () => this.toggleTheme(),
       help: () => openDialog(byId<HTMLDialogElement>('dlg-help')),
+      about: () => openDialog(byId<HTMLDialogElement>('dlg-about')),
+      licences: () => openDialog(byId<HTMLDialogElement>('dlg-licences')),
       export: () => this.openExport(),
       import: () => byId<HTMLInputElement>('file-image').click(),
       library: () => this.library.open(),

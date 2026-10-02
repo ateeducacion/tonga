@@ -560,13 +560,6 @@ kbd {
   background: var(--color-surface-2);
 }
 
-.dialog-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
 .help-links {
   display: flex;
   flex-wrap: wrap;
@@ -574,26 +567,10 @@ kbd {
   margin: 0;
 }
 
-.dialog a.link-btn {
+.dialog .link-btn {
   color: var(--color-text);
   border-color: var(--color-border);
   text-decoration: none;
-}
-
-.help-section {
-  border-top: 1px solid var(--color-border);
-  padding-top: var(--space-2);
-}
-
-.help-section > summary {
-  cursor: pointer;
-  list-style-position: outside;
-  margin-inline-start: var(--space-4);
-}
-
-.help-section > summary h3 {
-  display: inline;
-  margin: 0;
 }
 
 .license-list {
