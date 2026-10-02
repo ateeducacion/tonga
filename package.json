@@ -42,7 +42,7 @@
     "fabric": "7.4.0"
   },
   "allowScripts": {
-    "canvas": false,
+    "canvas": true,
     "fsevents": false
   }
 }
