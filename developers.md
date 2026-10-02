@@ -62,7 +62,7 @@ El `Makefile` repite lo mismo con atajos: `make up`, `make build`, `make test`, 
 
 ## Vista previa al compartir (WhatsApp, Telegram, redes)
 
-`index.html` lleva etiquetas Open Graph y Twitter. La imagen `public/og-image.jpg` (1200 × 630, menos de 300 KB) es una captura de una escena real de la app y se regenera con:
+`index.html` lleva etiquetas Open Graph y Twitter. La imagen `public/og-image.jpg` (1200 × 630, menos de 300 KB) es una tarjeta con el logo, el nombre y una captura real de la app, del mismo estilo que las demás herramientas del ATE (por ejemplo, elpx-optimizer). Se regenera con:
 
 ```bash
 npm run build && node scripts/make-og-image.mjs

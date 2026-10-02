@@ -66,3 +66,11 @@ path = ["public/og-image.jpg"]
 precedence = "override"
 SPDX-FileCopyrightText = "2019-2026 Gobierno de Canarias"
 SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0 AND CC-BY-NC-SA-4.0"
+
+# Logo of the Área de Tecnología Educativa, used only to render the link-preview card
+# (taken from ateeducacion/elpx-optimizer, src/web/assets/ate-logo.png).
+[[annotations]]
+path = ["scripts/assets/ate-logo.png"]
+precedence = "override"
+SPDX-FileCopyrightText = "Gobierno de Canarias (Área de Tecnología Educativa)"
+SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0"
