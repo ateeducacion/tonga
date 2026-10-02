@@ -69,7 +69,6 @@ mesa_01.png
 mesa_02.png
 mesa_03.png
 mesa_04.png
-mesa_06.png
 Mesa_05.png
 Mesa_06.png
 mesa_mezclas_01.png

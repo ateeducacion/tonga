@@ -24,6 +24,15 @@ export function parseLines(text) {
   return text.replace(/^\uFEFF/, '').split(/\r?\n/).map((l) => l.trim()).map((l) => (l ? l.split('|').map((f) => f.trim()) : null));
 }
 
+// Exact, case-sensitive existence (macOS ignores case; Linux and GitHub Pages do not).
+const listing = new Map();
+function existsExact(path) {
+  const i = path.lastIndexOf('/');
+  const dir = path.slice(0, i);
+  if (!listing.has(dir)) listing.set(dir, new Set(existsSync(dir) ? readdirSync(dir) : []));
+  return listing.get(dir).has(path.slice(i + 1));
+}
+
 const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export function buildCatalog(root = ROOT) {
@@ -67,8 +76,8 @@ export function buildCatalog(root = ROOT) {
       ids.add(id);
       const path = `${dir}/${file}`;
       const thumb = `${dir}/thumbnails/${file}`;
-      if (!existsSync(path)) errors.push(`${where}: missing image ${path}`);
-      if (!existsSync(thumb)) errors.push(`${where}: missing thumbnail ${thumb}`);
+      if (!existsExact(path)) errors.push(`${where}: missing image ${path} (names are case-sensitive)`);
+      if (!existsExact(thumb)) errors.push(`${where}: missing thumbnail ${thumb} (names are case-sensitive)`);
       assets.push({
         id,
         title: tooltip || basename(file, extname(file)).replace(/[_-]+/g, ' '),
