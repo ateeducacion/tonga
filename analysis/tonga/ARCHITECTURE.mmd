@@ -1,0 +1,72 @@
+graph TD
+  subgraph Shell
+    IDX[index.html bootstrap + locale_es]
+    THEME[js/theme/black-theme.js]
+  end
+  subgraph Core["Editor core (dist/tui-image-editor.js fork, TUI 3.6.0 + 271 JBD edits)"]
+    IE[ImageEditor mod2]
+    ACT[action mixin mod103]
+    INV[Invoker + commands]
+    GFX[Graphics mod105]
+  end
+  subgraph Render
+    FAB[bundled Fabric 2.7 mod106]
+    FAB3[js/fabric.js 3.0 shadowed]
+    CC[js/customiseControls.js]
+  end
+  subgraph UI
+    UIM[Ui mod74 + main template mod76]
+    SUB[submenu templates/classes]
+    CP[tui-color-picker / code-snippet]
+  end
+  subgraph Repo["Asset repository"]
+    IMGT[Imagen template mod161 + UI class]
+    REPOJS[js/repositorio.js]
+    DATA[(repositorios/**/lista.txt + PNGs)]
+    MODAL[jquery.modal + #listaImagenes]
+  end
+  subgraph IO["Import/Export"]
+    LOAD[main.load SVG/raster]
+    DL[main.download PDF/JPG/PNG/SVG]
+    LIBS[jsPDF / FileSaver / X2JS / ImageTracer]
+  end
+  subgraph Credits
+    CRED[creditos.html + jQuery UI dialog]
+  end
+  subgraph Dead
+    SB[service-basic.js / service-mobile.js]
+    ESQ[dist/esquema*.js, estudio_nuevos_comandos.js]
+  end
+  IDX -->|new tui.ImageEditor| IE
+  IDX -->|theme option| THEME
+  THEME --> UIM
+  IE --> UIM
+  IE --> ACT
+  IE --> INV
+  INV --> GFX
+  GFX --> FAB
+  IE -->|customiseCornerIcons| CC
+  CC -->|patches window.fabric| FAB
+  FAB -.->|overwrites window.fabric| FAB3
+  UIM --> SUB
+  SUB --> CP
+  UIM -->|header button events| ACT
+  SUB --> IMGT
+  IMGT -->|GET lista.txt| DATA
+  IMGT -->|cargarRepositorio| REPOJS
+  REPOJS -->|thumbnails + blobs| DATA
+  REPOJS --> MODAL
+  REPOJS -->|registerCustomImagen| ACT
+  REPOJS -->|imageEditor.cargarFondo + _invoker._isLocked| IE
+  REPOJS -->|bleep, mensaje globals| IDX
+  ACT --> LOAD
+  ACT --> DL
+  LOAD --> LIBS
+  DL --> LIBS
+  LOAD --> GFX
+  DL --> GFX
+  UIM -->|#page-help| CRED
+  IDX -->|$dialog .load| CRED
+  CRED -->|parent $dialog| IDX
+  SB -.->|prototype of| DL
+  ESQ -.->|notes on| IE

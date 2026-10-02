@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>TongaApp | UCTICEE | Gobierno de Canarias</title>
+
+    <link type="text/css" href="./css/tui-color-picker.min.css" rel="stylesheet" />
+    <link type="text/css" href="./dist/tui-image-editor.css" rel="stylesheet" />
+    <link type="text/css" href="./css/image-picker.css" rel="stylesheet" />
+    <link type="text/css" href="./css/acordeon.css" rel="stylesheet" />
+    <style>
+        @import url(./css/google.css);
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+    </style>
+    <link rel="icon" href="./img/logo-a.png" type="image/png" sizes="16x16" />
+
+    <!-- <link href="https://fonts.googleapis.com/css?family=Montserrat|Open+Sans|Roboto&display=swap" rel="stylesheet" /> -->
+    <link href="./css/fonts_family_montserrat.css" rel="stylesheet" />
+
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/jquery-ui.min.js"></script>
+    <!-- jQuery Modal -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" /> -->
+    <script src="./js/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="./css/jquery.modal.min.css" />
+
+    <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
+    <script src="./js/axios.min.js"></script>
+
+    <script type="text/javascript" src="./js/repositorio.js"></script>
+
+    <script type="text/javascript" src="./js/jspdf.min.js"></script>
+
+    <style>
+        #principal{
+            height: calc(100% - 1em);
+            background-color: black;
+            color: gray;
+        }
+        html{            background-color: #151515;}
+        #legal{
+            background-color: #151515;
+            height: 1em;
+            color: gray;
+            text-align: right;
+            padding-right: 1.2em;
+            padding-top: 0.2em;
+            font-family:"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
+            /* font-size: em; */
+        }
+        #legal a,
+        #legal a:active,
+        #legal a:visited 
+        {
+            color: gray;
+            text-decoration: none;
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+    <div id="cargando"></div>
+    <div id="mensaje"></div>
+
+    <div id="listaImagenes" class="modal"></div>
+
+
+    <style>
+        /* REPOSITORIOS */
+        #loading {
+            display: none;
+        }
+    </style>
+
+    <div id="principal">
+            <div id="tui-image-editor-container"></div>
+    </div>
+    <div id="legal">
+        <a target="_new" href="https://www.gobiernodecanarias.org/principal/avisolegal.html">Aviso Legal</a> | 
+        <a target="_new" href="https://www.gobiernodecanarias.org/eucd/politica_privacidad/">Politica de privacidad</a> 
+    </div>
+
+
+    <!-- <input type="image" src="img/botones/comenzar.png" title="Comenzar" id="botonComenzarCentral"
+        name="botonComenzarCentral" style="position:absolute; top:45%; left:45%; max-width: 100%;  max-height: 100%"
+        class="tie-btn-comenzar" onclick="lanzarComenzar()" /> -->
+
+    <script type="text/javascript">
+        // JBD 02.03.2020 COMENZAR - Creo el botón Comenzar del centro de la pantalla
+
+        // function crearBotonComenzarHTML() {
+        //     var type = "image";
+
+        //     //Create an input type dynamically.   
+        //     var element = document.createElement("input");
+        //     //Assign different attributes to the element. 
+        //     element.type = type;
+        //     element.src = "img/botones/comenzar.png";
+        //     element.title = "Comenzar";
+        //     element.style = "position:absolute; top:45%; left:45%; max-width: 100%;  max-height: 100%";
+        //     element.className = "tie-btn-comenzar";
+        //     element.name = "botonComenzarCentral";
+        //     element.id = "botonComenzarCentral";
+        //     //element.zindex = " 99999";
+
+        //     element.position = "absolute";
+        //     element.top = "50%";
+        //     element.left = "50%";
+        //     element.onclick = "lanzarComenzar()";
+
+
+        // } ();
+        // crearBotonComenzarHTML();
+        function lanzarComenzar() {
+            imageEditor.comenzar();
+        }
+    </script>
+
+    <script type="text/javascript">
+        var bleep = new Audio();
+        bleep.src = './sounds/button-22.mp3';
+    </script>
+
+    <script type="text/javascript" src="./js/fabric.js"></script>
+    <script type="text/javascript" src="./js/tui-code-snippet.js"></script>
+    <script type="text/javascript" src="./js/tui-color-picker.min.js"></script>
+    <script type="text/javascript" src="./js/FileSaver.min.js"></script>
+    <script type="text/javascript" src="./dist/tui-image-editor.js"></script>
+    <script type="text/javascript" src="./js/theme/black-theme.js"></script>
+    <script type="text/javascript" src="./js/image-picker.js"></script>
+    <script type="text/javascript" src="./js/xml2json.js"></script>
+    <script type="text/javascript" src="./js/customiseControls.js"></script>
+
+    <script>
+        // imageeditor y locale_es
+        var locale_es = {
+            // override default English locale to your custom
+
+            "Apply mask filter": "Aplicar máscara",
+            "Load Mask Image": "Cargar máscara",
+            "Text color": "Coor de texto",
+            Right: "Derecha",
+            Center: "Centrar",
+            Left: "Izquierda",
+            Underline: "Subrayado",
+            Italic: "Itálica",
+            Bold: "Negrita",
+            "Text size": "Tamaño texto",
+
+            "Register custom icon": "Cargar icono",
+            "Icon color": "Color de icono",
+
+            Crop: "Recortar",
+            "Delete-all": "Borrar todo",
+            Flip: "Voltear",
+            Rotate: "Rotar",
+            Draw: "Dibujar",
+            Shape: "Forma",
+            Icon: "Icono",
+            Text: "Texto",
+            Imagen: "Imagen",
+            Mask: "Máscara",
+            Filter: "Filtrar",
+            Grayscale: "Escala grises",
+            Invert: "Invertir",
+            Sepia: "Sepia",
+            Sepia2: "Vintage",
+            Blur: "Difuminar",
+            Sharpen: "Afilar",
+            Emboss: "Realzar",
+            "Remove White": "Quitar blancos",
+            Threshold: "Límite",
+            Distance: "Distancia",
+            Brightness: "Brillo",
+            Value: "Valor",
+            Noise: "Ruido",
+            "Color Filter": "Filtro de color",
+            Pixelate: "Pixelar",
+            Tint: "Tinte",
+            Opacity: "Opacidad",
+            Multiply: "Multiplicar",
+            Blend: "Mezclar",
+            Add: "Añadir",
+            Diff: "Diferenciar",
+            Subtract: "Restar",
+            Multiply: "Multiplicar",
+            Screen: "Pantalla",
+            Lighten: "Aligerar",
+            Darken: "Oscurecer",
+            Close: "Cerrar",
+
+            "Image Editor": "Editor",
+            Apply: "Aplicar",
+            Orientation: "Orientación",
+            "Rotate +90": "Rotar +90",
+            "Rotate -90": "Rotar -90",
+            FlipX: "Voltear X",
+            FlipY: "Voltear Y",
+            "Flip X": "Voltear X",
+            "Flip Y": "Voltear Y",
+            Reset: "Reiniciar",
+            "Free Drawing": "Mano alzada",
+            "Line Drawing": "Recta",
+            "Brush Size": "Tamaño pincel",
+            "Brush Color": "Color pincel",
+            Shape: "Forma",
+            Rectangle: "Rectángulo",
+            Custom: "Personalizado",
+            Square: "Cuadrado",
+            Ellipse: "Elipse",
+            Circle: "Círculo",
+            Triangle: "Triángulo",
+            "Stroke Size": "Grosor trazo",
+            Color: "Color",
+            Fill: "Rellenar",
+            Stroke: "Trazo",
+            Transparent: "Transparente",
+            Icon: "Icono",
+            "Arrow Icon": "Flecha",
+            "Cancel<br>Icon": "Cancelar Icono",
+
+            Download: "Descargar",
+            Undo: "Deshacer",
+            Redo: "Rehacer",
+            "Clear Objects": "Limpiar",
+            "Remove Active Object": "Quitar objeto activo",
+            Rotation: "Rotación",
+            "Draw Line": "Dibujar línea",
+            Range: "Rango",
+            Free: "Mano alzada",
+            Straight: "Recta",
+            Arrow: "Flecha",
+            "Arrow-2": "Flecha 2",
+            "Arrow-3": "Flecha 3",
+            "Star-1": "Estrella 1",
+            "Star-2": "Estrella 2",
+            Polygon: "Polígono",
+            Location: "Localización",
+            Heart: "Corazón",
+            Bubble: "Bocadillo",
+            "Custom icon": "Cargar icono"
+        };
+
+        // Image editor
+        var imageEditor = new tui.ImageEditor(
+            "#tui-image-editor-container",
+            {
+                includeUI: {
+                    usageStatistics: false,
+                    loadImage: {
+                        //path: 'img/sampleImage2.png',
+                        //path: 'img/sampleImage.jpg',
+                        //path: 'img/mar.jpeg',
+                        //path: 'img/mar-caribe.jpg',
+                        //path: "img/Home_Tonga-02.jpg",
+                        path: "img/Tonga_pantalla_inicio_v2.jpg",
+                        name: "ImagenInicial"
+                    },
+                    locale: locale_es,
+                    //backgroundColor: "LightBlue",
+                    theme: blackTheme, // or whiteTheme
+                    //initMenu: 'rotate',
+                    menu: [
+                        "crop",
+                        "rotate",
+                        "flip",
+                        "draw",
+                        "shape",
+                        "imagen",
+                        "icon",
+                        "text",
+                        "filter"
+                    ], //, 'load'],  , 'mask'
+                    menuBarPosition: "left" // top | bottom | left | right
+                }
+            }
+        );
+
+        window.onresize = function () {
+            // JBD 09.09.2019 Añado el nuevo cálculo del image-editor, para que no se cambie el tamaño que tengamos ahora en pantalla porque si no, se pone el tamaño inicial, aunque tenga zoom y entonces se descoordinan los tamaós del canvas y del image-editor
+            imageEditor.ui.resizeEditor();
+        };
+    </script>
+
+    <script>
+        var $dialog; // JBD 30.08.2019 CREDITOS - Creo el sistema para cerrar la ventana desde el icono X
+    </script>
+
+    <script type="text/javascript">
+        // Página de CREDITOS
+        $(document).ready(function () {
+            $("#page-help").each(function () {
+                var $link = $(this);
+                $dialog = $("<div></div>")
+                    .load($link.attr("href"))
+                    .dialog({
+                        autoOpen: false,
+                        title: $link.attr("title"),
+                        width: 900,
+                        height: 600
+                    });
+
+                $link.click(function () {
+                    $dialog.dialog("open");
+                    return false;
+                });
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        // REPOSITORIOS
+        $("#listaImagenes").draggable();
+
+        /*         imageEditor.on('objectActivated', function(props) {
+                          console.log(props);
+                          console.log(props.type);
+                          console.log(props.id);
+                      }); */
+    </script>
+
+    <div id="segundocanvas"></div>
+</body>
+
+</html>

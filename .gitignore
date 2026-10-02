@@ -136,3 +136,13 @@ temp/
 
 # End of https://www.gitignore.io/api/node,macos
 .aider*
+
+### Tonga ###
+dist/
+coverage/
+test-results/
+playwright-report/
+/legacy/
+.aider*
+analysis/tonga/packets/
+analysis/tonga/REPORT.html

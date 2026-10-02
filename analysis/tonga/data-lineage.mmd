@@ -1,0 +1,8 @@
+graph LR
+  imagenUI["Imagen submenu (mod 161)"] -- read --> root[(repositorios/lista.txt)]
+  repo["js/repositorio.js"] -- read --> col[(repositorios/*/lista.txt<br/>images + thumbnails)]
+  action["action mixin (mod 103)"] -- read --> user[(user files<br/>input type=file)]
+  action -- read --> ui[(img/, dist/svg, sounds)]
+  theme["black-theme.js"] -- read --> ui
+  action == write ==> exp[(downloads<br/>PNG/JPG/SVG/PDF)]
+  ci["ci.yml"] == write ==> gh[(gh-pages branch)]

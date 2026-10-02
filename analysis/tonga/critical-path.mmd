@@ -1,0 +1,17 @@
+flowchart TD
+  A[Open index.html] --> B[new tui.ImageEditor<br/>Fabric 2.7 bundled]
+  B --> C[Comenzar: transparent canvas]
+  C --> D[Imagen submenu reads repositorios/lista.txt]
+  D --> E[cargarRepositorio: fetch thumbnails as base64]
+  E --> F{double click}
+  F -- object --> G[insertarImagen -> registerCustomImagen]
+  F -- tongaappfondo --> H[cargarFondo + _invoker._isLocked=false]
+  G --> I[Move / rotate / flip / layer]
+  H --> I
+  I --> J{Download}
+  J --> K[PNG/JPG toDataURL]
+  J --> L[SVG toSVG + X2JS + embed background]
+  J --> M[PDF jsPDF A4]
+  K --> N[FileSaver saveAs]
+  L --> N
+  M --> N
