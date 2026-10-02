@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import type { Plugin } from 'vite';
@@ -25,7 +26,20 @@ function serviceWorker(): Plugin {
 // Override for other deployments: VITE_SITE_URL=https://example.org/tonga/ npm run build
 process.env.VITE_SITE_URL ??= 'https://ateeducacion.github.io/tonga/';
 
-const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
+/**
+ * The version shown in the app comes from git tags, so tagging v2.1.1 is enough: "2.1.1" on the
+ * tagged commit, "2.1.1-3-gabc1234" three commits later. TONGA_VERSION overrides it (release CI);
+ * package.json is the fallback when there is no git history (e.g. a source ZIP).
+ */
+function appVersion(): string {
+  if (process.env.TONGA_VERSION) return process.env.TONGA_VERSION.replace(/^v/, '');
+  try {
+    return execFileSync('git', ['describe', '--tags', '--match', 'v[0-9]*'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().replace(/^v/, '');
+  } catch {
+    return (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
+  }
+}
+const version = appVersion();
 
 // dist/ is fully static; scripts/copy-collections.mjs adds repositorios/ next to the app.
 export default defineConfig({
