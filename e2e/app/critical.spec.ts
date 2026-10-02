@@ -185,3 +185,12 @@ test('status messages never cover the phone tool bar', async ({ page }) => {
   await page.getByRole('button', { name: 'Añadir rectángulo' }).click({ timeout: 2000 });
   await expect(layers(page)).toHaveCount(1);
 });
+
+test('a freshly opened or created drawing has no unsaved changes', async ({ page }) => {
+  await page.goto('./');
+  await expect(page).toHaveTitle('Sin título · Tonga');
+  await page.getByRole('dialog', { name: 'Nuevo dibujo' }).getByRole('button', { name: 'Crear' }).click();
+  await expect(page).toHaveTitle('Sin título · Tonga');
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  await expect(page).toHaveTitle('• Sin título · Tonga');
+});
