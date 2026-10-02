@@ -1,8 +1,11 @@
 declare const __APP_VERSION__: string;
+declare const __APP_BUILD__: string;
 
 /** The shared collections (repositorios/) sit next to index.html. */
 export const LIBRARY_ROOT = './';
 export const APP_VERSION: string = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
+/** Exact build (git describe), shown only as a tooltip on the version. */
+export const APP_BUILD: string = typeof __APP_BUILD__ === 'string' ? __APP_BUILD__ : APP_VERSION;
 
 /** Upper limits for imported files (memory safety on school computers). */
 export const MAX_IMPORT_BYTES = 20 * 1024 * 1024;

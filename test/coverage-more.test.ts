@@ -398,3 +398,38 @@ describe('catalogue loading (success)', () => {
     await expect(loadCatalog('catalog.json')).resolves.toEqual(cat);
   });
 });
+
+describe('selection handles and right click', () => {
+  it('gives objects a round rotation handle above them', async () => {
+    const { controlsUtils } = await import('fabric');
+    const rect = new Rect();
+    expect(rect.controls.mtr?.render).toBe(controlsUtils.renderCircleControl);
+    expect(rect.controls.mtr?.offsetY).toBe(-30);
+    expect(rect.cornerStrokeColor).toBe('#b9480f');
+  });
+
+  it('a right click selects the object under the pointer and reports where to open the menu', async () => {
+    document.body.innerHTML = '<canvas id="c"></canvas>';
+    const ed = new Editor(document.getElementById('c') as HTMLCanvasElement, identity);
+    await ed.open(newProject(400, 300));
+    ed.addShape('rect');
+    ed.addShape('ellipse');
+    const [ellipse, rect] = [ed.canvas.getObjects()[1]!, ed.canvas.getObjects()[0]!];
+    const opened: [number, number][] = [];
+    ed.onContextMenu((x, y) => opened.push([x, y]));
+    const fire = (target: unknown, button: number) =>
+      ed.canvas.fire('mouse:down', { e: { button, clientX: 12, clientY: 34 } as MouseEvent, target } as never);
+
+    fire(rect, 0); // a left click is not a menu request
+    expect(opened).toEqual([]);
+    fire(rect, 2);
+    expect(opened).toEqual([[12, 34]]);
+    expect(ed.selected()).toEqual([rect]);
+
+    ed.selectAll();
+    fire(ellipse, 2); // already selected: the multiple selection is kept
+    expect(ed.selected()).toHaveLength(2);
+    fire(undefined, 2); // empty canvas: menu without changing the selection
+    expect(opened).toHaveLength(3);
+  });
+});

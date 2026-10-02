@@ -63,7 +63,7 @@ Con la etiqueta:
 
 - `release.yml` crea la release con el ZIP de `dist/` y el SBOM.
 - CI y Pages vuelven a desplegar la web. Pages solo publica commits que están en `main`.
-- La versión que muestra la app (*Información*) sale de la etiqueta (`git describe --tags`): «2.x.y» en el commit etiquetado y «2.x.y-N-gabc1234» en commits posteriores. `version` de `package.json` solo se usa si no hay historial de git.
+- La versión que muestra la app (*Información*) es la última etiqueta `v*` («2.x.y»). El build exacto («2.x.y-N-gabc1234», de `git describe`) solo aparece como texto emergente sobre el número, para reportar fallos. `version` de `package.json` solo se usa si no hay historial de git.
 - La PWA se actualiza sola: el service worker tiene un nombre de caché derivado del contenido del build, así que cualquier versión nueva, incluido un cambio de número, se instala, borra la caché anterior y ofrece «Actualizar» sin recargar a la fuerza.
 
 ## Vista previa al compartir (WhatsApp, Telegram, redes)

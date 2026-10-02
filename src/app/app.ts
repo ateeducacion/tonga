@@ -2,7 +2,7 @@
 import { Editor } from '../canvas/editor';
 import type { CatalogAsset } from '../assets/catalog';
 import { resolveSource, resolveToDataUrl } from '../assets/sources';
-import { APP_VERSION } from '../config';
+import { APP_BUILD, APP_VERSION } from '../config';
 import { UserError } from '../errors';
 import { defaultFileName, exportFileName, exportProject, type ExportFormat } from '../export/export';
 import { importFile } from '../import/load';
@@ -43,6 +43,7 @@ export class App {
     hydrateIcons();
     setupTabs(document.querySelector('.panel-tabs') as HTMLElement);
     byId('about-version').textContent = APP_VERSION;
+    if (APP_BUILD !== APP_VERSION) byId('about-version').title = `Compilación ${APP_BUILD}`;
     this.editor.subscribe(() => this.render());
     this.editor.onContextMenu((x, y) => this.menu.open(x, y, this.menuEntries()));
     this.bindActions();
