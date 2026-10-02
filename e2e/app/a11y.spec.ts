@@ -33,7 +33,7 @@ test('export and help dialogs', async ({ page }) => {
   await page.getByRole('button', { name: 'Exportar' }).click();
   expect(await audit(page)).toEqual([]);
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Ayuda, licencias y aviso legal' }).click();
+  await page.getByRole('button', { name: 'Ayuda y atajos' }).click();
   expect(await audit(page)).toEqual([]);
 });
 
@@ -50,5 +50,13 @@ test('image tools in the inspector', async ({ page }) => {
   await newDrawing(page);
   await page.locator('#file-image').setInputFiles('test/fixtures/legacy/export.png');
   await expect(page.getByRole('group', { name: 'Imagen' })).toBeVisible();
+  expect(await audit(page)).toEqual([]);
+});
+
+test('information and licences dialogs', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Información, licencias y aviso legal' }).click();
+  expect(await audit(page)).toEqual([]);
+  await page.getByRole('button', { name: 'Licencias', exact: true }).click();
   expect(await audit(page)).toEqual([]);
 });
