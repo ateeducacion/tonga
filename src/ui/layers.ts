@@ -9,6 +9,7 @@ export function renderLayers(editor: Editor): void {
   const focusedKey = (document.activeElement as HTMLElement | null)?.dataset.focusKey;
   const layers = editor.layers();
   byId('layers-empty').hidden = layers.length > 0;
+  byId('layers-count').textContent = String(layers.length);
   list.replaceChildren(
     ...layers.map((l, i) => {
       const name = l.name || LAYER_LABEL[l.type];

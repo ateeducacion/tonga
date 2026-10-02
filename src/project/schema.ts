@@ -37,7 +37,7 @@ export const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
 export class ProjectError extends UserError {}
 
-type Migration = (doc: Record<string, unknown>) => Record<string, unknown>;
+export type Migration = (doc: Record<string, unknown>) => Record<string, unknown>;
 // MIGRATIONS[n] upgrades a version-n document to version n+1. Add v1 -> v2 here when v2 exists.
 const MIGRATIONS: Record<number, Migration> = {};
 
@@ -56,16 +56,20 @@ export function parseProject(text: string): Project {
   return migrate(doc);
 }
 
-export function migrate(input: unknown): Project {
+/**
+ * Upgrades a parsed document to the current version and validates it. `migrations` and `current`
+ * are parameters only so the upgrade path can be tested before a version 2 exists.
+ */
+export function migrate(input: unknown, migrations: Record<number, Migration> = MIGRATIONS, current: number = CURRENT_VERSION): Project {
   if (!isRecord(input) || input.format !== FORMAT) throw new ProjectError('El fichero no es un proyecto de Tonga.');
   let doc = input;
   let version = doc.version;
   if (!Number.isInteger(version) || (version as number) < 1) throw new ProjectError('La versión del proyecto no es válida.');
-  if ((version as number) > CURRENT_VERSION) {
+  if ((version as number) > current) {
     throw new ProjectError('Este proyecto se creó con una versión más nueva de Tonga. Actualiza la aplicación para abrirlo.');
   }
-  while ((version as number) < CURRENT_VERSION) {
-    const step = MIGRATIONS[version as number];
+  while ((version as number) < current) {
+    const step = migrations[version as number];
     if (!step) throw new ProjectError(`No hay migración desde la versión ${String(version)}.`);
     doc = step(doc);
     version = doc.version;

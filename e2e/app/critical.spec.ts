@@ -149,7 +149,10 @@ test('works with the keyboard only: add, move, delete, undo (RULE-100)', async (
   await expect(layers(page)).toHaveText(['Rectángulo 1']);
 
   // Typing in a field never triggers shortcuts.
+  await page.getByRole('tab', { name: /Capas/ }).click();
   await layers(page).first().click();
+  await page.getByRole('tab', { name: 'Capas 1' }).press('ArrowLeft'); // back to Propiedades with the keyboard
+  await expect(page.getByRole('tab', { name: 'Propiedades' })).toHaveAttribute('aria-selected', 'true');
   await inspector(page).getByLabel('Nombre', { exact: true }).fill('r');
   await inspector(page).getByLabel('Nombre', { exact: true }).press('Backspace');
   await expect(layers(page)).toHaveCount(1);
@@ -236,4 +239,24 @@ test('Info shows the source link, legal notices and a licences panel; nothing is
   await licences.getByRole('button', { name: 'Volver' }).click();
   await expect(licences).toBeHidden();
   await expect(about).toBeVisible();
+});
+
+test('the side panel shows Propiedades or Capas as tabs', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  const props = page.getByRole('tab', { name: 'Propiedades' });
+  const capas = page.getByRole('tab', { name: 'Capas 2' });
+  await expect(props).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel', { name: 'Propiedades' })).toBeVisible();
+  await expect(page.locator('#panel-layers')).toBeHidden();
+
+  await props.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(capas).toBeFocused();
+  await expect(capas).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel', { name: /Capas/ })).toBeVisible();
+  await expect(layers(page)).toHaveText(['Elipse 1', 'Texto 1']);
+  await page.keyboard.press('Home');
+  await expect(props).toHaveAttribute('aria-selected', 'true');
 });

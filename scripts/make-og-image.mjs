@@ -59,7 +59,7 @@ try {
 
   // 2. The card.
   const logo = readFileSync('public/favicon.svg', 'utf8').replace('<svg ', '<svg width="56" height="56" ');
-  const ate = dataUri('scripts/assets/ate-logo.png', 'image/png');
+  const ate = dataUri('public/ate-logo.png', 'image/png');
   const card = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
   await card.setContent(`<!doctype html><html lang="es"><head><meta charset="utf-8"><style>
     * { box-sizing: border-box; margin: 0; }
