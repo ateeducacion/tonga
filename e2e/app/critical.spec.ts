@@ -194,3 +194,27 @@ test('a freshly opened or created drawing has no unsaved changes', async ({ page
   await page.getByRole('button', { name: 'Añadir texto' }).click();
   await expect(page).toHaveTitle('• Sin título · Tonga');
 });
+
+test('crops and adjusts an image from the inspector, undoably', async ({ page }) => {
+  await newDrawing(page);
+  await page.locator('#file-image').setInputFiles('test/fixtures/legacy/export.png');
+  await expect(layers(page)).toHaveText(['export']);
+  const image = page.getByRole('group', { name: 'Imagen' });
+  const width = Number(await inspector(page).getByLabel('Ancho', { exact: true }).inputValue());
+
+  await image.getByLabel('Izquierda').fill('25');
+  await image.getByLabel('Derecha').fill('25');
+  await expect(inspector(page).getByLabel('Ancho', { exact: true })).toHaveValue(String(Math.round(width / 2)));
+
+  await image.getByLabel('Escala de grises').check();
+  await image.getByLabel('Brillo (valor)').fill('40');
+  await expect(image.getByLabel('Brillo (deslizador)')).toHaveValue('40');
+
+  await page.getByRole('button', { name: 'Deshacer' }).click();
+  await expect(image.getByLabel('Brillo (valor)')).toHaveValue('0');
+  await expect(image.getByLabel('Escala de grises')).toBeChecked();
+
+  await image.getByRole('button', { name: 'Quitar recorte y ajustes' }).click();
+  await expect(image.getByLabel('Escala de grises')).not.toBeChecked();
+  await expect(inspector(page).getByLabel('Ancho', { exact: true })).toHaveValue(String(width));
+});

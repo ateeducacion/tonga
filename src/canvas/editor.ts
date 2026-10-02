@@ -8,6 +8,7 @@ import { LAYER_LABEL } from '../i18n/es';
 import type { Background, Layer, LayerType, Project } from '../project/schema';
 import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
+import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, type ImageAdjustments, type ImageCrop } from './image';
 
 export type ShapeKind = 'rect' | 'ellipse' | 'triangle' | 'line';
 export type AlignEdge = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
@@ -36,6 +37,7 @@ export interface SelectionInfo {
   stroke: string | null;
   strokeWidth: number;
   text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; textAlign: string };
+  image?: { adjustments: ImageAdjustments; crop: ImageCrop };
 }
 
 export const DEFAULT_FILL = '#f28c28';
@@ -243,6 +245,7 @@ export class Editor {
       stroke: multi ? null : colour(o.stroke),
       strokeWidth: o.strokeWidth,
     };
+    if (isImage(o)) info.image = { adjustments: readAdjustments(o), crop: readCrop(o) };
     if (o instanceof Textbox) {
       info.text = {
         text: o.text, fontFamily: o.fontFamily, fontSize: o.fontSize, bold: o.fontWeight === 'bold' || Number(o.fontWeight) >= 600,
@@ -448,6 +451,24 @@ export class Editor {
       ? active.getObjects()
       : [active];
     for (const o of targets) o.set(props).setCoords();
+    this.canvas.requestRenderAll();
+    this.commit(key);
+  }
+
+  /** Brightness, contrast, greyscale… on the selected image. Slider drags share `key`. */
+  setImageAdjustments(adjustments: ImageAdjustments, key: string | null = null): void {
+    const o = this.canvas.getActiveObject();
+    if (!isImage(o)) return;
+    applyAdjustments(o, adjustments);
+    this.canvas.requestRenderAll();
+    this.commit(key);
+  }
+
+  /** Non-destructive crop of the selected image (percentages of each side). */
+  setImageCrop(crop: ImageCrop, key: string | null = null): void {
+    const o = this.canvas.getActiveObject();
+    if (!isImage(o)) return;
+    applyCrop(o, crop);
     this.canvas.requestRenderAll();
     this.commit(key);
   }

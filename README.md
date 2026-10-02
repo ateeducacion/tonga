@@ -15,7 +15,7 @@ Tonga es software estático: no tiene servidor, base de datos ni cuentas. **Tus 
 - Empezar un dibujo en A4 (horizontal o vertical), 16:9, cuadrado o a medida, con fondo transparente o de color.
 - Añadir texto, rectángulos, elipses, triángulos, líneas y dibujo libre; mover, redimensionar, girar, voltear, alinear, agrupar, ordenar capas, duplicar, copiar y pegar.
 - Buscar en la **biblioteca** por nombre o colección y añadir imágenes al lienzo o usarlas como fondo.
-- Añadir tus propias imágenes (PNG, JPEG, WebP, SVG).
+- Añadir tus propias imágenes (PNG, JPEG, WebP, SVG), recortarlas y ajustarlas: escala de grises, sepia, negativo, brillo, contraste, saturación y desenfoque.
 - Deshacer y rehacer, con atajos de teclado (ver *Ayuda* dentro de la aplicación).
 - Guardar el trabajo como proyecto `.tonga` para continuar otro día. Hay además un autoguardado en el navegador que se ofrece recuperar tras un cierre accidental.
 - Exportar a PNG, JPEG, SVG (vectorial y autocontenido) o PDF (A4).

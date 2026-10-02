@@ -2,6 +2,28 @@
 
 Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [2.1.0] - 2026-10-02
+
+### Añadido
+
+- Recorte de imágenes no destructivo, por porcentaje de cada lado.
+- Ajustes de imagen: escala de grises, sepia, negativo, brillo, contraste, saturación y desenfoque.
+- Vista previa al compartir el enlace (Open Graph) en WhatsApp, Telegram y redes.
+- Auditoría Lighthouse informativa tras cada despliegue.
+
+### Corregido
+
+- Los avisos ya no tapan la barra de herramientas en móvil.
+- Un dibujo en blanco ya no se marca como «sin guardar».
+- El lienzo ya no salta al arrancar (CLS 0,175 → 0,051).
+- Los avisos tienen contraste completo desde que aparecen.
+
+### Cambiado
+
+- El despliegue manual de Pages solo se permite desde `main`.
+- Dependabot no propone TypeScript ≥ 6.1 ni versiones mayores de `@types/node`.
+- Eliminada la rama `gh-pages`, que ya no se usaba.
+
 ## [2.0.0] - 2026-10-02
 
 Reescritura completa: Tonga deja de ser un fork de TOAST UI Image Editor. Detalle en [docs/MODERNIZATION.md](docs/MODERNIZATION.md).
@@ -29,7 +51,7 @@ Reescritura completa: Tonga deja de ser un fork de TOAST UI Image Editor. Detall
 ### Eliminado
 
 - TOAST UI Image Editor, jQuery, jQuery UI, jquery-modal, axios, FileSaver, X2JS, jsPDF, tui-code-snippet, tui-color-picker, image-picker y las copias de Fabric 2.7/3.0.
-- Máscaras, vectorizar iconos (ImageTracer), modos de fusión, recorte destructivo, filtros de imagen (pendientes de reimplementar), sonido y botón «Recargar página».
+- Máscaras, vectorizar iconos (ImageTracer), modos de fusión, recorte destructivo, filtros de imagen (recuperados en 2.1.0), sonido y botón «Recargar página».
 
 ### Seguridad
 

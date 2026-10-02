@@ -45,3 +45,10 @@ test('phone layout with the drawer open, dark theme', async ({ page }) => {
   await page.getByRole('button', { name: 'Mostrar propiedades y capas' }).click();
   expect(await audit(page)).toEqual([]);
 });
+
+test('image tools in the inspector', async ({ page }) => {
+  await newDrawing(page);
+  await page.locator('#file-image').setInputFiles('test/fixtures/legacy/export.png');
+  await expect(page.getByRole('group', { name: 'Imagen' })).toBeVisible();
+  expect(await audit(page)).toEqual([]);
+});

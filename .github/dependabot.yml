@@ -8,6 +8,13 @@ updates:
       dev-tooling:
         dependency-type: development
         update-types: [minor, patch]
+    ignore:
+      # typescript-eslint 8.x supports TypeScript < 6.1 (docs/adr/0003-vite-typescript.md).
+      - dependency-name: typescript
+        versions: ['>=6.1.0']
+      # Types follow the Node LTS that Tonga targets (engines >=24, CI on Node 24).
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /

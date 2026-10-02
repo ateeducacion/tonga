@@ -380,6 +380,23 @@ h3 {
   margin: 0;
 }
 
+.image-tools {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  margin: 0;
+}
+
+.image-tools legend {
+  font-weight: 600;
+  padding: 0 var(--space-1);
+}
+
+.inspector .slider-row {
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+}
+
 .inspector label.check,
 .check {
   display: flex;
@@ -673,9 +690,9 @@ kbd {
     animation: toast-in 160ms ease-out;
   }
 
+  /* Movement only: text keeps full contrast from the first frame. */
   @keyframes toast-in {
     from {
-      opacity: 0;
       translate: 0 8px;
     }
   }

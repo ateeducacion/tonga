@@ -42,6 +42,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // Let jsdom decode <img> sources (with node-canvas), so image layers can be tested.
+    environmentOptions: { jsdom: { resources: 'usable' } },
     include: ['test/**/*.test.ts'],
     coverage: {
       provider: 'v8',
