@@ -32,7 +32,7 @@ El análisis completo está en [`analysis/tonga/`](../analysis/tonga/):
 | 1. Baseline e infraestructura | #9 | Caracterización Playwright de la versión original, con sus exportaciones como fixtures; Vite + TypeScript; CI con permisos mínimos y Pages solo después de un CI correcto; Dependabot; métricas reproducibles |
 | 2. Núcleo | #10 | Formato `.tonga` con validación y migraciones, historial con snapshots, editor sobre Fabric 7 con solo APIs públicas |
 | 3-4. Interfaz, biblioteca, importar/exportar | #13 | Interfaz nueva accesible y responsive, catálogo generado y validado, biblioteca con búsqueda, exportación PNG/JPEG/SVG/PDF sin jsPDF, importación saneada, autoguardado |
-| 5. Cutover y hardening | — | La nueva app pasa a la raíz y se retira la versión original; PWA; REUSE/SPDX; documentación; ADR; skills; release; informe |
+| 5. Cutover y hardening | #14 | La nueva app pasa a la raíz y se retira la versión original; PWA; REUSE/SPDX; documentación; ADR; skills; release; informe |
 
 Métricas: [MODERNIZATION-REPORT.md](MODERNIZATION-REPORT.md) (generado por `scripts/report.mjs`).
 
