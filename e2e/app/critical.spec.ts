@@ -177,3 +177,11 @@ test('shows the properties panel as a drawer on a phone', async ({ page }) => {
   await expect(page.locator('#sidepanel')).toBeHidden();
   await expect(page.getByRole('button', { name: 'Exportar' })).toBeInViewport();
 });
+
+test('status messages never cover the phone tool bar', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await newDrawing(page);
+  await expect(page.locator('.toast').first()).toBeVisible(); // «Nuevo dibujo…» is still on screen
+  await page.getByRole('button', { name: 'Añadir rectángulo' }).click({ timeout: 2000 });
+  await expect(layers(page)).toHaveCount(1);
+});
