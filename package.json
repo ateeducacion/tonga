@@ -1,26 +1,48 @@
 {
   "name": "tonga",
-  "version": "1.1.3",
-  "description": "Static drawing application Tonga",
+  "version": "2.0.0-dev",
+  "description": "Aplicación web estática de dibujo para el aula (Tonga)",
   "private": true,
-  "license": "AGPL-3.0",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://ateeducacion.github.io/tonga/",
+  "author": "Área de Tecnología Educativa <ate.educacion@gobiernodecanarias.org>",
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "scripts": {
-    "start": "http-server -p 8000 -c-1",
-    "update": "npm update && cp node_modules/axios/dist/axios.min.js js/axios.min.js && cp node_modules/fabric/dist/fabric.min.js js/fabric.min.js && cp node_modules/file-saver/dist/FileSaver.min.js js/FileSaver.min.js && cp node_modules/jquery/dist/jquery.min.js js/jquery.min.js && cp node_modules/jquery-ui-dist/jquery-ui.min.js js/jquery-ui.min.js && cp node_modules/jspdf/dist/jspdf.min.js js/jspdf.min.js && cp node_modules/xml2json/lib/xml2json.min.js js/xml2json.min.js && cp node_modules/tui-code-snippet/dist/tui-code-snippet.min.js js/tui-code-snippet.min.js && cp node_modules/tui-color-picker/dist/tui-color-picker.min.js js/tui-color-picker.min.js"
+    "dev": "vite",
+    "build": "vite build && node scripts/assemble.mjs",
+    "preview": "node scripts/serve.mjs",
+    "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\"",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "check": "node scripts/check-dist.mjs",
+    "metrics": "node scripts/metrics.mjs",
+    "audit": "npm audit --audit-level=high"
   },
   "devDependencies": {
-    "axios": "^1.9.0",
-    "fabric": "^6.6.6",
-    "file-saver": "^2.0.5",
-    "http-server": "^14.1.1",
-    "jquery": "^3.7.1",
-    "jquery-ui-dist": "^1.13.3",
-    "jspdf": "^3.0.1",
-    "tui-code-snippet": "^2.3.3",
-    "tui-color-picker": "^2.2.8",
-    "xml2json": "^0.7.1"
+    "@axe-core/playwright": "4.13.0",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.19.1",
+    "@vitest/coverage-v8": "5.0.3",
+    "eslint": "10.11.0",
+    "globals": "17.13.0",
+    "jsdom": "30.1.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.0",
+    "vite": "8.3.2",
+    "vitest": "5.0.3"
+  },
+  "dependencies": {
+    "fabric": "7.4.0"
+  },
+  "allowScripts": {
+    "canvas": false,
+    "fsevents": false
   }
 }
