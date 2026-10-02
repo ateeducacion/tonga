@@ -19,8 +19,7 @@ body {
   display: grid;
   grid-template:
     'top top top' auto
-    'tools work panel' 1fr
-    'tools legal panel' auto / auto 1fr 320px;
+    'tools work panel' 1fr / auto 1fr 320px;
   overflow: hidden;
   accent-color: var(--color-accent);
 }
@@ -265,16 +264,6 @@ h3 {
   cursor: grab !important;
 }
 
-.legal {
-  grid-area: legal;
-  display: flex;
-  gap: var(--space-3);
-  justify-content: flex-end;
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--font-size-sm);
-}
-
-.legal a,
 .dialog a {
   color: var(--color-accent);
 }
@@ -571,6 +560,48 @@ kbd {
   background: var(--color-surface-2);
 }
 
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.help-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.dialog a.link-btn {
+  color: var(--color-text);
+  border-color: var(--color-border);
+  text-decoration: none;
+}
+
+.help-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+}
+
+.help-section > summary {
+  cursor: pointer;
+  list-style-position: outside;
+  margin-inline-start: var(--space-4);
+}
+
+.help-section > summary h3 {
+  display: inline;
+  margin: 0;
+}
+
+.license-list {
+  padding-inline-start: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+}
+
 .confirm-preview {
   max-width: 100%;
   max-height: 200px;
@@ -705,8 +736,7 @@ kbd {
     grid-template:
       'top' auto
       'work' 1fr
-      'tools' auto
-      'legal' auto / 1fr;
+      'tools' auto / 1fr;
   }
 
   .brand-name {
@@ -795,7 +825,6 @@ kbd {
 
   .zoom [data-action='zoom-in'],
   .zoom [data-action='zoom-out'],
-  .topbar [data-action='about'],
   .topbar [data-action='theme'],
   .topbar .divider {
     display: none;

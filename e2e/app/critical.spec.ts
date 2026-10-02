@@ -218,3 +218,19 @@ test('crops and adjusts an image from the inspector, undoably', async ({ page })
   await expect(image.getByLabel('Escala de grises')).not.toBeChecked();
   await expect(inspector(page).getByLabel('Ancho', { exact: true })).toHaveValue(String(width));
 });
+
+test('help gathers the source code link, licences and legal notices; nothing is pinned to the screen (RULE-099/111)', async ({ page }) => {
+  await newDrawing(page);
+  await expect(page.locator('body > footer')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ayuda, licencias y aviso legal' }).click();
+  const help = page.getByRole('dialog', { name: 'Ayuda' });
+  await expect(help.getByRole('link', { name: /Código fuente en GitHub/ })).toHaveAttribute('href', 'https://github.com/ateeducacion/tonga');
+  await help.getByText('Licencias', { exact: true }).click();
+  await expect(help.getByText(/AGPL-3.0-or-later/)).toBeVisible();
+  await expect(help.getByRole('link', { name: 'CC BY-NC-SA 4.0' })).toBeVisible();
+  await help.getByText('Aviso legal y privacidad', { exact: true }).click();
+  await expect(help.getByRole('link', { name: /Aviso legal/ })).toHaveAttribute('href', /gobiernodecanarias\.org/);
+  await expect(help.getByRole('link', { name: /Política de privacidad/ })).toHaveAttribute('rel', 'noopener noreferrer');
+  await help.getByText('Acerca de Tonga', { exact: true }).click();
+  await expect(help.getByText(/Versión \d+\.\d+\.\d+/)).toBeVisible();
+});

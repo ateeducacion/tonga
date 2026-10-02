@@ -82,7 +82,7 @@ try {
       <span class="mark">${logo}</span>
       <h1>Tonga</h1>
       <h2>Dibujo para el aula</h2>
-      <p>Más de 1.600 ilustraciones educativas para crear láminas y carteles en el navegador, sin registro y sin subir nada.</p>
+      <p>Software libre con más de 1.600 ilustraciones educativas para crear láminas y carteles en el navegador, sin registro y sin subir nada.</p>
     </div>
     <div class="ate"><img src="${ate}" alt=""><span>Área de Tecnología Educativa · Gobierno de Canarias</span></div>
     <div class="shot"><img src="data:image/png;base64,${shot.toString('base64')}" alt=""></div>
