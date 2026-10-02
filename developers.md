@@ -56,9 +56,15 @@ El `Makefile` repite lo mismo con atajos: `make up`, `make build`, `make test`, 
 
 ## Publicar una versión
 
-1. Actualiza `version` en `package.json` y `CHANGELOG.md`.
-2. Fusiona en `main`.
-3. `git tag v2.x.y && git push origin v2.x.y`. El workflow `release.yml` crea la release con el ZIP de `dist/` y el SBOM.
+1. Pasa las entradas de `[Unreleased]` de `CHANGELOG.md` a la nueva versión y fusiona en `main`.
+2. Etiqueta ese commit de `main`: `git tag v2.x.y && git push origin v2.x.y`.
+
+Con la etiqueta:
+
+- `release.yml` crea la release con el ZIP de `dist/` y el SBOM.
+- CI y Pages vuelven a desplegar la web. Pages solo publica commits que están en `main`.
+- La versión que muestra la app (*Información*) sale de la etiqueta (`git describe --tags`): «2.x.y» en el commit etiquetado y «2.x.y-N-gabc1234» en commits posteriores. `version` de `package.json` solo se usa si no hay historial de git.
+- La PWA se actualiza sola: el service worker tiene un nombre de caché derivado del contenido del build, así que cualquier versión nueva, incluido un cambio de número, se instala, borra la caché anterior y ofrece «Actualizar» sin recargar a la fuerza.
 
 ## Vista previa al compartir (WhatsApp, Telegram, redes)
 

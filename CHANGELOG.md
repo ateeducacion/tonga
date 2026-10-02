@@ -4,6 +4,12 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Cambiado
+
+- La versión que muestra la aplicación sale de la etiqueta de git (`v2.1.1` → «2.1.1»). Al publicar una etiqueta `v*` se vuelve a desplegar la web con esa versión, y la PWA ofrece actualizarse.
+
+## [2.1.1] - 2026-10-03
+
 ### Añadido
 
 - Colección «Fondos de mar» en la biblioteca (5 fondos).
