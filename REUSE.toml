@@ -27,11 +27,12 @@ precedence = "override"
 SPDX-FileCopyrightText = "2019-2026 Gobierno de Canarias"
 SPDX-License-Identifier = "AGPL-3.0-or-later AND CC-BY-NC-SA-4.0"
 
-# Lucide icon paths (ISC; some derived from Feather, MIT) inside Tonga's own module.
+# Lucide icon paths (ISC; some derived from Feather, MIT) and the Octicons GitHub mark (MIT)
+# inside Tonga's own module.
 [[annotations]]
 path = ["src/ui/icons.ts"]
 precedence = "override"
-SPDX-FileCopyrightText = ["2019-2026 Gobierno de Canarias", "2026 Lucide Icons and Contributors", "2013-present Cole Bemis"]
+SPDX-FileCopyrightText = ["2019-2026 Gobierno de Canarias", "2026 Lucide Icons and Contributors", "2013-present Cole Bemis", "2026 GitHub Inc."]
 SPDX-License-Identifier = "AGPL-3.0-or-later AND ISC AND MIT"
 
 # Third-party agent skills, installed verbatim with `gh skill add` (.agents/upstream-skills.txt).

@@ -6,6 +6,7 @@ Componentes de terceros que **se distribuyen** con Tonga (están dentro de `dist
 |---|---|---|---|---|
 | Fabric.js | 7.4.0 | Motor del lienzo (incluido en el bundle JS) | MIT | https://github.com/fabricjs/fabric.js |
 | Lucide | 1.50.0 (lucide-static) | 50 iconos copiados como SVG en `src/ui/icons.ts` | ISC; parte derivada de Feather, MIT | https://github.com/lucide-icons/lucide |
+| Primer Octicons | 19.38.0 | Icono `mark-github` en `src/ui/icons.ts` | MIT, © GitHub Inc. | https://github.com/primer/octicons |
 | Imágenes de `repositorios/` | — | Biblioteca de imágenes | CC BY-NC-SA 4.0, © Gobierno de Canarias | Créditos originales (rama `upstream`, `creditos.html`) |
 
 Ningún código de TOAST UI Image Editor, jQuery, jQuery UI, axios, FileSaver, X2JS, jsPDF ni de la extensión `customiseControls` forma parte de esta versión: se usaron solo en la versión original (rama `upstream`).

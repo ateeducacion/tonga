@@ -33,7 +33,7 @@ test('export and help dialogs', async ({ page }) => {
   await page.getByRole('button', { name: 'Exportar' }).click();
   expect(await audit(page)).toEqual([]);
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Ayuda y atajos' }).click();
+  await page.getByRole('button', { name: 'Ayuda, licencias y aviso legal' }).click();
   expect(await audit(page)).toEqual([]);
 });
 
