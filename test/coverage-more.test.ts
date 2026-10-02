@@ -290,6 +290,16 @@ describe('Editor (remaining operations)', () => {
     expect(ed.toProject().layers.map((l) => l.object.src)).toEqual([src, src]);
   });
 
+  it('cuts: copies to the clipboard and removes the selection, as one undo step', async () => {
+    ed.addShape('rect');
+    expect(ed.hasClipboard).toBe(false);
+    ed.cut();
+    expect(ed.layers()).toHaveLength(0);
+    expect(ed.hasClipboard).toBe(true);
+    await ed.paste();
+    expect(ed.layers().map((l) => l.name)).toEqual(['Rectángulo 1']);
+  });
+
   it('undo and redo do nothing at the ends of the history', async () => {
     const r = ed.revision;
     await ed.undo();
@@ -348,7 +358,10 @@ describe('shortcuts and helpers', () => {
     expect(commandFor(key('ArrowRight'))).toEqual({ nudge: [1, 0] });
     expect(commandFor(key('ArrowUp'))).toEqual({ nudge: [0, -1] });
     expect(commandFor(key('='))).toBe('zoom-in');
-    expect(commandFor(key('x', { ctrlKey: true }))).toBeNull();
+    expect(commandFor(key('x', { ctrlKey: true }))).toBe('cut');
+    expect(commandFor(key('j', { ctrlKey: true }))).toBeNull();
+    expect(commandFor(key('ContextMenu'))).toBe('context-menu');
+    expect(commandFor(key('F10', { shiftKey: true }))).toBe('context-menu');
     expect(commandFor(key('T', { shiftKey: true }))).toBeNull();
     expect(commandFor(key('q'))).toBeNull();
     expect(commandFor(key('z', { altKey: true }))).toBeNull();

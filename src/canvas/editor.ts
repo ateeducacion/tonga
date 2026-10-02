@@ -8,6 +8,7 @@ import { LAYER_LABEL } from '../i18n/es';
 import type { Background, Layer, LayerType, Project } from '../project/schema';
 import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
+import './controls';
 import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, type ImageAdjustments, type ImageCrop } from './image';
 
 export type ShapeKind = 'rect' | 'ellipse' | 'triangle' | 'line';
@@ -61,12 +62,13 @@ export class Editor {
   private clipboard: Layer[] = [];
   private pasteCount = 0;
   private listeners = new Set<() => void>();
+  private contextMenuListener: ((x: number, y: number) => void) | null = null;
 
   constructor(
     element: HTMLCanvasElement,
     private readonly resolve: SourceResolver,
   ) {
-    this.canvas = new Canvas(element, { preserveObjectStacking: true, selectionKey: 'shiftKey', fireRightClick: false });
+    this.canvas = new Canvas(element, { preserveObjectStacking: true, selectionKey: 'shiftKey', fireRightClick: true, stopContextMenu: true });
     this.canvas.freeDrawingBrush = new PencilBrush(this.canvas);
     const changed = () => this.emit();
     this.canvas.on('selection:created', changed);
@@ -76,6 +78,16 @@ export class Editor {
     this.canvas.on('object:modified', () => this.commit());
     this.canvas.on('text:changed', ({ target }) => this.commit(`text:${target.id ?? ''}`));
     this.canvas.on('text:editing:exited', () => this.history.seal());
+    // Right click: select what is under the pointer (keeping a multiple selection) and open the menu.
+    this.canvas.on('mouse:down', ({ e, target }) => {
+      if (!('button' in e) || e.button !== 2) return;
+      if (target && target.selectable !== false && !this.selected().includes(target)) {
+        this.canvas.setActiveObject(target);
+        this.canvas.requestRenderAll();
+        this.emit();
+      }
+      this.contextMenuListener?.(e.clientX, e.clientY);
+    });
     this.canvas.on('path:created', ({ path }) => {
       this.identify(path, 'path');
       this.commit();
@@ -86,6 +98,11 @@ export class Editor {
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
+  }
+
+  /** Called with viewport coordinates when the user right-clicks the canvas. */
+  onContextMenu(listener: (x: number, y: number) => void): void {
+    this.contextMenuListener = listener;
   }
 
   private emit(): void {
@@ -111,6 +128,10 @@ export class Editor {
   /** Increases whenever the document changes (edit, undo, redo, open). */
   get revision(): number {
     return this.rev;
+  }
+
+  get hasClipboard(): boolean {
+    return this.clipboard.length > 0;
   }
 
   get zoomLevel(): number {
@@ -387,6 +408,11 @@ export class Editor {
     this.canvas.discardActiveObject();
     this.canvas.remove(...objs);
     this.commit();
+  }
+
+  cut(): void {
+    this.copy();
+    this.removeSelected();
   }
 
   copy(): void {

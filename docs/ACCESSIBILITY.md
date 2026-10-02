@@ -14,6 +14,7 @@ El lienzo es una imagen (`<canvas role="img">`) que un lector de pantalla no pue
 
 - Todo es alcanzable con Tab. El primer elemento es «Saltar al lienzo».
 - Las formas y el texto se insertan **centrados con un botón**: no hace falta arrastrar (criterio 2.5.7).
+- El menú contextual se abre también con la tecla Menú o Mayús+F10, sobre el objeto seleccionado. Es un menú WAI-ARIA (flechas, Inicio/Fin, Intro, Esc), y todo lo que contiene está también en el inspector y en los atajos.
 - Flechas para mover 1 px y Shift+flechas para 10 px; Supr para borrar; Ctrl/⌘+Z/Y/C/V/D/A; +, −, 0 y 1 para el zoom; V, H, B, T, R, E, L, I y K para herramientas y acciones. Los atajos **no actúan** mientras se escribe en un campo ni al editar texto del lienzo, y están documentados en *Ayuda*.
 - Biblioteca: el buscador recibe el foco; en la cuadrícula, las flechas, Inicio y Fin mueven la selección (`aria-activedescendant`) y Enter añade la imagen.
 - Los diálogos son `<dialog>` modales nativos: atrapan el foco, se cierran con Esc y devuelven el foco al cerrar.
