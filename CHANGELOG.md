@@ -2,6 +2,16 @@
 
 Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [Unreleased]
+
+### Añadido
+
+- Colección «Fondos de mar» en la biblioteca (5 fondos).
+
+### Cambiado
+
+- Licencia del software declarada como `AGPL-3.0-or-later` (GNU AGPL v3 o posterior).
+
 ## [2.1.0] - 2026-10-02
 
 ### Añadido

@@ -53,10 +53,10 @@ Métricas: [MODERNIZATION-REPORT.md](MODERNIZATION-REPORT.md) (generado por `scr
 
 ## Qué empeoró o queda pendiente (deuda explícita)
 
-1. **Licencias**: el titular no ha decidido entre AGPL «solo v3» y «v3 o posterior», ni ha confirmado la cesión de derechos a la Administración (ver [LICENSING](LICENSING.md)). No hay atribución por imagen en la biblioteca.
+1. ~~**Licencia del software**~~ → **decidido**: `AGPL-3.0-or-later` (alternativa: `GPL-3.0-or-later`). Sigue sin haber atribución por imagen en la biblioteca, y el código original de `upstream` no tiene licencia declarada (no se reutiliza). Ver [LICENSING](LICENSING.md).
 2. ~~**Filtros de imagen**~~ → **resuelto en 2.1.0**: escala de grises, sepia, negativo, brillo, contraste, saturación y desenfoque, desde el inspector y con deshacer.
 3. ~~**Recorte**~~ → **resuelto en 2.1.0**: recorte no destructivo por porcentaje de cada lado, también con teclado.
-4. **`repositorios/FondosMar/`** no se publica (sin `lista.txt` ni procedencia), y hay 26 ficheros sin referenciar pendientes de revisar ([ASSETS](ASSETS.md)).
+4. ~~**`repositorios/FondosMar/`**~~ → **publicada** con la misma licencia que el resto. Quedan 14 ficheros sin referenciar pendientes de revisar ([ASSETS](ASSETS.md)).
 5. **Revisión manual de accesibilidad** con lectores de pantalla: pendiente ([ACCESSIBILITY](ACCESSIBILITY.md)). axe no basta.
 6. **CSP en GitHub Pages**: Pages no permite cabeceras. La CSP solo se aplica en despliegues propios ([SECURITY](SECURITY.md)).
 7. ~~**Lighthouse CI**~~ → **resuelto**: `lighthouse.yml` audita la web publicada tras cada despliegue. Es informativo: deja un resumen y avisa si baja del nivel medido, pero no bloquea.
