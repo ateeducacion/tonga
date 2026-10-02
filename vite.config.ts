@@ -27,19 +27,20 @@ function serviceWorker(): Plugin {
 process.env.VITE_SITE_URL ??= 'https://ateeducacion.github.io/tonga/';
 
 /**
- * The version shown in the app comes from git tags, so tagging v2.1.1 is enough: "2.1.1" on the
- * tagged commit, "2.1.1-3-gabc1234" three commits later. TONGA_VERSION overrides it (release CI);
- * package.json is the fallback when there is no git history (e.g. a source ZIP).
+ * The version shown in the app is the latest v* git tag ("2.1.1"), so tagging is enough.
+ * The exact build ("2.1.1-3-gabc1234", from git describe) is only a tooltip, for bug reports.
+ * TONGA_VERSION overrides both (release CI); package.json is the fallback without git history.
  */
-function appVersion(): string {
-  if (process.env.TONGA_VERSION) return process.env.TONGA_VERSION.replace(/^v/, '');
+function describe(...args: string[]): string | null {
   try {
-    return execFileSync('git', ['describe', '--tags', '--match', 'v[0-9]*'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().replace(/^v/, '');
+    return execFileSync('git', ['describe', '--tags', '--match', 'v[0-9]*', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().replace(/^v/, '');
   } catch {
-    return (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
+    return null;
   }
 }
-const version = appVersion();
+const fallback = (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
+const version = process.env.TONGA_VERSION?.replace(/^v/, '') ?? describe('--abbrev=0') ?? fallback;
+const build = process.env.TONGA_VERSION?.replace(/^v/, '') ?? describe() ?? fallback;
 
 // dist/ is fully static; scripts/copy-collections.mjs adds repositorios/ next to the app.
 export default defineConfig({
@@ -47,6 +48,7 @@ export default defineConfig({
   plugins: [serviceWorker()],
   define: {
     __APP_VERSION__: JSON.stringify(version),
+    __APP_BUILD__: JSON.stringify(build),
   },
   publicDir: 'public',
   build: {
