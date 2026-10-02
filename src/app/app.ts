@@ -56,6 +56,7 @@ export class App {
     await this.editor.open(newProject(1123, 794));
     this.savedRevision = this.autosavedRevision = this.editor.revision; // a blank page has nothing to save
     this.zoomFit();
+    byId('canvas-frame').classList.add('ready');
     const saved = await loadAutosave().catch(() => undefined);
     if (saved) {
       const when = new Date(saved.savedAt).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });

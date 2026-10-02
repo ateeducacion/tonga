@@ -69,4 +69,17 @@ Métricas: [MODERNIZATION-REPORT.md](MODERNIZATION-REPORT.md) (generado por `scr
 
 ## Mediciones puntuales
 
-Lighthouse (Chrome DevTools), web publicada: ver la sección añadida al final de [MODERNIZATION-REPORT.md](MODERNIZATION-REPORT.md) cuando se mida tras el despliegue.
+Lighthouse 13.5.0 (CLI, Chromium sin interfaz) sobre <https://ateeducacion.github.io/tonga/>, el 2026-10-02:
+
+| Perfil | Rendimiento | Accesibilidad | Buenas prácticas | LCP | TBT | CLS |
+|---|---:|---:|---:|---:|---:|---:|
+| Escritorio (antes de corregir el salto del lienzo) | 92 | 100 | 100 | 0,5 s | 0 ms | 0,175 |
+| Móvil | 100 | 100 | 100 | 1,5 s | 10 ms | 0,02 |
+
+El CLS de escritorio venía del `<canvas>` (300 × 150 px por defecto), que saltaba al ajustarse a la pantalla. Ahora el lienzo se muestra cuando ya tiene su tamaño definitivo; en local, el CLS baja a 0,051 y el rendimiento sube a 99. Se repite con:
+
+```bash
+npx lighthouse https://ateeducacion.github.io/tonga/ --preset=desktop --only-categories=performance,accessibility,best-practices
+```
+
+Lighthouse no está en el CI (punto 7 de la deuda).
