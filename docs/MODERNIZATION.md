@@ -3,7 +3,7 @@
 ## Punto de partida
 
 - **Rama `upstream`**: `f10785f` («Initial commit: original vendor source»), el código entregado por el proveedor (TOAST UI Image Editor 3.6.0 modificado, Tonga 1.1.x). No se ha modificado.
-- **`main` antes de modernizar**: `91ca335`. Desciende de `upstream` (`git merge-base --is-ancestor origin/upstream origin/main` es cierto) con 7 commits: README, CHANGELOG, `LICENSE` AGPL, `package.json`, un workflow que publicaba en `gh-pages` y el prompt de modernización.
+- **`dist/` compilado del proveedor**: no está en `upstream` (estaba excluido de git) y sin él la aplicación original no arranca. Se guardó sin cambios en el commit `8f23fce`, y las comparaciones de carga sirven `upstream` con ese `dist/`. `main` desciende de `upstream`; los commits que había antes de la modernización solo publicaban ese mismo código, así que no se comparan por separado.
 - **Etiqueta**: no se ha creado ninguna para no tocar el historial. La foto original es la rama `upstream`.
 
 El análisis completo está en [`analysis/tonga/`](../analysis/tonga/):
