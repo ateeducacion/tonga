@@ -2,6 +2,7 @@
 // nothing is selected). Rebuilt when the selection changes; otherwise only values are synced,
 // so typing in a field never loses focus.
 import type { AlignEdge, Editor, SelectionInfo } from '../canvas/editor';
+import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '../canvas/image';
 import { HEX_COLOR } from '../project/schema';
 import { byId, h, iconButton } from './dom';
 import type { IconName } from './icons';
@@ -44,6 +45,21 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
     if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
       if (el !== document.activeElement && el.type !== 'checkbox') el.value = el.type === 'color' && !HEX_COLOR.test(value) ? '#000000' : value;
     }
+  }
+  if (info?.image) {
+    const { adjustments: a, crop: c } = info.image;
+    const set = (name: string, v: number | boolean) => {
+      const el = form.elements.namedItem(name);
+      if (!(el instanceof HTMLInputElement) || el === document.activeElement) return;
+      if (el.type === 'checkbox') el.checked = v as boolean;
+      else el.value = String(v);
+    };
+    for (const k of ['grayscale', 'sepia', 'invert'] as const) set(k, a[k]);
+    for (const k of ['brightness', 'contrast', 'saturation', 'blur'] as const) {
+      set(k, a[k]);
+      set(`${k}N`, a[k]);
+    }
+    for (const k of ['left', 'top', 'right', 'bottom'] as const) set(`crop-${k}`, c[k]);
   }
   if (info?.text) {
     const bold = form.elements.namedItem('bold') as HTMLInputElement | null;
@@ -143,6 +159,8 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
     parts.push(s);
   }
 
+  if (info.image) parts.push(imageFields(editor, key));
+
   const align = (edge: AlignEdge, iconName: IconName, label: string) => action(iconName, label, () => editor.align(edge));
   parts.push(
     h('div', { class: 'actions', role: 'group', 'aria-label': multi ? 'Alinear la selección' : 'Alinear con el lienzo' },
@@ -166,6 +184,50 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
       action('trash2', 'Borrar (Supr)', () => editor.removeSelected())),
   );
   return parts;
+}
+
+/** Crop (percent per side) and adjustments for an image. Every control has a visible label. */
+function imageFields(editor: Editor, key: (p: string) => string): HTMLElement {
+  const read = (form: HTMLElement): { a: ImageAdjustments; c: ImageCrop } => {
+    const v = (name: string) => Number((form.querySelector<HTMLInputElement>(`[name="${name}"]`) as HTMLInputElement).value) || 0;
+    const on = (name: string) => (form.querySelector<HTMLInputElement>(`[name="${name}"]`) as HTMLInputElement).checked;
+    return {
+      a: { grayscale: on('grayscale'), sepia: on('sepia'), invert: on('invert'), brightness: v('brightness'), contrast: v('contrast'), saturation: v('saturation'), blur: v('blur') },
+      c: { left: v('crop-left'), top: v('crop-top'), right: v('crop-right'), bottom: v('crop-bottom') },
+    };
+  };
+  const slider = (label: string, name: string, min: number, max: number) => {
+    const range = h('input', { type: 'range', name, min, max, step: 1, 'aria-label': `${label} (deslizador)` });
+    const exact = h('input', { type: 'number', name: `${name}N`, min, max, step: 1, inputmode: 'numeric', 'aria-label': `${label} (valor)` });
+    range.addEventListener('input', () => (exact.value = range.value));
+    exact.addEventListener('input', () => (range.value = exact.value));
+    return h('div', {}, h('span', { class: 'muted' }, label), h('div', { class: 'color-row slider-row' }, exact, range));
+  };
+  const box = h('fieldset', { class: 'inspector image-tools' },
+    h('legend', {}, 'Imagen'),
+    h('span', { class: 'muted' }, 'Recortar (% de cada lado)'),
+    h('div', { class: 'grid2' }, num('Izquierda', 'crop-left', { min: 0, max: 95 }), num('Derecha', 'crop-right', { min: 0, max: 95 }), num('Arriba', 'crop-top', { min: 0, max: 95 }), num('Abajo', 'crop-bottom', { min: 0, max: 95 })),
+    h('div', { class: 'grid2' },
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'grayscale' }), 'Escala de grises'),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'sepia' }), 'Sepia'),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'invert' }), 'Negativo')),
+    slider('Brillo', 'brightness', -100, 100),
+    slider('Contraste', 'contrast', -100, 100),
+    slider('Saturación', 'saturation', -100, 100),
+    slider('Desenfoque', 'blur', 0, 100));
+  const reset = h('button', { type: 'button', class: 'btn' }, 'Quitar recorte y ajustes');
+  reset.addEventListener('click', () => {
+    editor.setImageAdjustments({ ...NO_ADJUSTMENTS });
+    editor.setImageCrop({ ...NO_CROP });
+  });
+  box.append(reset);
+  box.addEventListener('input', (e) => {
+    const name = (e.target as HTMLInputElement).name;
+    const { a, c } = read(box);
+    if (name.startsWith('crop-')) editor.setImageCrop(c, key('crop'));
+    else editor.setImageAdjustments(a, key(`adjust-${name.replace(/N$/, '')}`));
+  });
+  return box;
 }
 
 function canvasFields(editor: Editor, actions: InspectorActions): HTMLElement[] {
