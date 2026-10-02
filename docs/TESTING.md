@@ -22,7 +22,7 @@ Cubren la lógica sin DOM o con un DOM mínimo:
 - **catálogo**: el catálogo real se construye sin errores, búsqueda sin acentos;
 - **atajos**: combinaciones, y que no actúen mientras se escribe.
 
-`npm run coverage` exige umbrales sobre esos módulos de lógica (líneas ≥ 85 %, funciones ≥ 85 %, sentencias ≥ 80 %, ramas ≥ 65 %). La conexión con el DOM (`src/app`, los componentes de `src/ui`, `main.ts`, IndexedDB) no se mide con tests unitarios: la cubren los E2E en tres navegadores.
+La cobertura se publica en [Codecov](https://codecov.io/gh/ateeducacion/tonga) desde el CI (subida por OIDC, sin token). `npm run coverage` exige umbrales sobre esos módulos de lógica (líneas ≥ 85 %, funciones ≥ 85 %, sentencias ≥ 80 %, ramas ≥ 65 %). La conexión con el DOM (`src/app`, los componentes de `src/ui`, `main.ts`, IndexedDB) no se mide con tests unitarios: la cubren los E2E en tres navegadores.
 
 ## End-to-end
 
