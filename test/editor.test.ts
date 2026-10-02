@@ -110,3 +110,14 @@ describe('Editor', () => {
     expect(editor.toProject().canvas.background).toEqual({ kind: 'transparent' });
   });
 });
+
+describe('Editor sizing', () => {
+  it('sets the visible size exactly, uniform stroke included', async () => {
+    document.body.innerHTML = '<canvas id="c"></canvas>';
+    const ed = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
+    await ed.open(newProject(800, 600));
+    ed.addShape('rect');
+    ed.setSize(400, 300);
+    expect(ed.inspect()).toMatchObject({ width: 400, height: 300 });
+  });
+});

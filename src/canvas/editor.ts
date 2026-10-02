@@ -21,6 +21,23 @@ export interface LayerInfo {
   selected: boolean;
 }
 
+/** What the inspector shows for the current selection. Numbers are in canvas pixels / degrees. */
+export interface SelectionInfo {
+  ids: string[];
+  type: LayerType | 'selection';
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  angle: number;
+  opacity: number;
+  fill: string | null;
+  stroke: string | null;
+  strokeWidth: number;
+  text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; textAlign: string };
+}
+
 export const DEFAULT_FILL = '#f28c28';
 export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
@@ -38,6 +55,7 @@ export class Editor {
   private zoom = 1;
   private history = new History(serializeProject(newProject(1, 1)));
   private restoring = false;
+  private rev = 0;
   private clipboard: Layer[] = [];
   private pasteCount = 0;
   private listeners = new Set<() => void>();
@@ -88,6 +106,11 @@ export class Editor {
     return this.history.canRedo;
   }
 
+  /** Increases whenever the document changes (edit, undo, redo, open). */
+  get revision(): number {
+    return this.rev;
+  }
+
   get zoomLevel(): number {
     return this.zoom;
   }
@@ -102,6 +125,7 @@ export class Editor {
   async open(project: Project): Promise<void> {
     await this.load(project);
     this.history.reset(serializeProject(this.toProject()));
+    this.rev++;
     this.emit();
   }
 
@@ -124,7 +148,9 @@ export class Editor {
   /** Records the current state as an undo step. Same `key` in a row = one step. */
   commit(key: string | null = null): void {
     if (this.restoring) return;
+    const before = this.history.current;
     this.history.push(serializeProject(this.toProject()), key);
+    if (this.history.current !== before) this.rev++;
     this.emit();
   }
 
@@ -141,6 +167,7 @@ export class Editor {
   private async restore(state: string): Promise<void> {
     const ids = this.selected().map((o) => o.id ?? '');
     await this.load(parseProject(state), ids);
+    this.rev++;
     this.emit();
   }
 
@@ -196,6 +223,41 @@ export class Editor {
     return this.canvas.getObjects().find((o) => o.id === id);
   }
 
+  inspect(): SelectionInfo | null {
+    const o = this.canvas.getActiveObject();
+    if (!o) return null;
+    const multi = o instanceof ActiveSelection;
+    const type = multi ? 'selection' : layerType(o);
+    const colour = (v: unknown) => (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : typeof v === 'string' && v ? v : null);
+    const info: SelectionInfo = {
+      ids: this.selected().map((x) => x.id ?? ''),
+      type,
+      name: multi ? '' : (o.name ?? ''),
+      x: Math.round(o.left),
+      y: Math.round(o.top),
+      width: Math.round(o.getScaledWidth()),
+      height: Math.round(o.getScaledHeight()),
+      angle: Math.round(o.angle),
+      opacity: o.opacity,
+      fill: multi ? null : colour(o.fill),
+      stroke: multi ? null : colour(o.stroke),
+      strokeWidth: o.strokeWidth,
+    };
+    if (o instanceof Textbox) {
+      info.text = {
+        text: o.text, fontFamily: o.fontFamily, fontSize: o.fontSize, bold: o.fontWeight === 'bold' || Number(o.fontWeight) >= 600,
+        italic: o.fontStyle === 'italic', textAlign: o.textAlign,
+      };
+    }
+    return info;
+  }
+
+  /** True while the user types inside a text object on the canvas. */
+  isEditingText(): boolean {
+    const o = this.canvas.getActiveObject();
+    return o instanceof Textbox && o.isEditing;
+  }
+
   selected(): FabricObject[] {
     return this.canvas.getActiveObjects();
   }
@@ -239,19 +301,40 @@ export class Editor {
   // ---- Creating objects -------------------------------------------------------------------
 
   /** Gives a new object an id and the next free automatic name ("Texto 3"). */
-  private identify(obj: FabricObject, type: LayerType): void {
+  private identify(obj: FabricObject, type: LayerType, name?: string): void {
+    if (name?.trim()) {
+      obj.set({ id: newId(), name: name.trim().slice(0, 200) });
+      return;
+    }
     const label = LAYER_LABEL[type];
     const used = this.canvas.getObjects().map((o) => o.name ?? '').map((n) => (n.startsWith(`${label} `) ? Number(n.slice(label.length + 1)) : 0));
     obj.set({ id: newId(), name: `${label} ${Math.max(0, ...used.filter(Number.isFinite)) + 1}` });
   }
 
-  private place(obj: FabricObject, type: LayerType): void {
-    this.identify(obj, type);
+  private place(obj: FabricObject, type: LayerType, name?: string): void {
+    this.identify(obj, type, name);
     // RULE-007: new objects start at the centre of the canvas.
     if (obj.left === 0 && obj.top === 0) obj.set({ left: this.width / 2, top: this.height / 2 });
     obj.setCoords();
     this.canvas.add(obj);
     this.canvas.setActiveObject(obj);
+    this.commit();
+  }
+
+  /** Adds already-built objects (e.g. parsed from an SVG) as new layers and selects them. */
+  addObjects(objects: FabricObject[], name?: string): void {
+    if (!objects.length) return;
+    this.restoring = true;
+    try {
+      for (const o of objects) {
+        this.identify(o, layerType(o), objects.length === 1 ? name : undefined);
+        o.setCoords();
+        this.canvas.add(o);
+      }
+    } finally {
+      this.restoring = false;
+    }
+    this.select(objects.map((o) => o.id ?? ''));
     this.commit();
   }
 
@@ -279,8 +362,7 @@ export class Editor {
     img.set({ assetSrc: canonical });
     const scale = Math.min(1, (this.width * 0.8) / (img.width || 1), (this.height * 0.8) / (img.height || 1));
     img.scale(scale);
-    this.place(img, 'image');
-    if (name) this.rename(img.id ?? '', name);
+    this.place(img, 'image', name);
   }
 
   setDrawing(on: boolean, color = DEFAULT_STROKE, width = 4): void {
@@ -374,7 +456,11 @@ export class Editor {
   setSize(width: number, height: number, key: string | null = null): void {
     const o = this.canvas.getActiveObject();
     if (!o || width <= 0 || height <= 0) return;
-    this.setProps({ scaleX: width / (o.width || 1), scaleY: height / (o.height || 1) }, key);
+    // A uniform stroke keeps its width when the object scales, so only the rest is scaled.
+    const sw = o.strokeUniform ? o.strokeWidth : 0;
+    const baseW = (o.getScaledWidth() - sw) / o.scaleX;
+    const baseH = (o.getScaledHeight() - sw) / o.scaleY;
+    this.setProps({ scaleX: Math.max(1, width - sw) / (baseW || 1), scaleY: Math.max(1, height - sw) / (baseH || 1) }, key);
   }
 
   order(where: 'forward' | 'backward' | 'front' | 'back'): void {
