@@ -75,6 +75,7 @@ Lighthouse 13.5.0 (CLI, Chromium sin interfaz) sobre <https://ateeducacion.githu
 |---|---:|---:|---:|---:|---:|---:|
 | Escritorio (antes de corregir el salto del lienzo) | 92 | 100 | 100 | 0,5 s | 0 ms | 0,175 |
 | Móvil | 100 | 100 | 100 | 1,5 s | 10 ms | 0,02 |
+| Escritorio (tras la corrección, web publicada) | 100 | 100 | 100 | 0,5 s | — | 0,051 |
 
 El CLS de escritorio venía del `<canvas>` (300 × 150 px por defecto), que saltaba al ajustarse a la pantalla. Ahora el lienzo se muestra cuando ya tiene su tamaño definitivo; en local, el CLS baja a 0,051 y el rendimiento sube a 99. Se repite con:
 
