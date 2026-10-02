@@ -13,7 +13,6 @@ ebook_01.png
 embudo.png
 embudo_decantacion.png
 espatula.png
-esqueleto.png
 estudiante_sillin_01.png
 estudiante_sillin_02.png
 filtro_1.png
@@ -43,10 +42,8 @@ pizarra_01.png
 placas_petri.png
 probeta.png
 probetas.png
-profesora_laboratorio.png
 propipeta.png
 rejilla.png
-sillin_02.png
 soporte.png
 termometro.png
 tripode.png

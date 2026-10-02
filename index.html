@@ -3,14 +3,241 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tonga</title>
+    <meta name="color-scheme" content="light dark" />
+    <title>Tonga · Dibujo para el aula</title>
     <meta name="description" content="Tonga: aplicación de dibujo para el aula. Funciona en el navegador; nada sale de tu equipo." />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <!-- Applies a pinned theme before first paint (external file: keeps a strict CSP possible). -->
+    <script src="./theme-init.js"></script>
   </head>
   <body>
-    <main id="app">
-      <h1>Tonga</h1>
-      <p>Nueva versión en construcción.</p>
+    <a class="skip-link" href="#workspace">Saltar al lienzo</a>
+
+    <header class="topbar">
+      <div class="brand">
+        <img src="./favicon.svg" alt="" width="28" height="28" />
+        <span class="brand-name">Tonga</span>
+      </div>
+      <nav class="topbar-actions" aria-label="Acciones del proyecto">
+        <button type="button" class="btn" data-action="new" data-icon="filePlus"><span class="label">Nuevo</span></button>
+        <button type="button" class="btn" data-action="open" data-icon="folderOpen"><span class="label">Abrir</span></button>
+        <button type="button" class="btn" data-action="save" data-icon="save"><span class="label">Guardar</span></button>
+        <span class="divider" aria-hidden="true"></span>
+        <button type="button" class="btn icon-only" data-action="undo" data-icon="undo2" aria-label="Deshacer" title="Deshacer (Ctrl+Z)" aria-keyshortcuts="Control+Z Meta+Z"></button>
+        <button type="button" class="btn icon-only" data-action="redo" data-icon="redo2" aria-label="Rehacer" title="Rehacer (Ctrl+Shift+Z)" aria-keyshortcuts="Control+Shift+Z Control+Y"></button>
+        <span class="divider" aria-hidden="true"></span>
+        <div class="zoom" role="group" aria-label="Zoom">
+          <button type="button" class="btn icon-only" data-action="zoom-out" data-icon="zoomOut" aria-label="Alejar" title="Alejar (−)"></button>
+          <button type="button" class="btn zoom-value" data-action="zoom-100" title="Ver al 100 % (1)"><span id="zoom-value">100 %</span></button>
+          <button type="button" class="btn icon-only" data-action="zoom-in" data-icon="zoomIn" aria-label="Acercar" title="Acercar (+)"></button>
+          <button type="button" class="btn icon-only" data-action="zoom-fit" data-icon="maximize" aria-label="Ajustar a la pantalla" title="Ajustar a la pantalla (0)"></button>
+        </div>
+        <span class="spacer"></span>
+        <button type="button" class="btn icon-only" data-action="theme" data-icon="sunMoon" aria-label="Cambiar tema claro u oscuro" aria-pressed="false" title="Tema"></button>
+        <button type="button" class="btn icon-only" data-action="help" data-icon="circleHelp" aria-label="Ayuda y atajos" title="Ayuda"></button>
+        <button type="button" class="btn icon-only" data-action="about" data-icon="info" aria-label="Acerca de Tonga y licencias" title="Acerca de"></button>
+        <button type="button" class="btn primary" data-action="export" data-icon="download"><span class="label">Exportar</span></button>
+      </nav>
+    </header>
+
+    <nav class="tools" aria-label="Herramientas">
+      <div class="tool-list" role="radiogroup" aria-label="Herramienta activa">
+        <button type="button" class="tool" role="radio" aria-checked="true" data-tool="select" data-icon="mousePointer2" aria-label="Seleccionar" title="Seleccionar (V)"></button>
+        <button type="button" class="tool" role="radio" aria-checked="false" data-tool="hand" data-icon="hand" aria-label="Mover la vista" title="Mover la vista (H)"></button>
+        <button type="button" class="tool" role="radio" aria-checked="false" data-tool="draw" data-icon="pencil" aria-label="Dibujo libre" title="Dibujo libre (B)"></button>
+      </div>
+      <span class="divider" aria-hidden="true"></span>
+      <button type="button" class="tool" data-add="text" data-icon="type" aria-label="Añadir texto" title="Añadir texto (T)"></button>
+      <button type="button" class="tool" data-add="rect" data-icon="square" aria-label="Añadir rectángulo" title="Añadir rectángulo (R)"></button>
+      <button type="button" class="tool" data-add="ellipse" data-icon="circle" aria-label="Añadir elipse" title="Añadir elipse (E)"></button>
+      <button type="button" class="tool" data-add="triangle" data-icon="triangle" aria-label="Añadir triángulo" title="Añadir triángulo"></button>
+      <button type="button" class="tool" data-add="line" data-icon="slash" aria-label="Añadir línea" title="Añadir línea (L)"></button>
+      <span class="divider" aria-hidden="true"></span>
+      <button type="button" class="tool" data-action="import" data-icon="upload" aria-label="Añadir imagen desde tu equipo" title="Añadir imagen (I)"></button>
+      <button type="button" class="tool" data-action="library" data-icon="images" aria-label="Abrir la biblioteca de imágenes" title="Biblioteca (K)"></button>
+      <span class="spacer"></span>
+      <button type="button" class="tool panel-toggle" data-action="panel" data-icon="panelRight" aria-label="Mostrar propiedades y capas" aria-expanded="false" aria-controls="sidepanel"></button>
+    </nav>
+
+    <main id="workspace" class="workspace" tabindex="-1" aria-label="Área de trabajo">
+      <div class="stage" id="stage">
+        <div class="canvas-frame" id="canvas-frame">
+          <canvas id="canvas" role="img" aria-label="Lienzo de dibujo" aria-describedby="canvas-desc"></canvas>
+        </div>
+      </div>
+      <p id="canvas-desc" class="visually-hidden">El contenido del lienzo se describe en el panel Capas. Selecciona allí un objeto para editarlo con el teclado.</p>
     </main>
+
+    <aside id="sidepanel" class="sidepanel" aria-label="Propiedades y capas">
+      <button type="button" class="btn panel-close" data-action="panel" data-icon="x">Cerrar panel</button>
+      <section class="panel-section" aria-labelledby="inspector-title">
+        <h2 id="inspector-title">Propiedades</h2>
+        <form id="inspector" class="inspector" autocomplete="off" novalidate></form>
+      </section>
+      <section class="panel-section layers-section" aria-labelledby="layers-title">
+        <h2 id="layers-title">Capas</h2>
+        <ul id="layers" class="layers"></ul>
+        <p id="layers-empty" class="muted">El lienzo está vacío. Añade un texto, una forma o una imagen.</p>
+      </section>
+    </aside>
+
+    <div id="status" class="visually-hidden" role="status" aria-live="polite"></div>
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
+    <input type="file" id="file-image" accept="image/png,image/jpeg,image/webp,image/svg+xml,.svg" hidden />
+    <input type="file" id="file-project" accept=".tonga,application/json" hidden />
+
+    <!-- New drawing -->
+    <dialog id="dlg-new" class="dialog" aria-labelledby="dlg-new-title">
+      <form method="dialog" class="dialog-body">
+        <h2 id="dlg-new-title">Nuevo dibujo</h2>
+        <fieldset class="presets">
+          <legend>Tamaño del lienzo</legend>
+          <label class="preset"><input type="radio" name="preset" value="1123x794" checked /> <span>A4 horizontal</span> <small>1123 × 794</small></label>
+          <label class="preset"><input type="radio" name="preset" value="794x1123" /> <span>A4 vertical</span> <small>794 × 1123</small></label>
+          <label class="preset"><input type="radio" name="preset" value="1920x1080" /> <span>Presentación 16:9</span> <small>1920 × 1080</small></label>
+          <label class="preset"><input type="radio" name="preset" value="1080x1080" /> <span>Cuadrado</span> <small>1080 × 1080</small></label>
+          <label class="preset"><input type="radio" name="preset" value="custom" /> <span>Personalizado</span></label>
+        </fieldset>
+        <div class="row custom-size">
+          <label>Ancho (px) <input type="number" name="width" min="16" max="8192" value="1123" inputmode="numeric" /></label>
+          <label>Alto (px) <input type="number" name="height" min="16" max="8192" value="794" inputmode="numeric" /></label>
+        </div>
+        <fieldset class="row">
+          <legend>Fondo</legend>
+          <label><input type="radio" name="bg" value="transparent" checked /> Transparente</label>
+          <label><input type="radio" name="bg" value="color" /> Color</label>
+          <input type="color" name="bgcolor" value="#ffffff" aria-label="Color de fondo" />
+        </fieldset>
+        <div class="dialog-actions">
+          <button type="button" class="btn" data-action="open-from-new">Abrir un proyecto…</button>
+          <span class="spacer"></span>
+          <button type="submit" value="cancel" class="btn" formnovalidate>Cancelar</button>
+          <button type="submit" value="create" class="btn primary">Crear</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Library -->
+    <dialog id="dlg-library" class="dialog dialog-wide" aria-labelledby="dlg-library-title">
+      <div class="dialog-body library">
+        <header class="library-head">
+          <h2 id="dlg-library-title">Biblioteca</h2>
+          <button type="button" class="btn icon-only" data-close data-icon="x" aria-label="Cerrar la biblioteca"></button>
+        </header>
+        <div class="library-filters">
+          <label class="search">
+            <span class="visually-hidden">Buscar en la biblioteca</span>
+            <input type="search" id="library-search" placeholder="Buscar (p. ej. «cuervo», «mapa»)" />
+          </label>
+          <label>
+            <span class="visually-hidden">Colección</span>
+            <select id="library-collection"></select>
+          </label>
+        </div>
+        <p id="library-count" class="muted" aria-live="polite"></p>
+        <div id="library-grid" class="library-grid" role="listbox" aria-label="Resultados" tabindex="0"></div>
+        <footer class="library-foot">
+          <p id="library-selected" class="muted">Elige una imagen.</p>
+          <span class="spacer"></span>
+          <button type="button" class="btn" id="library-as-bg" disabled>Usar como fondo</button>
+          <button type="button" class="btn primary" id="library-add" disabled>Añadir al lienzo</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Export -->
+    <dialog id="dlg-export" class="dialog" aria-labelledby="dlg-export-title">
+      <form method="dialog" class="dialog-body">
+        <h2 id="dlg-export-title">Exportar</h2>
+        <fieldset class="row formats">
+          <legend>Formato</legend>
+          <label><input type="radio" name="format" value="png" checked /> PNG</label>
+          <label><input type="radio" name="format" value="jpeg" /> JPEG</label>
+          <label><input type="radio" name="format" value="svg" /> SVG</label>
+          <label><input type="radio" name="format" value="pdf" /> PDF (A4)</label>
+        </fieldset>
+        <label class="field">Nombre del fichero <input type="text" name="filename" required maxlength="80" /></label>
+        <label class="field" data-for="png jpeg">Escala
+          <select name="scale">
+            <option value="0.5">50 %</option>
+            <option value="1" selected>100 %</option>
+            <option value="2">200 %</option>
+          </select>
+        </label>
+        <label class="field" data-for="jpeg">Calidad JPEG <input type="range" name="quality" min="0.5" max="1" step="0.05" value="0.9" /></label>
+        <label class="check" data-for="png svg"><input type="checkbox" name="transparent" checked /> Fondo transparente (si el lienzo no tiene fondo)</label>
+        <p class="muted" id="export-summary"></p>
+        <div class="dialog-actions">
+          <span class="spacer"></span>
+          <button type="submit" value="cancel" class="btn" formnovalidate>Cancelar</button>
+          <button type="submit" value="export" class="btn primary">Descargar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Help -->
+    <dialog id="dlg-help" class="dialog" aria-labelledby="dlg-help-title">
+      <div class="dialog-body">
+        <h2 id="dlg-help-title">Ayuda</h2>
+        <p>Crea un dibujo, añade textos, formas e imágenes de la biblioteca, y exporta el resultado. Tonga funciona en tu navegador: <strong>nada sale de tu equipo</strong>. Para continuar otro día, usa <em>Guardar</em> (fichero <code>.tonga</code>).</p>
+        <h3>Atajos de teclado</h3>
+        <table class="shortcuts">
+          <tbody>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd></th><td>Deshacer</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> · <kbd>Ctrl</kbd> + <kbd>Y</kbd></th><td>Rehacer</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>C</kbd> / <kbd>V</kbd></th><td>Copiar / pegar</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>D</kbd></th><td>Duplicar</td></tr>
+            <tr><th scope="row"><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>A</kbd></th><td>Seleccionar todo</td></tr>
+            <tr><th scope="row"><kbd>Supr</kbd> · <kbd>Retroceso</kbd></th><td>Borrar la selección</td></tr>
+            <tr><th scope="row"><kbd>Esc</kbd></th><td>Quitar la selección</td></tr>
+            <tr><th scope="row">Flechas · <kbd>Shift</kbd> + flechas</th><td>Mover 1 px · 10 px</td></tr>
+            <tr><th scope="row"><kbd>+</kbd> / <kbd>-</kbd> · <kbd>0</kbd> · <kbd>1</kbd></th><td>Zoom · ajustar · 100 %</td></tr>
+            <tr><th scope="row"><kbd>V</kbd> <kbd>H</kbd> <kbd>B</kbd></th><td>Seleccionar · mover la vista · dibujo libre</td></tr>
+            <tr><th scope="row"><kbd>T</kbd> <kbd>R</kbd> <kbd>E</kbd> <kbd>L</kbd> <kbd>I</kbd> <kbd>K</kbd></th><td>Texto · rectángulo · elipse · línea · imagen · biblioteca</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">Los atajos no actúan mientras escribes en un campo de texto. Con el teclado, el panel <em>Capas</em> permite elegir cada objeto, y <em>Propiedades</em>, cambiar su posición, tamaño, giro y colores. El dibujo libre necesita ratón, lápiz o dedo.</p>
+        <div class="dialog-actions"><span class="spacer"></span><button type="button" class="btn primary" data-close>Cerrar</button></div>
+      </div>
+    </dialog>
+
+    <!-- About -->
+    <dialog id="dlg-about" class="dialog" aria-labelledby="dlg-about-title">
+      <div class="dialog-body">
+        <h2 id="dlg-about-title">Acerca de Tonga</h2>
+        <p>Versión <span id="about-version"></span>. Aplicación de dibujo para el aula promovida por el Gobierno de Canarias. Desarrollo original de Altia; mantenimiento del Área de Tecnología Educativa (ATE).</p>
+        <h3>Licencias</h3>
+        <ul>
+          <li><strong>Software:</strong> GNU Affero General Public License v3 (ver <code>LICENSE</code>).</li>
+          <li><strong>Imágenes de la biblioteca:</strong> © Gobierno de Canarias, Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0), salvo que se indique otra cosa.</li>
+          <li><strong>Componentes de terceros:</strong> Fabric.js (MIT), iconos Lucide (ISC; parte de Feather, MIT). Detalle en <code>THIRD_PARTY_NOTICES.md</code>.</li>
+        </ul>
+        <p><a href="https://github.com/ateeducacion/tonga" rel="noopener noreferrer" target="_blank">Código fuente</a> · <a href="https://www.gobiernodecanarias.org/principal/avisolegal.html" rel="noopener noreferrer" target="_blank">Aviso legal</a> · <a href="https://www.gobiernodecanarias.org/eucd/politica_privacidad/" rel="noopener noreferrer" target="_blank">Política de privacidad</a></p>
+        <p class="muted">Privacidad: Tonga no usa analítica ni servicios externos. Tus dibujos se procesan y se guardan solo en este navegador.</p>
+        <div class="dialog-actions"><span class="spacer"></span><button type="button" class="btn primary" data-close>Cerrar</button></div>
+      </div>
+    </dialog>
+
+    <!-- Confirm / recover -->
+    <dialog id="dlg-confirm" class="dialog" aria-labelledby="dlg-confirm-title" aria-describedby="dlg-confirm-text">
+      <form method="dialog" class="dialog-body">
+        <h2 id="dlg-confirm-title"></h2>
+        <p id="dlg-confirm-text"></p>
+        <img id="dlg-confirm-image" class="confirm-preview" alt="" hidden />
+        <div class="dialog-actions">
+          <span class="spacer"></span>
+          <button type="submit" value="cancel" class="btn" id="dlg-confirm-cancel">Cancelar</button>
+          <button type="submit" value="ok" class="btn primary" id="dlg-confirm-ok">Aceptar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <footer class="legal">
+      <a href="https://www.gobiernodecanarias.org/principal/avisolegal.html" rel="noopener noreferrer" target="_blank">Aviso legal</a>
+      <a href="https://www.gobiernodecanarias.org/eucd/politica_privacidad/" rel="noopener noreferrer" target="_blank">Privacidad</a>
+    </footer>
+
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
