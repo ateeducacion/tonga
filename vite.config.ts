@@ -41,7 +41,10 @@ export default defineConfig({
     include: ['test/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      include: ['src/**/*.ts'],
+      // Logic modules. The DOM wiring (src/app, src/ui widgets, main, storage) is covered by the
+      // Playwright suite in three browsers instead (docs/TESTING.md).
+      include: ['src/project/**', 'src/history/**', 'src/canvas/**', 'src/export/**', 'src/import/sniff.ts', 'src/import/svg.ts', 'src/assets/catalog.ts', 'src/ui/shortcuts.ts'],
+      thresholds: { lines: 85, statements: 80, functions: 85, branches: 65 },
       reporter: ['text-summary', 'lcov'],
     },
   },
