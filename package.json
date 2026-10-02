@@ -18,7 +18,7 @@
     "http-server": "^14.1.1",
     "jquery": "^3.7.1",
     "jquery-ui-dist": "^1.13.3",
-    "jspdf": "^3.0.1",
+    "jspdf": "^4.2.1",
     "tui-code-snippet": "^2.3.3",
     "tui-color-picker": "^2.2.8",
     "xml2json": "^0.7.1"
