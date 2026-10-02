@@ -45,7 +45,11 @@ export class App {
     byId('about-version').textContent = APP_VERSION;
     if (APP_BUILD !== APP_VERSION) byId('about-version').title = `Compilación ${APP_BUILD}`;
     this.editor.subscribe(() => this.render());
-    this.editor.onContextMenu((x, y) => this.menu.open(x, y, this.menuEntries()));
+    // Our menu replaces the browser's on the canvas (and on the empty area around it).
+    byId('stage').addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      this.menu.open(e.clientX, e.clientY, this.menuEntries());
+    }, { capture: true });
     this.bindActions();
     this.bindTools();
     this.bindDialogs();

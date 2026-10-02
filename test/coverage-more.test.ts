@@ -408,28 +408,23 @@ describe('selection handles and right click', () => {
     expect(rect.cornerStrokeColor).toBe('#b9480f');
   });
 
-  it('a right click selects the object under the pointer and reports where to open the menu', async () => {
+  it('a right click selects the object under the pointer, keeping a multiple selection', async () => {
     document.body.innerHTML = '<canvas id="c"></canvas>';
     const ed = new Editor(document.getElementById('c') as HTMLCanvasElement, identity);
     await ed.open(newProject(400, 300));
     ed.addShape('rect');
     ed.addShape('ellipse');
-    const [ellipse, rect] = [ed.canvas.getObjects()[1]!, ed.canvas.getObjects()[0]!];
-    const opened: [number, number][] = [];
-    ed.onContextMenu((x, y) => opened.push([x, y]));
-    const fire = (target: unknown, button: number) =>
-      ed.canvas.fire('mouse:down', { e: { button, clientX: 12, clientY: 34 } as MouseEvent, target } as never);
+    const [rect, ellipse] = [ed.canvas.getObjects()[0]!, ed.canvas.getObjects()[1]!];
+    const fire = (target: unknown, button: number) => ed.canvas.fire('mouse:down', { e: { button } as MouseEvent, target } as never);
 
-    fire(rect, 0); // a left click is not a menu request
-    expect(opened).toEqual([]);
+    fire(rect, 0); // a left click is handled by Fabric, not by this hook
+    expect(ed.selected()).toEqual([ellipse]);
     fire(rect, 2);
-    expect(opened).toEqual([[12, 34]]);
     expect(ed.selected()).toEqual([rect]);
-
     ed.selectAll();
     fire(ellipse, 2); // already selected: the multiple selection is kept
     expect(ed.selected()).toHaveLength(2);
-    fire(undefined, 2); // empty canvas: menu without changing the selection
-    expect(opened).toHaveLength(3);
+    fire(undefined, 2); // empty canvas: the selection does not change
+    expect(ed.selected()).toHaveLength(2);
   });
 });

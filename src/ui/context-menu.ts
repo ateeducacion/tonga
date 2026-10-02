@@ -1,6 +1,8 @@
-// Right-click (or Menu key / Shift+F10) menu for the canvas. A native popover with the WAI-ARIA
-// menu pattern: arrow keys, Home/End, Enter; Esc or a click outside closes it. Everything here is
-// also reachable from the inspector and the shortcuts: the menu is a shortcut, never the only way.
+// Right-click (or Menu key / Shift+F10) menu for the canvas, following the WAI-ARIA menu pattern:
+// arrow keys, Home/End, Enter; Esc, a click outside, losing focus or resizing close it.
+// It is a manual popover (top layer) that handles its own dismissal: an automatic popover would
+// close itself on the pointerup that follows the right click. Everything here is also reachable
+// from the inspector and the shortcuts: the menu is a shortcut, never the only way.
 import { byId, h } from './dom';
 import { icon, type IconName } from './icons';
 
@@ -21,13 +23,23 @@ export class ContextMenu {
 
   constructor() {
     this.el.addEventListener('keydown', (e) => this.onKey(e));
-    this.el.addEventListener('toggle', (e) => {
-      if ((e as ToggleEvent).newState === 'closed') this.returnFocus?.focus();
-    });
+    // The pointerdown that opened the menu is already over by the time it is open.
+    document.addEventListener('pointerdown', (e) => {
+      if (this.isOpen() && !this.el.contains(e.target as Node)) this.close(false);
+    }, true);
+    window.addEventListener('blur', () => this.close(false));
+    window.addEventListener('resize', () => this.close(false));
+  }
+
+  isOpen(): boolean {
+    return this.el.matches(':popover-open');
   }
 
   open(x: number, y: number, entries: MenuEntry[]): void {
-    this.returnFocus = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : byId('workspace');
+    if (!this.isOpen()) {
+      const active = document.activeElement;
+      this.returnFocus = active instanceof HTMLElement && active !== document.body ? active : byId('workspace');
+    }
     this.el.replaceChildren(
       ...entries.map((entry) => {
         if (entry === 'separator') return h('div', { role: 'separator', class: 'menu-separator' });
@@ -42,8 +54,7 @@ export class ContextMenu {
         return item;
       }),
     );
-    if (this.el.matches(':popover-open')) this.el.hidePopover();
-    this.el.showPopover();
+    if (!this.isOpen()) this.el.showPopover();
     // Keep the whole menu inside the viewport.
     const { width, height } = this.el.getBoundingClientRect();
     this.el.style.left = `${Math.max(4, Math.min(x, innerWidth - width - 4))}px`;
@@ -51,8 +62,11 @@ export class ContextMenu {
     this.items()[0]?.focus();
   }
 
-  close(): void {
-    if (this.el.matches(':popover-open')) this.el.hidePopover();
+  /** Closes the menu; focus goes back where it was unless the user clicked somewhere else. */
+  close(restoreFocus = true): void {
+    if (!this.isOpen()) return;
+    this.el.hidePopover();
+    if (restoreFocus) this.returnFocus?.focus();
   }
 
   private items(): HTMLButtonElement[] {
@@ -60,6 +74,11 @@ export class ContextMenu {
   }
 
   private onKey(e: KeyboardEvent): void {
+    if (e.key === 'Escape' || e.key === 'Tab') {
+      e.preventDefault();
+      this.close();
+      return;
+    }
     const items = this.items();
     const i = items.indexOf(document.activeElement as HTMLButtonElement);
     const next = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];

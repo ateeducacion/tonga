@@ -291,3 +291,39 @@ test('right-click menu on the canvas; also with the Menu key (keyboard)', async 
   await menu.getByRole('menuitem', { name: /Duplicar/ }).press('Enter');
   await expect(layers(page)).toHaveCount(3);
 });
+
+test('a real right click keeps our menu open and never shows the browser menu', async ({ page }) => {
+  await newDrawing(page);
+  await page.evaluate(() => {
+    (window as unknown as { nativeMenus: number }).nativeMenus = 0;
+    window.addEventListener('contextmenu', (e) => {
+      if (!e.defaultPrevented) (window as unknown as { nativeMenus: number }).nativeMenus++;
+    });
+  });
+  const menu = page.getByRole('menu', { name: 'Acciones' });
+  const canvas = page.locator('.upper-canvas');
+  const box = (await canvas.boundingBox())!;
+  const rightClick = async (x: number, y: number) => {
+    await page.mouse.move(x, y);
+    await page.mouse.down({ button: 'right' });
+    await page.waitForTimeout(150);
+    await page.mouse.up({ button: 'right' });
+    await page.waitForTimeout(300);
+  };
+
+  // Empty canvas: the menu opens and stays open (it used to flash and close).
+  await rightClick(box.x + 30, box.y + 30);
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /Seleccionar todo/ })).toBeEnabled();
+  await page.mouse.click(box.x + 5, box.y + box.height - 5); // a click outside closes it
+  await expect(menu).toBeHidden();
+
+  // On an object: only our menu.
+  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
+  await rightClick(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /Borrar/ })).toBeEnabled();
+  expect(await page.evaluate(() => (window as unknown as { nativeMenus: number }).nativeMenus)).toBe(0);
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+});

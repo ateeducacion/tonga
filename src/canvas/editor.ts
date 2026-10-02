@@ -62,13 +62,12 @@ export class Editor {
   private clipboard: Layer[] = [];
   private pasteCount = 0;
   private listeners = new Set<() => void>();
-  private contextMenuListener: ((x: number, y: number) => void) | null = null;
 
   constructor(
     element: HTMLCanvasElement,
     private readonly resolve: SourceResolver,
   ) {
-    this.canvas = new Canvas(element, { preserveObjectStacking: true, selectionKey: 'shiftKey', fireRightClick: true, stopContextMenu: true });
+    this.canvas = new Canvas(element, { preserveObjectStacking: true, selectionKey: 'shiftKey', fireRightClick: true, stopContextMenu: false });
     this.canvas.freeDrawingBrush = new PencilBrush(this.canvas);
     const changed = () => this.emit();
     this.canvas.on('selection:created', changed);
@@ -78,7 +77,8 @@ export class Editor {
     this.canvas.on('object:modified', () => this.commit());
     this.canvas.on('text:changed', ({ target }) => this.commit(`text:${target.id ?? ''}`));
     this.canvas.on('text:editing:exited', () => this.history.seal());
-    // Right click: select what is under the pointer (keeping a multiple selection) and open the menu.
+    // Right click selects what is under the pointer (keeping a multiple selection). The menu
+    // itself opens on the native contextmenu event, which comes after this (see App).
     this.canvas.on('mouse:down', ({ e, target }) => {
       if (!('button' in e) || e.button !== 2) return;
       if (target && target.selectable !== false && !this.selected().includes(target)) {
@@ -86,7 +86,6 @@ export class Editor {
         this.canvas.requestRenderAll();
         this.emit();
       }
-      this.contextMenuListener?.(e.clientX, e.clientY);
     });
     this.canvas.on('path:created', ({ path }) => {
       this.identify(path, 'path');
@@ -98,11 +97,6 @@ export class Editor {
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
-  }
-
-  /** Called with viewport coordinates when the user right-clicks the canvas. */
-  onContextMenu(listener: (x: number, y: number) => void): void {
-    this.contextMenuListener = listener;
   }
 
   private emit(): void {
