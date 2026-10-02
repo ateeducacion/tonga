@@ -61,7 +61,7 @@ Un cambio de comportamiento lleva un test que lo fije. La lógica (formato, hist
 - No se copia código de webs, blogs, Stack Overflow, Gists ni repositorios sin comprobar su licencia. Un repositorio público no es código reutilizable. Si no hay licencia clara, se reimplementa la idea.
 - Todo fragmento de terceros registra proyecto, autor, URL, fichero, versión o commit, licencia y cambios ([THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).
 - Los ficheros nuevos quedan cubiertos por `REUSE.toml`; `reuse lint` tiene que pasar.
-- No se decide entre `AGPL-3.0-only` y `AGPL-3.0-or-later`, ni se relicencian contenidos, sin una decisión documentada del titular ([docs/LICENSING.md](docs/LICENSING.md)).
+- El software es `AGPL-3.0-or-later` y las imágenes de la biblioteca, CC BY-NC-SA 4.0 ([docs/LICENSING.md](docs/LICENSING.md)). No se relicencia nada sin una decisión documentada allí.
 
 ## Biblioteca de imágenes
 

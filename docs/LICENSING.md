@@ -6,8 +6,8 @@ Este documento separa **software**, **contenidos gráficos**, **iconos**, **fuen
 
 | Elemento | Licencia aplicada | Evidencia | Estado |
 |---|---|---|---|
-| Código de Tonga (`src/`, `scripts/`, `index.html`, configuración) | GNU AGPL v3, como `LicenseRef-Tonga-AGPL-3.0` | `LICENSE` (texto AGPL v3) añadido a `main` en 2025; `package.json` | La cláusula de versión está **pendiente** (ver más abajo) |
-| Imágenes de `repositorios/` | CC BY-NC-SA 4.0, © Gobierno de Canarias | `creditos.html` original (rama `upstream`): «Los contenidos y programas… son propiedad del Gobierno de Canarias… Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional» | Aplicada a todas las imágenes, sin atribución individual |
+| Código de Tonga (`src/`, `scripts/`, `index.html`, configuración) | **AGPL-3.0-or-later** | Decisión del mantenedor (ATE), 2026-10-02 (ver más abajo); `LICENSE` | Decidido |
+| Imágenes de `repositorios/` (incluida `FondosMar/`) | CC BY-NC-SA 4.0, © Gobierno de Canarias | `creditos.html` original (rama `upstream`): «Los contenidos y programas… son propiedad del Gobierno de Canarias… Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional». Para `FondosMar/`, decisión del mantenedor (2026-10-02): la misma licencia que el resto | Aplicada a todas las imágenes, sin atribución individual |
 | Iconos de la interfaz (`src/ui/icons.ts`) | ISC (Lucide); algunos MIT (Feather) | Licencia de `lucide-static` 1.50.0 | Atribuido en `THIRD_PARTY_NOTICES.md` |
 | Logo e iconos PWA (`public/favicon.svg`, `public/icons/`) | Igual que el código | Dibujados para Tonga 2.0 | — |
 | Fabric.js 7.4.0 (en el bundle) | MIT | `node_modules/fabric/LICENSE` | Atribuido en `THIRD_PARTY_NOTICES.md` |
@@ -18,16 +18,13 @@ Este documento separa **software**, **contenidos gráficos**, **iconos**, **fuen
 
 `REUSE.toml` asigna licencia y copyright a cada fichero. `reuse lint` pasa y lo comprueba el CI.
 
-## El software: ¿AGPL «solo v3» o «v3 o posterior»?
+## El software: AGPL-3.0-or-later
 
-- La rama histórica `upstream` (código entregado por el proveedor) **no tenía fichero de licencia**.
-- `main` añadió `LICENSE` con el texto íntegro de la GNU AGPL v3, y `package.json` declaraba `"AGPL-3.0"`. Ese identificador SPDX está obsoleto porque no distingue entre `AGPL-3.0-only` y `AGPL-3.0-or-later`.
-- El repositorio no documenta qué quiso el titular. Por eso no se ha elegido ninguno: REUSE usa `LicenseRef-Tonga-AGPL-3.0` (el texto AGPL v3 con una nota que explica la duda) y `package.json` dice `SEE LICENSE IN LICENSE`.
-- **Para cerrarlo**, el Gobierno de Canarias (o quien tenga la titularidad) indica «solo v3» u «o posterior». Después se cambia `LicenseRef-Tonga-AGPL-3.0` por `AGPL-3.0-only` o `AGPL-3.0-or-later` en `REUSE.toml` y `package.json`, se sustituye el fichero de `LICENSES/` y se documenta la decisión aquí.
+**Decisión (2026-10-02, mantenedor del proyecto en el Área de Tecnología Educativa):** el software de Tonga se publica bajo la **GNU Affero General Public License, versión 3 o posterior** (`AGPL-3.0-or-later`). Si en algún momento la AGPL no fuera posible, la alternativa indicada es la GPL, versión 3 o posterior (`GPL-3.0-or-later`).
 
-**Validez de la relicencia.** El código original lo desarrolló Altia por encargo. El repositorio no contiene el contrato ni una cesión de derechos que confirme que el Gobierno de Canarias pueda licenciarlo como AGPL. Se asume de buena fe, por la página de créditos («propiedad del Gobierno de Canarias»), pero **no se afirma que la relicencia sea jurídicamente válida**. Conviene archivar la evidencia (contrato o resolución) junto a esta decisión.
-
-Tonga 2.0 es una reescritura: no contiene código de la versión original. El código nuevo lo escribe el ATE para el Gobierno de Canarias.
+- `LICENSE` contiene el texto de la AGPL v3. `LICENSES/AGPL-3.0-or-later.txt`, `REUSE.toml` y `package.json` usan el identificador SPDX `AGPL-3.0-or-later`.
+- Antecedentes: la rama histórica `upstream` (código del proveedor) no tenía licencia; `main` añadió la AGPL v3 en 2025 con el identificador obsoleto `AGPL-3.0`.
+- **Alcance:** Tonga 2.x es una reescritura que no contiene código de la versión original; su código lo ha escrito el ATE para el Gobierno de Canarias. La decisión cubre, por tanto, todo el código de `main`. El código original de la rama `upstream` (desarrollado por Altia por encargo) sigue sin licencia declarada en el repositorio, y no se reutiliza.
 
 ## Los contenidos: CC BY-NC-SA 4.0
 

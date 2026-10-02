@@ -70,7 +70,7 @@ Tonga fue desarrollada por Altia para el Gobierno de Canarias sobre TOAST UI Ima
 
 ## Licencias
 
-- **Software:** GNU Affero General Public License v3 ([LICENSE](LICENSE)). Está pendiente de que el titular documente si es «solo v3» o «v3 o posterior».
+- **Software:** GNU Affero General Public License, versión 3 o posterior (`AGPL-3.0-or-later`, [LICENSE](LICENSE)).
 - **Imágenes de la biblioteca** (`repositorios/`): © Gobierno de Canarias, [CC BY-NC-SA 4.0](LICENSES/CC-BY-NC-SA-4.0.txt). Permite reutilizarlas con atribución y la misma licencia, **pero no con fines comerciales**.
 - **Componentes de terceros:** [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
