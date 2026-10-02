@@ -1,0 +1,57 @@
+# Informative Lighthouse run against the deployed site after each Pages deployment.
+# It never blocks anything: results go to the run summary and a report artifact.
+name: Lighthouse
+
+on:
+  workflow_run:
+    workflows: [Pages]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      URL: https://ateeducacion.github.io/tonga/
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Run Lighthouse (desktop and mobile)
+        run: |
+          set -euo pipefail
+          for preset in desktop mobile; do
+            flags=$([ "$preset" = desktop ] && echo "--preset=desktop" || true)
+            npx --yes lighthouse@13.5.0 "$URL" $flags --quiet \
+              --only-categories=performance,accessibility,best-practices \
+              --chrome-flags="--headless=new --no-sandbox" \
+              --output=json --output=html --output-path="./lighthouse-$preset"
+          done
+
+      - name: Summary (warn below the measured baseline)
+        run: |
+          node - <<'JS' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          // Baseline measured on 2026-10-02 (docs/MODERNIZATION.md).
+          const min = { performance: 90, accessibility: 100, 'best-practices': 100 };
+          console.log('| Perfil | Rendimiento | Accesibilidad | Buenas prácticas | LCP | CLS |\n|---|---:|---:|---:|---:|---:|');
+          for (const preset of ['desktop', 'mobile']) {
+            const r = JSON.parse(fs.readFileSync(`lighthouse-${preset}.report.json`, 'utf8'));
+            const s = Object.fromEntries(Object.entries(r.categories).map(([k, v]) => [k, Math.round(v.score * 100)]));
+            for (const [k, v] of Object.entries(min)) if (s[k] < v) process.stderr.write(`::warning::Lighthouse ${preset} ${k} ${s[k]} < ${v}\n`);
+            console.log(`| ${preset} | ${s.performance} | ${s.accessibility} | ${s['best-practices']} | ${r.audits['largest-contentful-paint'].displayValue} | ${r.audits['cumulative-layout-shift'].displayValue} |`);
+          }
+          JS
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lighthouse
+          path: lighthouse-*
+          retention-days: 30
