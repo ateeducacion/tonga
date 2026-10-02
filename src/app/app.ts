@@ -54,6 +54,7 @@ export class App {
 
   async start(): Promise<void> {
     await this.editor.open(newProject(1123, 794));
+    this.savedRevision = this.autosavedRevision = this.editor.revision; // a blank page has nothing to save
     this.zoomFit();
     const saved = await loadAutosave().catch(() => undefined);
     if (saved) {
