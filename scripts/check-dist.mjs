@@ -10,6 +10,11 @@ const html = existsSync('dist/index.html') ? readFileSync('dist/index.html', 'ut
 if (/(src|href)="\//.test(html)) failures.push('dist/index.html uses root-absolute URLs (breaks subdirectory hosting)');
 if (/<script(?![^>]*\bsrc=)[^>]*>/.test(html)) failures.push('dist/index.html has an inline script (blocks a strict CSP)');
 
+// Link previews: og:image must be an absolute https URL and the image must ship.
+const og = /<meta property="og:image" content="([^"]+)"/.exec(html)?.[1];
+if (!og || !/^https:\/\//.test(og)) failures.push(`og:image must be an absolute https URL (got ${og})`);
+if (!existsSync('dist/og-image.jpg')) failures.push('missing dist/og-image.jpg');
+
 const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]));
 for (const f of walk('dist').filter((f) => !f.startsWith('dist/repositorios/'))) if (f.endsWith('.map') || f.endsWith('.ts')) failures.push(`dev file shipped: ${f}`);
 
