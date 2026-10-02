@@ -210,12 +210,12 @@ Las reglas con defecto sospechado (45) **no se reproducen**: el destino implemen
 
 Decisiones del titular. Mientras no se respondan, el plan aplica la **opción por defecto** indicada y la deja documentada.
 
-- [ ] **Licencia del software:** ¿`AGPL-3.0-only` o `AGPL-3.0-or-later`? Por defecto se mantiene `AGPL-3.0` declarada como duda en `docs/LICENSING.md` y se corrige solo el identificador SPDX obsoleto cuando se decida.
+- [x] **Licencia del software:** (decidido el 2026-10-02: `AGPL-3.0-or-later`, alternativa `GPL-3.0-or-later`) ¿`AGPL-3.0-only` o `AGPL-3.0-or-later`? Por defecto se mantiene `AGPL-3.0` declarada como duda en `docs/LICENSING.md` y se corrige solo el identificador SPDX obsoleto cuando se decida.
 - [ ] **Contenidos:** `creditos.html` dice CC BY-NC-SA 4.0 (RULE-099). ¿Se mantiene, o el Gobierno de Canarias puede relicenciar? Por defecto se mantiene BY-NC-SA, separado del software.
 - [ ] **¿El PDF sigue siendo requisito?** Por defecto sí, con un writer propio (una página A4 con JPEG) y sin jsPDF.
 - [ ] **Compatibilidad con SVG antiguos de Tonga** (`data-background`, RULE-046): por defecto se soporta su importación.
 - [ ] **Funciones con poco valor:** máscaras (desactivadas hoy), vectorizar iconos (ImageTracer) y modos de fusión con nombres en español. Por defecto no se trasladan las máscaras ni ImageTracer; los filtros básicos sí.
-- [ ] **`repositorios/FondosMar/`** no aparece en el catálogo: ¿se publica? Por defecto se incluye como colección de fondos si sus `lista.txt` validan.
+- [x] **`repositorios/FondosMar/`** (decidido el 2026-10-02: se publica con la misma licencia que el resto) no aparece en el catálogo: ¿se publica? Por defecto se incluye como colección de fondos si sus `lista.txt` validan.
 - [ ] **Nombre de descarga:** hoy `imagen_YYYYMMDD_HHMMSS` (RULE-127). Por defecto el usuario elige el nombre, con `tonga-YYYYMMDD-HHMMSS` como propuesta.
 - [ ] **`/next/` durante la transición:** por defecto la nueva app se publica en `/next/` hasta la Fase 5.
 - [ ] Las 40 reglas marcadas para un experto en `BUSINESS_RULES.md` se resuelven como comportamiento de referencia (no contrato) salvo indicación contraria.

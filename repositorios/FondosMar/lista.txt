@@ -1,5 +1,5 @@
-mar.jpeg||tongaappfondo
-mar2.jpg||tongaappfondo
-mar3.jpg||tongaappfondo
-marredondo.png||tongaappfondo
-marredondonubes.png||tongaappfondo
+mar.jpeg|Mar|tongaappfondo
+mar2.jpg|Mar 2|tongaappfondo
+mar3.jpg|Mar 3|tongaappfondo
+marredondo.png|Mar redondo|tongaappfondo
+marredondonubes.png|Mar redondo con nubes|tongaappfondo

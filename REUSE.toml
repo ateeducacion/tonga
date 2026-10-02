@@ -3,14 +3,13 @@ SPDX-PackageName = "Tonga"
 SPDX-PackageSupplier = "Área de Tecnología Educativa, Gobierno de Canarias"
 SPDX-PackageDownloadLocation = "https://github.com/ateeducacion/tonga"
 
-# Software, configuration and documentation of the maintained app.
-# LicenseRef-Tonga-AGPL-3.0 = GNU AGPL v3 with the "only"/"or later" choice still undocumented
-# by the rights holder (docs/LICENSING.md). Replace it once that decision is recorded.
+# Software, configuration and documentation of the maintained app: GNU AGPL v3 or later
+# (decision recorded in docs/LICENSING.md, 2026-10-02).
 [[annotations]]
 path = "**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2019-2026 Gobierno de Canarias"
-SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 # Image collections. Evidence: the original credits (upstream branch, creditos.html) state that
 # the content belongs to the Gobierno de Canarias under CC BY-NC-SA 4.0. No per-image
@@ -26,14 +25,14 @@ SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
 path = ["test/fixtures/legacy/**", "docs/screenshots/**"]
 precedence = "override"
 SPDX-FileCopyrightText = "2019-2026 Gobierno de Canarias"
-SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0 AND CC-BY-NC-SA-4.0"
+SPDX-License-Identifier = "AGPL-3.0-or-later AND CC-BY-NC-SA-4.0"
 
 # Lucide icon paths (ISC; some derived from Feather, MIT) inside Tonga's own module.
 [[annotations]]
 path = ["src/ui/icons.ts"]
 precedence = "override"
 SPDX-FileCopyrightText = ["2019-2026 Gobierno de Canarias", "2026 Lucide Icons and Contributors", "2013-present Cole Bemis"]
-SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0 AND ISC AND MIT"
+SPDX-License-Identifier = "AGPL-3.0-or-later AND ISC AND MIT"
 
 # Third-party agent skills, installed verbatim with `gh skill add` (.agents/upstream-skills.txt).
 [[annotations]]
@@ -65,7 +64,7 @@ SPDX-License-Identifier = "MIT OR Apache-2.0"
 path = ["public/og-image.jpg"]
 precedence = "override"
 SPDX-FileCopyrightText = "2019-2026 Gobierno de Canarias"
-SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0 AND CC-BY-NC-SA-4.0"
+SPDX-License-Identifier = "AGPL-3.0-or-later AND CC-BY-NC-SA-4.0"
 
 # Logo of the Área de Tecnología Educativa, used only to render the link-preview card
 # (taken from ateeducacion/elpx-optimizer, src/web/assets/ate-logo.png).
@@ -73,4 +72,4 @@ SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0 AND CC-BY-NC-SA-4.0"
 path = ["scripts/assets/ate-logo.png"]
 precedence = "override"
 SPDX-FileCopyrightText = "Gobierno de Canarias (Área de Tecnología Educativa)"
-SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
