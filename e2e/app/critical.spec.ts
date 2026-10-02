@@ -78,6 +78,7 @@ test('exports PNG, JPEG, SVG and PDF in the browser (RULE-108/101/114/022/086)',
   await page.getByRole('button', { name: 'Añadir elipse' }).click();
   await page.getByRole('button', { name: 'Abrir la biblioteca de imágenes' }).click();
   await page.getByLabel('Buscar en la biblioteca').fill('cuervo volando');
+  await expect(page.locator('#library-grid').getByRole('option')).toHaveCount(1);
   await page.locator('#library-grid').getByRole('option').first().dblclick();
   await expect(layers(page)).toHaveCount(2);
 

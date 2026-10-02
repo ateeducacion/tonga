@@ -20,6 +20,7 @@
     "test": "vitest run --passWithNoTests",
     "coverage": "vitest run --coverage",
     "e2e": "playwright test",
+    "visual": "VISUAL=1 playwright test --project=visual",
     "check": "node scripts/check-dist.mjs",
     "metrics": "node scripts/metrics.mjs",
     "catalog": "node scripts/build-catalog.mjs --report",

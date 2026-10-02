@@ -18,6 +18,8 @@ export default defineConfig({
     { name: 'chromium', testDir: 'e2e/app', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', testDir: 'e2e/app', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', testDir: 'e2e/app', use: { ...devices['Desktop Safari'] } },
+    // Only with `npm run visual` (human-review gallery, never blocking).
+    ...(process.env.VISUAL ? [{ name: 'visual', testDir: 'e2e/visual', use: { ...devices['Desktop Chrome'] } }] : []),
   ],
   webServer: {
     command: `node scripts/serve.mjs ${PORT}`,
