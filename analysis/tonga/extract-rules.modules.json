@@ -1,0 +1,95 @@
+[
+ {
+  "name": "ImageEditor class",
+  "domain": "ONLY lines 565-2773 of the file (mod 2, 35 JBD edits)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 2208
+ },
+ {
+  "name": "Action mixin A",
+  "domain": "ONLY lines 11249-12200 (mod 103 load/zoom/menus, JBD edits)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 950
+ },
+ {
+  "name": "Action mixin B",
+  "domain": "ONLY lines 12200-13085 (mod 103 download PNG/JPG/SVG/PDF, JBD edits)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 885
+ },
+ {
+  "name": "Graphics module",
+  "domain": "ONLY lines 14444-16243 (mod 105, 38 JBD edits)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 1799
+ },
+ {
+  "name": "Invoker and constants",
+  "domain": "ONLY lines 4454-5654 (mod 68-73 undo/redo stacks, constants)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 1200
+ },
+ {
+  "name": "UI header",
+  "domain": "ONLY lines 5655-6718 (mod 74-76 Ui + header template, JBD edits)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 1062
+ },
+ {
+  "name": "Submenus",
+  "domain": "ONLY lines 6719-11248 (mod 77-102 submenus, JBD-marked parts only)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 4529
+ },
+ {
+  "name": "Flip rotate and commands",
+  "domain": "ONLY lines 47367-47918 and 51646-53252 (flip/rotation + commands)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 2158
+ },
+ {
+  "name": "Fabric fork patches",
+  "domain": "ONLY the lines marked JBD within 16244-44041 (Tonga patches to bundled Fabric 2.7)",
+  "files": [
+   "dist/tui-image-editor.js"
+  ],
+  "loc": 400
+ },
+ {
+  "name": "Imagen library",
+  "domain": "lines 53253-53655 of the dist file + js/repositorio.js + catalogue format",
+  "files": [
+   "dist/tui-image-editor.js",
+   "js/repositorio.js",
+   "repositorios/lista.txt",
+   "repositorios/escenarios/lista.txt"
+  ],
+  "loc": 530
+ },
+ {
+  "name": "Shell config and credits",
+  "domain": "editor config, locale_es, menu, legal and licence text",
+  "files": [
+   "index.html",
+   "creditos.html",
+   "js/theme/black-theme.js"
+  ],
+  "loc": 600
+ }
+]

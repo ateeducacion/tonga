@@ -1,0 +1,1169 @@
+{
+ "system": "Tonga",
+ "root": {
+  "id": "sys",
+  "name": "tonga",
+  "kind": "system",
+  "children": [
+   {
+    "id": "dom:shell",
+    "name": "Shell / bootstrap",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "f:js/theme/black-theme.js",
+      "name": "Black theme config",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 80,
+      "file": "js/theme/black-theme.js",
+      "description": "Black theme config that gives the drawing editor its dark look. It sets dark grey #1e1e1e backgrounds and the LogoDoble and LogoCanarias logos. It also styles the load, download and canvas size buttons, and sets the menu and submenu icon sets at 24px and 32px. Labels, checkboxes, range sliders and the colour picker get their colours here too. It reads UI assets such as icons, logos, sound and fonts. It is called by index.html and by the ImageEditor class (mod 2)."
+     },
+     {
+      "id": "f:index.html",
+      "name": "index.html (entry, locale_es, editor config)",
+      "kind": "screen",
+      "language": "html",
+      "loc": 293,
+      "file": "index.html",
+      "description": "Main entry screen of TongaApp for the Gobierno de Canarias. It hosts the browser drawing editor, plays a button sound, shows legal and privacy links, and gives the tools Spanish labels such as Draw, Crop and Text. It loads jQuery 1.7.2, jQuery UI 1.8.21, jquery-modal, axios 1.9.0, jsPDF 2.1.1, FileSaver, tui-code-snippet, tui-color-picker 2.2.0, X2JS, customiseControls, the Repository loader, the Black theme config and the ImageEditor class. Fabric 3.0.0 is loaded but shadowed, and image-picker is loaded but never called. It opens creditos.html for the credits."
+     }
+    ]
+   },
+   {
+    "id": "dom:core",
+    "name": "Editor core (TUI fork)",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "tui-runtime",
+      "name": "TUI runtime (core-js polyfills, DOM utils, Buffer)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 4085,
+      "file": "dist/tui-image-editor.js#tui-runtime",
+      "description": "This is the shared runtime of the bundled tui-image-editor.js, version 3.6.0. It is the webpack loader that starts the editor, plus browser polyfills such as element closest and classList so the drawing tool works in older browsers. It loads the ImageEditor class and the command modules, with module 160 commented out. It has no outgoing calls listed but is called by nearly every editor part: Action mixin, Commands, graphics components, drawing modes, the Fabric 2.7.0 fork, flip and rotation, graphics module, ImageEditor, Imagen, Invoker, submenus, constants and Ui."
+     },
+     {
+      "id": "tui-imageeditor",
+      "name": "ImageEditor class (mod 2)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 2208,
+      "file": "dist/tui-image-editor.js#L565-L2773",
+      "description": "This is the ImageEditor class (module 2), the main application object behind the drawing tool teachers and students open in the browser. It builds the optional UI, creates the command invoker and the graphics canvas, and turns on drag-to-add for icons and for a locally added Imagen menu. It also turns off usage statistics so the hostname is not sent. It is called by index.html, the repository loader and the Action mixin. It calls axios 1.9.0, customiseControls, the repository loader, the black theme, Action mixin, constants, Graphics, Invoker, runtime and Ui."
+     },
+     {
+      "id": "tui-invoker",
+      "name": "Invoker + command factory (mod 68-71)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 739,
+      "file": "dist/tui-image-editor.js#tui-invoker",
+      "description": "The Invoker and command factory (mod 68-71) run every editing step and keep the undo and redo history, so a student can step backward or forward through changes. It locks while a step runs, puts finished steps on the undo stack, moves undone steps to the redo stack, and announces whenever either stack changes. The Commands, the Drawing modes and the ImageEditor class call it. It dispatches work to the Commands (mod 142-159) and calls the constants and the runtime."
+     },
+     {
+      "id": "tui-consts",
+      "name": "Util + constants (mod 72-73)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 456,
+      "file": "dist/tui-image-editor.js#tui-consts",
+      "description": "This 456-line block (mod 72-73) holds helpers and constants shared across the editor. It clamps values, builds CSS text, reads object properties, converts hex colours to rgba, checks browser file support and injects theme styles. A local change dated 29.08.2019 commented out its hostname-sending function so the hostname is not sent to anyone. It calls the TUI runtime. It is called by the ImageEditor class (mod 2), Action mixin (mod 103), Graphics module (mod 105), commands, components, drawing modes, flip and rotation, Invoker, submenus, Ui and Imagen graphics."
+     },
+     {
+      "id": "tui-action",
+      "name": "Action mixin: load/download/menus (mod 103)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1836,
+      "file": "dist/tui-image-editor.js#L11249-L13085",
+      "description": "This Action mixin (module 103) connects the editor menus (shape, crop, flip, rotate, text, mask, draw, icon, imagen, filter) to actions. Its main actions load the starting image, undo, redo, delete one or all objects, enlarge or shrink the canvas, move objects up or down in layering, and reload. Reset and zoom are commented out. It reads user image and SVG files and UI assets, writes PNG/JPG/SVG/PDF exports, and calls FileSaver, jsPDF 2.1.1, axios 1.9.0, X2JS, ImageTracer, Graphics, ImageEditor and the repository loader. Commands also call it."
+     },
+     {
+      "id": "tui-graphics",
+      "name": "Graphics module (mod 105)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1799,
+      "file": "dist/tui-image-editor.js#L14444-L16243",
+      "description": "The Graphics module (mod 105) is the drawing engine behind the canvas where teachers and students edit pictures in the browser. It holds the canvas image, limits the visible canvas to a default maximum of 1000 by 800, and supports text, icons, free drawing, lines, shapes, filters, cropping and a local Imagen menu for adding pictures. It calls the Graphics components, the Drawing modes, the bundled Fabric 2.7.0 fork, the flip and rotation components, the Imagen graphics component, the constants and the runtime. The ImageEditor class and the Action mixin call it."
+     },
+     {
+      "id": "tui-commands",
+      "name": "Commands (mod 142-159)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1589,
+      "file": "dist/tui-image-editor.js#tui-commands",
+      "description": "Commands (mod 142-159) are the individual editing steps a user can undo, such as adding an image object, adding an object or adding a shape like a rect, circle or triangle. Each step knows how to apply itself and how to reverse itself, for example by removing the added picture again. The image step also passes along the file name so that pictures can be identified. Each step registers itself with the command factory. It calls the Invoker, the Action mixin, the constants, the Imagen submenu UI, the submenus and the runtime, and the Invoker dispatches work to it."
+     }
+    ]
+   },
+   {
+    "id": "dom:render",
+    "name": "Render engine (Fabric)",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "tui-fabric27",
+      "name": "Bundled Fabric 2.7.0 fork (mod 106)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 27797,
+      "file": "dist/tui-image-editor.js#L16244-L44041",
+      "description": "This is the bundled Fabric 2.7.0 fork (module 106) inside dist/tui-image-editor.js, the canvas engine that lets teachers and students draw, place shapes and apply image filters in the browser. Its setup detects touch screens, sets 96 DPI, caps cache canvases between 256 and 4096 pixels per side, and enables WebGL filtering with a 2048 texture size. It calls the TUI runtime and is called by customiseControls, the graphics components, the flip and rotation components, the graphics module and the Imagen graphics component."
+     },
+     {
+      "id": "tui-components",
+      "name": "Graphics components: crop, draw, text, icon, filter, shape (mod 115-131)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 3987,
+      "file": "dist/tui-image-editor.js#tui-components",
+      "description": "These modules (115-131) are the editor's graphics components for crop, draw, text, icon, filter and shape, the tools teachers and students use on the canvas. The excerpt shows the image loader. It sets a picture from a URL as the canvas background with anonymous cross-origin access, clears the background when no image is given, and rejects with an error message if loading fails. They call the constants, drawing modes, Fabric 2.7.0 fork and TUI runtime, and are called by flip and rotation, the graphics module and the Imagen component."
+     },
+     {
+      "id": "tui-fliprotate",
+      "name": "Flip + rotation components (mod 119-120)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 550,
+      "file": "dist/tui-image-editor.js#tui-fliprotate",
+      "description": "This 550-line block (mod 119-120) lets users mirror the picture horizontally or vertically and rotate it. The flip part reads the current setting, rejects a request that changes nothing, inverts the image angle and repositions every object. A local change dated 06.09.2019 sets zoom to 1 while flipping. The rotation code is not shown. It is called by the Graphics module (mod 105). It calls the graphics components (mod 115-131), util and constants (mod 72-73), the Fabric 2.7.0 fork (mod 106) and the TUI runtime."
+     },
+     {
+      "id": "tui-drawmodes",
+      "name": "Drawing modes (mod 132-139)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1032,
+      "file": "dist/tui-image-editor.js#tui-drawmodes",
+      "description": "Drawing modes (mod 132-139) control how a learner draws shapes on the canvas with the mouse. The part shown in the packet is the shape resize helper. While the user drags, it recalculates the width and height of a rect or triangle, or the radii of a circle. It takes rotation and stroke width into account and keeps the proportions equal when a shape is regular. The Graphics module (mod 105) and the Graphics components call it, and it calls the Invoker, the constants and the runtime."
+     },
+     {
+      "id": "f:js/customiseControls.js",
+      "name": "customiseControls (pixolith, MIT)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 601,
+      "file": "js/customiseControls.js",
+      "description": "This 601-line extension, MIT-licensed and written for pixolith, changes how the handles around a selected drawing object look. Users moving or resizing items see custom corner icons, shapes, colours and padding. It loads each icon as an image, draws the controls on the canvas, and warns if the fabric version is older than 1.6.0. It is loaded by index.html and called by the ImageEditor class (mod 2). It extends the bundled Fabric 2.7.0 fork (mod 106)."
+     },
+     {
+      "id": "f:js/fabric.js",
+      "name": "Fabric 3.0.0 (loaded, shadowed)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 26311,
+      "file": "js/fabric.js",
+      "description": "This file, js/fabric.js, is a standalone copy of the Fabric 3.0.0 canvas drawing library, the engine behind the shapes, freehand strokes and images that teachers and students edit in the browser. Its node label marks it as loaded but shadowed, which suggests another copy takes precedence at runtime, but the packet alone does not show which one. The excerpt only sets defaults such as 96 DPI and a 2048 texture size. Its only connection is being loaded by index.html, the entry page."
+     }
+    ]
+   },
+   {
+    "id": "dom:ui",
+    "name": "UI chrome / menus",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "tui-ui",
+      "name": "Ui class + main header template (mod 74-76)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1062,
+      "file": "dist/tui-image-editor.js#tui-ui",
+      "description": "The Ui class and main header template (mod 74-76) build the editor's on-screen menus for teachers and students. The main bar has buttons for undo, redo, delete, delete all, download, load, smaller and bigger, moving objects up or down in the stacking order, reloading the last file, reloading the page and starting to edit an svg. It also has submenus for shape, crop, flip, rotate, text, mask, Imagen, icon, draw and filter, with locale and theme support. The ImageEditor class calls it, and it calls the constants, the Imagen submenu UI, the submenus and the runtime."
+     },
+     {
+      "id": "tui-submenus",
+      "name": "Submenus, theme, locale (mod 77-102)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 4505,
+      "file": "dist/tui-image-editor.js#tui-submenus",
+      "description": "This block (modules 77-102) builds the editor's submenus, theme and locale, which control how the tool panels look for teachers and students. The excerpt shows a theme manager that merges a custom theme with standard styles and generates CSS for submenu labels, partitions, range sliders, colour pickers, checkboxes and icon sizes. A logo style case is commented out. It calls the util and constants modules and the TUI runtime, and it is called by the Commands modules and the Ui class."
+     }
+    ]
+   },
+   {
+    "id": "dom:repo",
+    "name": "Asset repository",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "tui-imagen-ui",
+      "name": "Imagen submenu template + UI (mod 161)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 130,
+      "file": "dist/tui-image-editor.js#tui-imagen-ui",
+      "description": "Builds the Imagen submenu (mod 161), where users choose pictures. It shows an accordion list of image collections and a Cargar Imagen button for uploading their own file. It reads the root catalogue through axios 1.9.0, groups the entries under headers and inserts them as raw HTML. Each entry opens its collection by dispatching to the Repository loader. A failed connection shows an error message. It is called by the Commands (mod 142-159) and by the Ui class and main header template (mod 74-76)."
+     },
+     {
+      "id": "tui-imagen-gfx",
+      "name": "Imagen graphics component (mod 162)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 271,
+      "file": "dist/tui-image-editor.js#L53384-L53655",
+      "description": "Graphics component (mod 162) that puts a picture item, called Imagen, on the drawing canvas for teachers and students. It sets a default black colour (#000000) and a selection style, makes the new item active, and can let users size it by dragging. Its table of shape paths is commented out, so adding an item will probably fail. The Graphics module (mod 105) calls it. It calls the graphics components, the util and constants (mod 72-73), the bundled Fabric 2.7.0 fork (mod 106) and the TUI runtime."
+     },
+     {
+      "id": "f:js/repositorio.js",
+      "name": "Repository loader (thumbnails, insert, background)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 127,
+      "file": "js/repositorio.js",
+      "description": "Repository loader that lets users browse a collection of pictures. It fetches the collection list and thumbnails through axios 1.9.0 and shows them in a dialog with a double-click hint. A double-click either inserts the chosen picture into the drawing or loads it as the background, and plays a sound. It reads collection lists, images and thumbnails and calls the ImageEditor class (mod 2) and the Action mixin (mod 103). Both of those and index.html call it, and the Imagen submenu template (mod 161) dispatches to it."
+     }
+    ]
+   },
+   {
+    "id": "dom:io",
+    "name": "Import / export",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "tui-imagetracer",
+      "name": "ImageTracer (mod 104)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1357,
+      "file": "dist/tui-image-editor.js#L13086-L14443",
+      "description": "ImageTracer (mod 104) is the bundled imagetracer.js version 1.2.4, described in its header as a simple raster image tracer and vectorizer. It turns a pixel picture into vector paths, and its presets (posterized, curvy, sharp, detailed, smoothed, grayscale and others) control how many colors and how much detail are kept. In a classroom drawing tool this appears to support turning a bitmap into editable shapes, but that is inferred. Its only recorded connection is a call from the Action mixin (mod 103), which handles load, download and menus."
+     },
+     {
+      "id": "f:js/jspdf.min.js",
+      "name": "jsPDF 2.1.1",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 347,
+      "file": "js/jspdf.min.js",
+      "description": "This 347-line minified copy of jsPDF 2.1.1, an MIT-licensed library, creates PDF documents directly in the browser. Its bundled plugins add images, process JPEG data, provide a canvas-like 2D drawing context, apply stream filters and load files. In the drawing app it appears to support exporting work as PDF, though the packet does not show the export flow itself. It is loaded by index.html and called by the Action mixin (mod 103), which handles load, download and menus."
+     },
+     {
+      "id": "f:js/FileSaver.min.js",
+      "name": "FileSaver",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 2,
+      "file": "js/FileSaver.min.js"
+     },
+     {
+      "id": "f:js/xml2json.js",
+      "name": "X2JS (xml2json)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 513,
+      "file": "js/xml2json.js",
+      "description": "This 513-line third-party library, X2JS version 1.2.0 under the Apache License, converts XML documents into JavaScript objects and back. It sets configuration defaults, escapes and unescapes XML characters, handles arrays and parses XML date-times. In the drawing app it helps read or write XML-based content, though the packet does not show which files. It is loaded by index.html and called by the Action mixin (mod 103), which handles load, download and menus."
+     }
+    ]
+   },
+   {
+    "id": "dom:credits",
+    "name": "Credits / legal",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "f:creditos.html",
+      "name": "creditos.html (credits dialog)",
+      "kind": "screen",
+      "language": "html",
+      "loc": 121,
+      "file": "creditos.html",
+      "description": "Credits dialog. It says the content belongs to the Gobierno de Canarias and is free for the educational community to use under a Creative Commons Atribución-NoComercial-CompartirIgual 4.0 licence. It shows partner logos, © Gobierno de Canarias 2019 and Versión 1.1.3, and closes from its X icon. It calls jQuery 1.7.2 and jQuery UI 1.8.21, and index.html dispatches to it. Its close function uses a dialog variable that is not defined anywhere in this excerpt, so how the close works cannot be confirmed here."
+     }
+    ]
+   },
+   {
+    "id": "dom:vendor",
+    "name": "Vendored libraries",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "f:js/jquery.min.js",
+      "name": "jQuery 1.7.2",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 4,
+      "file": "js/jquery.min.js"
+     },
+     {
+      "id": "f:js/jquery-ui.min.js",
+      "name": "jQuery UI 1.8.21",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 5,
+      "file": "js/jquery-ui.min.js"
+     },
+     {
+      "id": "f:js/jquery.modal.min.js",
+      "name": "jquery-modal",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 5,
+      "file": "js/jquery.modal.min.js"
+     },
+     {
+      "id": "f:js/axios.min.js",
+      "name": "axios 1.9.0",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 3,
+      "file": "js/axios.min.js"
+     },
+     {
+      "id": "f:js/tui-code-snippet.js",
+      "name": "tui-code-snippet",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 3735,
+      "file": "js/tui-code-snippet.js",
+      "description": "This is tui-code-snippet version 1.5.2, a general utility library loaded to support the drawing editor rather than a feature teachers or students see. It bundles helpers for copying object properties, stamping objects with unique ids, browser detection, popups, date formatting, class and namespace definition, custom events and map structures. Its only listed connection is being loaded by index.html, the entry page. The packet does not show which editor parts use it."
+     },
+     {
+      "id": "f:js/tui-color-picker.min.js",
+      "name": "tui-color-picker 2.2.0",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 9,
+      "file": "js/tui-color-picker.min.js",
+      "description": "This is the minified Toast UI Colorpicker, version 2.2.0, under the MIT license. In the drawing app it provides the color selection widget that teachers and students use to choose colors. The excerpt shows that it depends on tui-code-snippet and includes conversions between hex and RGB colors, plus RGB to HSV helpers. The file is only 9 lines long. Its single recorded connection is that index.html, the app entry page, loads and calls it."
+     },
+     {
+      "id": "f:js/image-picker.js",
+      "name": "image-picker (loaded, never called)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 332,
+      "file": "js/image-picker.js",
+      "description": "This 332-line jQuery plugin by Rodrigo Vera, generated by CoffeeScript 2.0.1, turns a select list into a grid of clickable image thumbnails. Its options include hiding the select, showing labels and limiting choices. It could let users pick pictures visually, but the node is labelled as loaded and never called. Its only connection is index.html, which loads it. The packet shows no part of the editor using it, so it appears to be dead code."
+     }
+    ]
+   },
+   {
+    "id": "dom:build",
+    "name": "Build / deploy",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "f:.github/workflows/ci.yml",
+      "name": "CI: deploy whole repo to gh-pages",
+      "kind": "job",
+      "loc": 18,
+      "file": ".github/workflows/ci.yml",
+      "description": "This 18-line GitHub Actions workflow publishes the drawing app to the web. It runs on every push and every pull request to main: it checks out the code and then uses a Pages deploy action to copy the whole repository folder, with no build step, onto the gh-pages branch with clean enabled. Its one recorded connection is that write to the published site branch. Because it also runs on pull requests, it may try to deploy unmerged changes."
+     },
+     {
+      "id": "f:Makefile",
+      "name": "Makefile (up/update/package)",
+      "kind": "job",
+      "loc": 16,
+      "file": "Makefile",
+      "description": "This 16-line Makefile gives developers shortcuts for working on the drawing app. The up target starts the local server through npm run start. The update target runs npm run update to refresh the vendor libraries. The package target reads the version from package.json, copies everything into dist/package, zips it into a versioned archive and then deletes the staging folder. Its recorded connection is a call to package.json. The phony list names vendor, but the target is actually called update."
+     },
+     {
+      "id": "f:package.json",
+      "name": "package.json + npm run update",
+      "kind": "job",
+      "loc": 26,
+      "file": "package.json",
+      "description": "This is the npm manifest for tonga, version 1.1.3, a static drawing application licensed AGPL-3.0 that needs node 18 or later. Its start script serves the app on port 8000 with caching turned off. Its update script runs npm update and copies minified vendor files such as axios, fabric and FileSaver into the js folder. The dev dependencies include fabric, jspdf, jquery, the Toast UI color picker and http-server. The Makefile calls it through its up and update targets."
+     }
+    ]
+   },
+   {
+    "id": "dom:dead",
+    "name": "Dead / reference code",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "f:js/theme/white-theme.js",
+      "name": "White theme (unused)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 70,
+      "file": "js/theme/white-theme.js",
+      "description": "This 70-line module holds a ready-made white visual theme for the image editor that teachers and students draw in. It sets a white background with light grey borders, a white load button and an orange download button, icon paths for the main menu and submenus at 24px and 32px, and styles for checkboxes, range sliders and the color picker. Its connections list is empty, so no node is recorded as loading it, which fits its label as unused."
+     },
+     {
+      "id": "f:js/service-basic.js",
+      "name": "NHN sample: service-basic",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 849,
+      "file": "js/service-basic.js",
+      "description": "This is the NHN sample script service-basic, a demo control panel that connects page buttons and inputs to the image editor. It covers loading an image file, downloading as jpg, png or svg, undo, redo, crop, flip, rotation, free drawing, lines, shapes, text, icons, masks and image filters such as grayscale, sepia, blur and pixelate. It creates an editor capped at 700 by 500 and several color pickers. Its connections list is empty, so the packet records no caller or callee for it."
+     },
+     {
+      "id": "f:js/service-mobile.js",
+      "name": "NHN sample: service-mobile",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 473,
+      "file": "js/service-mobile.js",
+      "description": "This 473-line NHN sample script connects a mobile toolbar to the image editor. It has buttons for upload, download, undo, redo, crop, flip, rotate, text, arrow and custom icons, free and line drawing, and shapes such as rectangles, circles and triangles. It creates four colour pickers and an editor with a corner size of 50, caps images at 8MP, and turns base64 images into a Blob for download. The packet lists no connections, so it is unclear whether the app loads it at all."
+     },
+     {
+      "id": "f:js/repositorio.min.js",
+      "name": "Stale minified repositorio",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 18,
+      "file": "js/repositorio.min.js",
+      "description": "This 18-line minified script, labelled as stale, runs the image repository browser. It shows a loading message, fetches images, converts them to base64, and adds a thumbnail list to the page. Double-clicking a thumbnail either inserts the picture into the drawing or sets it as the background, which is fetched from a path under /repositorios/. Connection errors appear as a message. The HTML is built by joining strings that include image names. The packet lists no connections, so nothing is recorded as loading it."
+     },
+     {
+      "id": "f:js/fabric.min.js",
+      "name": "Fabric 3.0.0 min (unused)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1,
+      "file": "js/fabric.min.js"
+     },
+     {
+      "id": "f:js/axios.js",
+      "name": "axios 0.19.0 (unused)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1396,
+      "file": "js/axios.js",
+      "description": "This node is a copy of the axios 0.19.0 library, a generic tool for sending web requests from the browser. The node is labelled unused and its connections list is empty, so nothing in the drawing app is recorded as calling it and it calls nothing else in the map. The packet is too thin to show any business role for teachers or students. It only supports describing this as a bundled third-party file of 1396 lines with no recorded links."
+     },
+     {
+      "id": "f:js/xml2json.min.js",
+      "name": "X2JS min (unused)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 1,
+      "file": "js/xml2json.min.js"
+     },
+     {
+      "id": "f:js/tui-code-snippet.min.js",
+      "name": "tui-code-snippet min (unused)",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 7,
+      "file": "js/tui-code-snippet.min.js",
+      "description": "This 7-line file is the minified tui-code-snippet utility library, version 1.5.2, under the MIT license. It registers helper functions under a shared tui namespace that other Toast UI components can use. The packet labels it unused and lists no connections, so no part of the drawing app is recorded as loading it. The packet holds only the license header and the start of the loader, so it says nothing about which helpers the app would actually need."
+     },
+     {
+      "id": "f:dist/esquema_comandos.js",
+      "name": "Hand-made outline of fork commands",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 246,
+      "file": "dist/esquema_comandos.js",
+      "description": "Hand-made outline of the editor commands in the fork that users can undo. The commands add icons, images (with their file name, from a change dated 23.08.2019), objects, shapes and text. Others apply filters, including masks, change icon colour, shape, text and text style, clear all objects, flip the image and load an image. Each command saves undo data before it acts. The packet lists no connections, so nothing shows who calls or reads it. It looks like a reference outline rather than running code."
+     },
+     {
+      "id": "f:dist/tui-image-editor_esquema.js",
+      "name": "Hand-made outline of the fork",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 698,
+      "file": "dist/tui-image-editor_esquema.js",
+      "description": "This 698-line file is a hand-made outline of the fork. It lists the editor's method names without their bodies. It sketches what teachers and students can do on the canvas: load images from a file or URL, draw freely, add text, shapes and icons, crop, flip, rotate, apply filters, zoom, undo and redo, and export with toDataURL. It also outlines the Invoker and Command undo machinery and the command names in block 73. The packet lists no connections, so nothing is known about who calls or reads it."
+     },
+     {
+      "id": "f:dist/estudio_nuevos_comandos.js",
+      "name": "Pasted Fabric study",
+      "kind": "module",
+      "language": "javascript",
+      "loc": 59,
+      "file": "dist/estudio_nuevos_comandos.js",
+      "description": "This 59-line file looks like a pasted study copy of Fabric canvas code. It handles dragging an object with the mouse to rotate, scale, skew or move it, then fires matching events such as rotating, scaling or moving. A note dated 17.03.2020 adds an undo hook that runs a rotate command after every transform, using a parameter variable that the excerpt never defines. The packet lists no connections, so there is no evidence that the app loads it."
+     },
+     {
+      "id": "f:creditos_completo.html",
+      "name": "creditos_completo.html (unlinked)",
+      "kind": "screen",
+      "language": "html",
+      "loc": 75,
+      "file": "creditos_completo.html",
+      "description": "Unlinked credits page with the same Créditos popup layout. It says the content belongs to the Gobierno de Canarias and is free for the educational community, uses Creative Commons Reconocimiento – No Comercial wording, and shows partner logos and © Gobierno de Canarias 2019. It loads only stylesheets and no scripts, and its close link points nowhere. The packet lists no connections, so no caller or data use can be confirmed. It looks like a leftover version of the credits."
+     }
+    ]
+   },
+   {
+    "id": "dom:data",
+    "name": "Data stores",
+    "kind": "domain",
+    "children": [
+     {
+      "id": "ds:catalog-root",
+      "name": "Root catalogue (sections + collections)",
+      "kind": "datastore",
+      "file": "repositorios/lista.txt"
+     },
+     {
+      "id": "ds:collections",
+      "name": "Collection lists, images, thumbnails",
+      "kind": "datastore",
+      "file": "repositorios/*/lista.txt + images + thumbnails/"
+     },
+     {
+      "id": "ds:ui-assets",
+      "name": "UI assets (icons, logos, sound, fonts)",
+      "kind": "datastore",
+      "file": "img/, dist/svg/, sounds/, webfonts/"
+     },
+     {
+      "id": "ds:user-files",
+      "name": "User's local image/SVG files",
+      "kind": "datastore",
+      "file": "<input type=file>"
+     },
+     {
+      "id": "ds:exports",
+      "name": "Exported PNG/JPG/SVG/PDF",
+      "kind": "datastore",
+      "file": "browser download"
+     },
+     {
+      "id": "ds:gh-pages",
+      "name": "Published site branch",
+      "kind": "datastore",
+      "file": "branch gh-pages"
+     }
+    ]
+   }
+  ]
+ },
+ "edges": [
+  {
+   "source": "f:.github/workflows/ci.yml",
+   "target": "ds:gh-pages",
+   "kind": "write"
+  },
+  {
+   "source": "f:Makefile",
+   "target": "f:package.json",
+   "kind": "call"
+  },
+  {
+   "source": "f:creditos.html",
+   "target": "f:js/jquery-ui.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:creditos.html",
+   "target": "f:js/jquery.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:creditos.html",
+   "kind": "dispatch"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/FileSaver.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/axios.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/customiseControls.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/fabric.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/image-picker.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/jquery-ui.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/jquery.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/jquery.modal.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/jspdf.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/repositorio.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/theme/black-theme.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/tui-code-snippet.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/tui-color-picker.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "f:js/xml2json.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:index.html",
+   "target": "tui-imageeditor",
+   "kind": "call"
+  },
+  {
+   "source": "f:js/customiseControls.js",
+   "target": "tui-fabric27",
+   "kind": "call"
+  },
+  {
+   "source": "f:js/repositorio.js",
+   "target": "ds:collections",
+   "kind": "read"
+  },
+  {
+   "source": "f:js/repositorio.js",
+   "target": "f:js/axios.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "f:js/repositorio.js",
+   "target": "tui-action",
+   "kind": "call"
+  },
+  {
+   "source": "f:js/repositorio.js",
+   "target": "tui-imageeditor",
+   "kind": "call"
+  },
+  {
+   "source": "f:js/theme/black-theme.js",
+   "target": "ds:ui-assets",
+   "kind": "read"
+  },
+  {
+   "source": "tui-action",
+   "target": "ds:exports",
+   "kind": "write"
+  },
+  {
+   "source": "tui-action",
+   "target": "ds:ui-assets",
+   "kind": "read"
+  },
+  {
+   "source": "tui-action",
+   "target": "ds:user-files",
+   "kind": "read"
+  },
+  {
+   "source": "tui-action",
+   "target": "f:js/FileSaver.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "f:js/axios.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "f:js/jspdf.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "f:js/repositorio.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "f:js/xml2json.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "tui-graphics",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "tui-imageeditor",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "tui-imagetracer",
+   "kind": "call"
+  },
+  {
+   "source": "tui-action",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-commands",
+   "target": "tui-action",
+   "kind": "call"
+  },
+  {
+   "source": "tui-commands",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-commands",
+   "target": "tui-imagen-ui",
+   "kind": "call"
+  },
+  {
+   "source": "tui-commands",
+   "target": "tui-invoker",
+   "kind": "call"
+  },
+  {
+   "source": "tui-commands",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-commands",
+   "target": "tui-submenus",
+   "kind": "call"
+  },
+  {
+   "source": "tui-components",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-components",
+   "target": "tui-drawmodes",
+   "kind": "call"
+  },
+  {
+   "source": "tui-components",
+   "target": "tui-fabric27",
+   "kind": "call"
+  },
+  {
+   "source": "tui-components",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-consts",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-drawmodes",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-drawmodes",
+   "target": "tui-invoker",
+   "kind": "call"
+  },
+  {
+   "source": "tui-drawmodes",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-fabric27",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-fliprotate",
+   "target": "tui-components",
+   "kind": "call"
+  },
+  {
+   "source": "tui-fliprotate",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-fliprotate",
+   "target": "tui-fabric27",
+   "kind": "call"
+  },
+  {
+   "source": "tui-fliprotate",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-graphics",
+   "target": "tui-components",
+   "kind": "call"
+  },
+  {
+   "source": "tui-graphics",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-graphics",
+   "target": "tui-drawmodes",
+   "kind": "call"
+  },
+  {
+   "source": "tui-graphics",
+   "target": "tui-fabric27",
+   "kind": "call"
+  },
+  {
+   "source": "tui-graphics",
+   "target": "tui-fliprotate",
+   "kind": "call"
+  },
+  {
+   "source": "tui-graphics",
+   "target": "tui-imagen-gfx",
+   "kind": "call"
+  },
+  {
+   "source": "tui-graphics",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "f:js/axios.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "f:js/customiseControls.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "f:js/repositorio.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "f:js/theme/black-theme.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "tui-action",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "tui-graphics",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "tui-invoker",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imageeditor",
+   "target": "tui-ui",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imagen-gfx",
+   "target": "tui-components",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imagen-gfx",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imagen-gfx",
+   "target": "tui-fabric27",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imagen-gfx",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imagen-ui",
+   "target": "ds:catalog-root",
+   "kind": "read"
+  },
+  {
+   "source": "tui-imagen-ui",
+   "target": "f:js/axios.min.js",
+   "kind": "call"
+  },
+  {
+   "source": "tui-imagen-ui",
+   "target": "f:js/repositorio.js",
+   "kind": "dispatch"
+  },
+  {
+   "source": "tui-invoker",
+   "target": "tui-commands",
+   "kind": "dispatch"
+  },
+  {
+   "source": "tui-invoker",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-invoker",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-submenus",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-submenus",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-ui",
+   "target": "tui-consts",
+   "kind": "call"
+  },
+  {
+   "source": "tui-ui",
+   "target": "tui-imagen-ui",
+   "kind": "call"
+  },
+  {
+   "source": "tui-ui",
+   "target": "tui-runtime",
+   "kind": "call"
+  },
+  {
+   "source": "tui-ui",
+   "target": "tui-submenus",
+   "kind": "call"
+  }
+ ],
+ "entryPoints": [
+  "f:index.html",
+  "f:.github/workflows/ci.yml",
+  "f:Makefile"
+ ],
+ "deadEnds": [
+  "f:creditos_completo.html",
+  "f:dist/esquema_comandos.js",
+  "f:dist/estudio_nuevos_comandos.js",
+  "f:dist/tui-image-editor_esquema.js",
+  "f:js/axios.js",
+  "f:js/fabric.min.js",
+  "f:js/repositorio.min.js",
+  "f:js/service-basic.js",
+  "f:js/service-mobile.js",
+  "f:js/theme/white-theme.js",
+  "f:js/tui-code-snippet.min.js",
+  "f:js/xml2json.min.js"
+ ],
+ "observations": [
+  "The TUI fork (dist/tui-image-editor.js) is a single point of failure: 16 internal buckets, no source, 271 JBD hand edits; tui-action (mod 103) is the hub for load, download, menus and Tonga-specific features.",
+  "Two Fabric copies: index.html loads js/fabric.js 3.0.0, then the bundled 2.7.0 overwrites window.fabric; customiseControls.js patches the 2.7 copy. js/fabric.js has inbound edges only from the <script> tag.",
+  "The fork and js/repositorio.js are glued through globals in both directions (imageEditor, _imageEncode, cargarRepositorio via inline onClick, imageEditor._invoker._isLocked): extraction candidate = a typed asset-library module with a public editor API.",
+  "Inline on*=\"\" handlers built from lista.txt strings (cargarRepositorio, insertarImagen) are dispatch edges invisible to import analysis; they are the XSS sinks SEC-006.",
+  "image-picker.js, jquery.min.js 1.7.2 and jquery-ui 1.8.21 are loaded for one dialog and one modal; the rewrite replaces them with <dialog>.",
+  "Build/deploy nodes do not touch the runtime graph at all: CI writes the whole repo to gh-pages with no build or test step."
+ ],
+ "flows": [
+  {
+   "name": "Crear un dibujo con la biblioteca",
+   "persona": "Docente o alumnado",
+   "description": "Una persona abre Tonga, empieza un lienzo transparente, inserta imágenes de una colección y las coloca.",
+   "steps": [
+    {
+     "label": "Abre Tonga en el navegador",
+     "nodes": [
+      "f:index.html",
+      "tui-imageeditor",
+      "tui-ui"
+     ]
+    },
+    {
+     "label": "Pulsa Comenzar (lienzo transparente)",
+     "nodes": [
+      "tui-ui",
+      "tui-action",
+      "tui-imageeditor"
+     ]
+    },
+    {
+     "label": "Abre Imagen y despliega una colección",
+     "nodes": [
+      "tui-imagen-ui",
+      "ds:catalog-root"
+     ]
+    },
+    {
+     "label": "Ve las miniaturas",
+     "nodes": [
+      "f:js/repositorio.js",
+      "ds:collections",
+      "f:js/jquery.modal.min.js"
+     ]
+    },
+    {
+     "label": "Doble clic: inserta la imagen o la pone de fondo",
+     "nodes": [
+      "f:js/repositorio.js",
+      "tui-action",
+      "tui-imagen-gfx",
+      "tui-fabric27"
+     ]
+    },
+    {
+     "label": "Mueve, gira, voltea y ordena capas",
+     "nodes": [
+      "tui-fliprotate",
+      "tui-commands",
+      "tui-invoker",
+      "tui-graphics"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Exportar el trabajo",
+   "persona": "Docente o alumnado",
+   "description": "La persona descarga su dibujo como PNG, JPG, SVG o PDF para usarlo en clase.",
+   "steps": [
+    {
+     "label": "Pulsa el botón de formato",
+     "nodes": [
+      "tui-ui",
+      "tui-action"
+     ]
+    },
+    {
+     "label": "Se rasteriza o serializa el lienzo",
+     "nodes": [
+      "tui-graphics",
+      "tui-fabric27"
+     ]
+    },
+    {
+     "label": "SVG: se reescribe con X2JS y se incrusta el fondo",
+     "nodes": [
+      "f:js/xml2json.js"
+     ]
+    },
+    {
+     "label": "PDF: se maqueta en A4 con jsPDF",
+     "nodes": [
+      "f:js/jspdf.min.js"
+     ]
+    },
+    {
+     "label": "Se descarga el fichero",
+     "nodes": [
+      "f:js/FileSaver.min.js",
+      "ds:exports"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Retomar un dibujo guardado como SVG",
+   "persona": "Alumnado",
+   "description": "La persona vuelve a cargar un SVG exportado por Tonga para seguir editándolo.",
+   "steps": [
+    {
+     "label": "Elige Cargar imagen y selecciona el SVG",
+     "nodes": [
+      "tui-ui",
+      "tui-action",
+      "ds:user-files"
+     ]
+    },
+    {
+     "label": "Fabric parsea el SVG y recupera el fondo",
+     "nodes": [
+      "tui-fabric27",
+      "tui-graphics"
+     ]
+    },
+    {
+     "label": "Sigue editando con texto, formas y dibujo",
+     "nodes": [
+      "tui-components",
+      "tui-drawmodes",
+      "tui-submenus"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Consultar los créditos",
+   "persona": "Visitante",
+   "description": "La persona abre los créditos para ver autoría y licencias de las colecciones.",
+   "steps": [
+    {
+     "label": "Pulsa Créditos",
+     "nodes": [
+      "tui-ui",
+      "f:index.html"
+     ]
+    },
+    {
+     "label": "Se abre el diálogo con creditos.html",
+     "nodes": [
+      "f:js/jquery-ui.min.js",
+      "f:creditos.html"
+     ]
+    }
+   ]
+  }
+ ]
+}

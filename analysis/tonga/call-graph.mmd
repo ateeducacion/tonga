@@ -1,0 +1,28 @@
+graph TD
+  classDef entry fill:#cc785c,color:#fff,stroke:#cc785c
+  Shell["Shell / bootstrap<br/>index.html"]:::entry
+  CI["Build / deploy<br/>ci.yml, Makefile"]:::entry
+  Core["Editor core (TUI fork)<br/>ImageEditor, action, invoker, commands, graphics"]
+  Render["Render engine<br/>Fabric 2.7 bundled, components, drawing modes"]
+  UI["UI chrome / menus<br/>Ui, submenus, theme, locale"]
+  Repo["Asset repository<br/>repositorio.js, Imagen submenu"]
+  IO["Import / export<br/>jsPDF, FileSaver, X2JS, ImageTracer"]
+  Vendor["Vendored libs<br/>jQuery 1.7.2, jQuery UI 1.8, axios, tui-snippet, color-picker"]
+  Credits["Credits<br/>creditos.html"]
+  Dead["Dead / reference<br/>12 files"]
+  Shell --> Core
+  Shell --> Vendor
+  Shell --> Render
+  Shell -. dialog load .-> Credits
+  Core --> UI
+  Core --> Render
+  Core --> IO
+  Core --> Repo
+  UI --> Core
+  UI --> Repo
+  Repo -- inline onClick --> Repo
+  Repo --> Core
+  Repo --> Vendor
+  Render --> Core
+  Credits --> Vendor
+  CI --> GH[(gh-pages)]
