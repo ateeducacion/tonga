@@ -54,15 +54,15 @@ Métricas: [MODERNIZATION-REPORT.md](MODERNIZATION-REPORT.md) (generado por `scr
 ## Qué empeoró o queda pendiente (deuda explícita)
 
 1. **Licencias**: el titular no ha decidido entre AGPL «solo v3» y «v3 o posterior», ni ha confirmado la cesión de derechos a la Administración (ver [LICENSING](LICENSING.md)). No hay atribución por imagen en la biblioteca.
-2. **Filtros de imagen** (brillo, escala de grises, desenfoque…): Tonga 1 tenía un menú de filtros; la 2.0 todavía no. Es la principal función perdida.
-3. **Recorte**: no hay recorte de imagen. Se puede cambiar el tamaño del lienzo, pero no recortar una foto.
+2. ~~**Filtros de imagen**~~ → **resuelto en 2.1.0**: escala de grises, sepia, negativo, brillo, contraste, saturación y desenfoque, desde el inspector y con deshacer.
+3. ~~**Recorte**~~ → **resuelto en 2.1.0**: recorte no destructivo por porcentaje de cada lado, también con teclado.
 4. **`repositorios/FondosMar/`** no se publica (sin `lista.txt` ni procedencia), y hay 26 ficheros sin referenciar pendientes de revisar ([ASSETS](ASSETS.md)).
 5. **Revisión manual de accesibilidad** con lectores de pantalla: pendiente ([ACCESSIBILITY](ACCESSIBILITY.md)). axe no basta.
 6. **CSP en GitHub Pages**: Pages no permite cabeceras. La CSP solo se aplica en despliegues propios ([SECURITY](SECURITY.md)).
-7. **Lighthouse CI** no está en el pipeline. Hay una medición puntual (abajo) y el informe reproducible de carga. Se puede añadir como job informativo.
+7. ~~**Lighthouse CI**~~ → **resuelto**: `lighthouse.yml` audita la web publicada tras cada despliegue. Es informativo: deja un resumen y avisa si baja del nivel medido, pero no bloquea.
 8. **Capturas visuales** no bloqueantes: no hay comparación automática de píxeles.
-9. **Rama `gh-pages`**: ya no se usa (Pages se despliega con artifacts), pero no se ha borrado. Se puede eliminar.
-10. **Pull requests de Dependabot anteriores** a la modernización: apuntan al `package.json` viejo y se pueden cerrar.
+9. ~~**Rama `gh-pages`**~~ → **borrada** (Pages se despliega con artifacts).
+10. ~~**Pull requests de Dependabot anteriores**~~ → **cerrados**, con su explicación. Dependabot ya no propone TypeScript ≥ 6.1 (incompatible con typescript-eslint) ni versiones mayores de `@types/node` (Tonga apunta a Node 24 LTS).
 11. **Imágenes grandes**: 31 imágenes de la biblioteca miden más de 2.048 px. Funcionan, pero se podrían generar derivados más ligeros en el build.
 12. **El PDF es una imagen** (texto no seleccionable).
 13. **Memoria con imágenes muy grandes**: el límite de 8.192 px por lado protege, pero una foto de 8.192² ocupa unos 256 MB decodificada.

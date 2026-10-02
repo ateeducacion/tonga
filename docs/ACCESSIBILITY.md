@@ -7,7 +7,7 @@ Referencia técnica: **WCAG 2.2 AA**. Un resultado limpio de axe **no** demuestr
 El lienzo es una imagen (`<canvas role="img">`) que un lector de pantalla no puede recorrer. Por eso el dibujo tiene una **representación en el DOM**:
 
 - El panel **Capas** es una lista de botones nativos. Para cada objeto hay botones con nombre accesible para seleccionar («Texto 1 (Texto)», «… oculta, bloqueada»), subir, bajar, ocultar o mostrar, y bloquear o desbloquear.
-- El panel **Propiedades** permite editar el objeto seleccionado sin ratón: nombre, posición, tamaño (con «Mantener proporción»), giro, opacidad, colores (selector y campo hexadecimal), texto, tipografía, alineación, orden, volteo, duplicar y borrar.
+- El panel **Propiedades** permite editar el objeto seleccionado sin ratón: nombre, posición, tamaño (con «Mantener proporción»), giro, opacidad, colores (selector y campo hexadecimal), texto, tipografía, alineación, orden, volteo, duplicar y borrar. En las imágenes también se puede recortar (campos por lado) y ajustar: cada deslizador tiene al lado un campo numérico.
 - Una región `role="status"` anuncia selecciones, inserciones, borrados, deshacer y rehacer, y la herramienta activa.
 
 ## Teclado
