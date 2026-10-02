@@ -1,10 +1,11 @@
-// Minimal static server for dist/ (preview and Playwright). No dependencies.
+// Minimal static server (preview, Playwright, report). No dependencies.
+// Usage: node scripts/serve.mjs [port=4173] [root=dist]
 import { createServer } from 'node:http';
 import { createReadStream, statSync } from 'node:fs';
 import { extname, join, normalize, resolve } from 'node:path';
 
-const root = resolve('dist');
 const port = Number(process.argv[2] ?? 4173);
+const root = resolve(process.argv[3] ?? 'dist');
 const types = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript',
   '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png',
@@ -25,4 +26,4 @@ createServer((req, res) => {
   }
   res.writeHead(200, { 'Content-Type': types[extname(file).toLowerCase()] ?? 'application/octet-stream' });
   createReadStream(file).pipe(res);
-}).listen(port, '127.0.0.1', () => console.log(`Serving dist/ on http://127.0.0.1:${port}/`));
+}).listen(port, '127.0.0.1', () => console.log(`Serving ${root} on http://127.0.0.1:${port}/`));
