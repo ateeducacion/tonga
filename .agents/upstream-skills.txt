@@ -1,0 +1,14 @@
+# Skills de terceros instalados con `gh skill add` (alias de `gh skill install`).
+# La revisión concreta que usa `gh skill update` está en metadata.github-*
+# de cada SKILL.md (github-repo, github-path, github-ref, github-tree-sha).
+# Este listado es el origen para reinstalar. No editar los skills a mano.
+#
+# gh skill add OWNER/REPO PATH --dir .agents/skills
+# rsync -a --delete --exclude .DS_Store --exclude .venv .agents/skills/ .claude/skills/
+#
+# repo path licencia aviso
+github/awesome-copilot skills/github-actions-hardening MIT .agents/licenses/github-awesome-copilot-MIT.txt
+github/awesome-copilot skills/test-gap-audit MIT .agents/licenses/github-awesome-copilot-MIT.txt
+cloudflare/security-audit-skill skills/security-audit MIT .agents/licenses/cloudflare-security-audit-MIT.txt
+microsoft/playwright-cli skills/playwright-cli Apache-2.0 .agents/licenses/microsoft-playwright-cli-Apache-2.0.txt
+microsoft/playwright packages/playwright-core/src/tools/skills/playwright-trace Apache-2.0 .agents/licenses/microsoft-playwright-Apache-2.0.txt

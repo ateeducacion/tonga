@@ -120,6 +120,12 @@ export class App {
     this.autosaveTimer = window.setTimeout(() => void this.autosave(), AUTOSAVE_DELAY);
   }
 
+  /** Saves the autosave now (before a reload to a new version, for example). */
+  async flush(): Promise<void> {
+    clearTimeout(this.autosaveTimer);
+    if (this.dirty) await this.autosave();
+  }
+
   private async autosave(): Promise<void> {
     try {
       this.autosavedRevision = this.editor.revision;

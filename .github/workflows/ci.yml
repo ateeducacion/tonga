@@ -28,9 +28,11 @@ jobs:
 
       - run: npm ci
       - run: npm run audit
+      - run: npm run licenses
+      - run: pipx run reuse==6.2.0 lint
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test
+      - run: npm run coverage
       - run: npm run build
       - run: npm run check
 

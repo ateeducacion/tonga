@@ -1,6 +1,6 @@
 {
   "name": "tonga",
-  "version": "2.0.0-dev",
+  "version": "2.0.0",
   "description": "Aplicación web estática de dibujo para el aula (Tonga)",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "node scripts/build-catalog.mjs && vite",
-    "build": "node scripts/build-catalog.mjs && vite build && node scripts/assemble.mjs",
+    "build": "node scripts/build-catalog.mjs && vite build && node scripts/copy-collections.mjs",
     "preview": "node scripts/serve.mjs",
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\"",
     "lint": "eslint .",
@@ -24,7 +24,9 @@
     "check": "node scripts/check-dist.mjs",
     "metrics": "node scripts/metrics.mjs",
     "catalog": "node scripts/build-catalog.mjs --report",
-    "audit": "npm audit --audit-level=high"
+    "audit": "npm audit --audit-level=high",
+    "licenses": "node scripts/licenses.mjs",
+    "sbom": "npm sbom --sbom-format spdx --omit dev > dist/sbom.spdx.json"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

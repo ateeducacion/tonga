@@ -77,14 +77,14 @@ Modules: f:index.html, f:package.json, f:Makefile, f:.github/workflows/ci.yml
 Scale: S
 Risk: Medio. (1) Las capturas de canvas del legacy no son deterministas entre navegadores; mitigación: aserciones sobre estado (objetos, dimensiones, MIME, estructura SVG) y capturas no bloqueantes. (2) Publicar el legacy y `/next/` desde un único artifact puede romper rutas relativas; mitigación: `base: './'` en Vite y un E2E sobre el artifact servido en un subdirectorio.
 Entry criteria:
-- [ ] Rama de trabajo creada desde `main`; `origin/upstream` sigue en `f10785f`
-- [ ] `PREFLIGHT.md` sin checks en ❌
+- [x] Rama de trabajo creada desde `main`; `origin/upstream` sigue en `f10785f`
+- [x] `PREFLIGHT.md` sin checks en ❌
 Exit criteria:
-- [ ] `npm ci && npm run build` produce `dist/` estático con el legacy en la raíz y un esqueleto Vite + TS en `/next/`
-- [ ] Suite Playwright de caracterización del legacy (Chromium) que cubre los flujos de §4 y está registrada en `analysis/tonga/BASELINE.md`, con exports de referencia y métricas (peticiones, bytes iniciales, errores de consola)
-- [ ] `scripts/metrics` reproduce las métricas de `upstream` frente a `main`
-- [ ] CI con `permissions: contents: read`, actions fijadas por SHA, lint + typecheck + test + build + e2e; Pages solo desde `push` a `main`, tras el CI y mediante artifact
-- [ ] Dependabot (npm + github-actions) válido; el CI anterior que desplegaba en `gh-pages` está eliminado
+- [x] `npm ci && npm run build` produce `dist/` estático con el legacy en la raíz y un esqueleto Vite + TS en `/next/`
+- [x] Suite Playwright de caracterización del legacy (Chromium) que cubre los flujos de §4 y está registrada en `analysis/tonga/BASELINE.md`, con exports de referencia y métricas (peticiones, bytes iniciales, errores de consola)
+- [x] `scripts/metrics` reproduce las métricas de `upstream` frente a `main`
+- [x] CI con `permissions: contents: read`, actions fijadas por SHA, lint + typecheck + test + build + e2e; Pages solo desde `push` a `main`, tras el CI y mediante artifact
+- [x] Dependabot (npm + github-actions) válido; el CI anterior que desplegaba en `gh-pages` está eliminado
 
 #### Phase 2 — Núcleo: CanvasAdapter, modelo de documento e historial
 Command: /code-modernization:modernize-reimagine
@@ -92,12 +92,13 @@ Modules: tui-imageeditor, tui-invoker, tui-commands, tui-graphics, tui-fabric27,
 Scale: L
 Risk: Alto. (1) Undo/redo y el arrastre continuo generan estados de más o pierden operaciones; mitigación: snapshots con coalescencia, límite por número y por bytes, y tests unitarios de propiedades. (2) Serializar con Fabric 7 obliga a registrar las clases para `loadFromJSON`; mitigación: formato `.tonga` propio con adaptador y tests de round-trip.
 Entry criteria:
-- [ ] Exit criteria de la Fase 1 marcados
-- [ ] ADR de Fabric 7.4 / Vite / TypeScript / Vitest / Playwright en `docs/adr/` (con Context7, docs oficiales y advisories)
+- [x] Exit criteria de la Fase 1 marcados
+- [x] ADR de Fabric 7.4 / Vite / TypeScript / Vitest / Playwright en `docs/adr/` (con Context7, docs oficiales y advisories)
+  Nota: los ADR se escribieron en la Fase 5; la investigación (Context7, npm, advisories, spike) se hizo antes de la Fase 2.
 Exit criteria:
-- [ ] Ningún acceso a propiedades que empiecen por `_` de Fabric (comprobado con un lint o grep en CI)
-- [ ] Round-trip `project → serialize → load` equivalente en tests unitarios; migraciones v1 preparadas; versión desconocida rechazada de forma controlada
-- [ ] Las reglas del contrato de §5 asignadas a esta fase tienen tests que pasan
+- [x] Ningún acceso a propiedades que empiecen por `_` de Fabric (comprobado con un lint o grep en CI)
+- [x] Round-trip `project → serialize → load` equivalente en tests unitarios; migraciones v1 preparadas; versión desconocida rechazada de forma controlada
+- [x] Las reglas del contrato de §5 asignadas a esta fase tienen tests que pasan
 
 #### Phase 3 — Interfaz nueva y biblioteca
 Command: /code-modernization:modernize-reimagine
@@ -105,12 +106,12 @@ Modules: tui-ui, tui-submenus, f:js/theme/black-theme.js, f:js/tui-color-picker.
 Scale: M
 Risk: Medio. (1) El catálogo generado desde 59 `lista.txt` con BOM y CRLF puede perder o romper elementos; mitigación: parser compatible + validador que hace fallar el build ante IDs duplicados, ficheros inexistentes o categorías sin definir. (2) Accesibilidad del canvas; mitigación: panel de capas como representación DOM, axe en E2E y prueba manual documentada.
 Entry criteria:
-- [ ] Exit criteria de la Fase 2 marcados
+- [x] Exit criteria de la Fase 2 marcados
 Exit criteria:
-- [ ] `catalog.json` generado y validado en build; ninguna miniatura se carga al iniciar
-- [ ] Biblioteca con búsqueda, categorías, teclado y botón «Añadir al lienzo» (el doble clic es solo un atajo)
-- [ ] axe sin violaciones serias en inicio, editor, biblioteca, exportación, diálogo y móvil; atajos documentados en Ayuda
-- [ ] Capturas en cuatro viewports adjuntas al PR
+- [x] `catalog.json` generado y validado en build; ninguna miniatura se carga al iniciar
+- [x] Biblioteca con búsqueda, categorías, teclado y botón «Añadir al lienzo» (el doble clic es solo un atajo)
+- [x] axe sin violaciones serias en inicio, editor, biblioteca, exportación, diálogo y móvil; atajos documentados en Ayuda
+- [x] Capturas en cuatro viewports adjuntas al PR
 
 #### Phase 4 — Importar/exportar y persistencia
 Command: /code-modernization:modernize-reimagine
@@ -118,10 +119,10 @@ Modules: tui-action, tui-imagetracer, f:js/jspdf.min.js, f:js/FileSaver.min.js, 
 Scale: M
 Risk: Medio. (1) Importar SVG trae rastreo, canvas contaminado y bombas de entidades; mitigación: sanitizador con fixtures maliciosos (`<script>`, `javascript:`, hrefs externos, DOCTYPE/entidades, dimensiones enormes). (2) Memoria con imágenes grandes; mitigación: assets por sha256 en IndexedDB e historial limitado por bytes.
 Entry criteria:
-- [ ] Exit criteria de la Fase 2 marcados
+- [x] Exit criteria de la Fase 2 marcados
 Exit criteria:
-- [ ] PNG, JPEG (calidad y escala), SVG (vectorial, saneado y autocontenido) y PDF (writer propio, A4) verificados en E2E en los 3 navegadores
-- [ ] Autosave en IndexedDB con recuperación (nunca automática), aviso de cambios sin guardar y limpieza de la recuperación
+- [x] PNG, JPEG (calidad y escala), SVG (vectorial, saneado y autocontenido) y PDF (writer propio, A4) verificados en E2E en los 3 navegadores
+- [x] Autosave en IndexedDB con recuperación (nunca automática), aviso de cambios sin guardar y limpieza de la recuperación
 
 #### Phase 5 — Cutover, limpieza, hardening y licencias
 Command: /code-modernization:modernize-reimagine
@@ -129,13 +130,13 @@ Modules: f:creditos.html, f:creditos_completo.html, f:js/jquery.min.js, f:js/jqu
 Scale: M
 Risk: Medio. (1) Hacer la relicencia sin la intención del titular; mitigación: `docs/LICENSING.md` documenta las dudas y no afirma nada sin evidencia. (2) Borrar algo que todavía se usa; mitigación: el E2E completo pasa antes y después de cada borrado.
 Entry criteria:
-- [ ] Exit criteria de las Fases 3 y 4 marcados
+- [x] Exit criteria de las Fases 3 y 4 marcados
 Exit criteria:
-- [ ] La nueva app se sirve en la raíz de Pages; TOAST UI, jQuery, axios y FileSaver ya no están en `dist/`
-- [ ] Manifest + service worker en la raíz; el shell funciona sin conexión; una versión nueva se anuncia sin recarga silenciosa
-- [ ] `reuse lint` pasa; existen `REUSE.toml`, `LICENSES/` y `THIRD_PARTY_NOTICES.md`
-- [ ] `npm audit` sin vulnerabilidades altas ni críticas; CSP recomendada documentada en `docs/SECURITY.md`
-- [ ] `docs/MODERNIZATION-REPORT.md` generado por script (upstream frente a main); README, AGENTS.md, developers.md y docs/ completos; workflow de release `v*`
+- [x] La nueva app se sirve en la raíz de Pages; TOAST UI, jQuery, axios y FileSaver ya no están en `dist/`
+- [x] Manifest + service worker en la raíz; el shell funciona sin conexión; una versión nueva se anuncia sin recarga silenciosa
+- [x] `reuse lint` pasa; existen `REUSE.toml`, `LICENSES/` y `THIRD_PARTY_NOTICES.md`
+- [x] `npm audit` sin vulnerabilidades altas ni críticas; CSP recomendada documentada en `docs/SECURITY.md`
+- [x] `docs/MODERNIZATION-REPORT.md` generado por script (upstream frente a main); README, AGENTS.md, developers.md y docs/ completos; workflow de release `v*`
 
 ## 4. Business Walkthroughs
 
@@ -218,6 +219,10 @@ Decisiones del titular. Mientras no se respondan, el plan aplica la **opción po
 - [ ] **Nombre de descarga:** hoy `imagen_YYYYMMDD_HHMMSS` (RULE-127). Por defecto el usuario elige el nombre, con `tonga-YYYYMMDD-HHMMSS` como propuesta.
 - [ ] **`/next/` durante la transición:** por defecto la nueva app se publica en `/next/` hasta la Fase 5.
 - [ ] Las 40 reglas marcadas para un experto en `BUSINESS_RULES.md` se resuelven como comportamiento de referencia (no contrato) salvo indicación contraria.
+
+## Estado de ejecución (2026-10-02)
+
+Fases 1-5 ejecutadas (PR #9, #10, #13 y #14). Las fases 3 y 4 se entregaron juntas. Deuda pendiente en `docs/MODERNIZATION.md`.
 
 ## 8. Approval Block
 

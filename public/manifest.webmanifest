@@ -1,0 +1,17 @@
+{
+  "name": "Tonga · Dibujo para el aula",
+  "short_name": "Tonga",
+  "description": "Aplicación de dibujo para el aula. Funciona en el navegador; nada sale de tu equipo.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17181c",
+  "theme_color": "#b9480f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

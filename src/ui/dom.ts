@@ -41,11 +41,20 @@ export function announce(message: string): void {
   requestAnimationFrame(() => (status.textContent = message));
 }
 
-export function toast(message: string, kind: 'info' | 'error' = 'info', ms = 3500): void {
+export function toast(message: string, kind: 'info' | 'error' = 'info', ms = 3500, action?: { label: string; run: () => void }): void {
   const box = byId('toasts');
   const el = h('div', { class: `toast ${kind}`, role: kind === 'error' ? 'alert' : undefined }, message);
+  if (action) {
+    const b = h('button', { type: 'button', class: 'btn toast-action' }, action.label);
+    b.addEventListener('click', () => {
+      el.remove();
+      action.run();
+    });
+    el.append(' ', b);
+  }
   box.append(el);
-  setTimeout(() => el.remove(), kind === 'error' ? ms * 2 : ms);
+  // A toast with an action stays until used: it may need more time than a status message.
+  if (!action) setTimeout(() => el.remove(), kind === 'error' ? ms * 2 : ms);
 }
 
 export function openDialog(dialog: HTMLDialogElement): void {

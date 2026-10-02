@@ -23,7 +23,7 @@ export { expect };
 
 /** Opens the app and creates a new drawing with the given preset (default A4 landscape). */
 export async function newDrawing(page: Page, preset = 'A4 horizontal'): Promise<void> {
-  await page.goto('./next/');
+  await page.goto('./');
   const dialog = page.getByRole('dialog', { name: 'Nuevo dibujo' });
   await expect(dialog).toBeVisible();
   await dialog.getByText(preset).click();

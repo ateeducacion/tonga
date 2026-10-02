@@ -1,9 +1,7 @@
-// Where the shared collections live relative to the app. Until the cutover the app is
-// published under next/ and the collections at the site root; Vite injects the value.
-declare const __LIBRARY_ROOT__: string;
 declare const __APP_VERSION__: string;
 
-export const LIBRARY_ROOT: string = typeof __LIBRARY_ROOT__ === 'string' ? __LIBRARY_ROOT__ : './';
+/** The shared collections (repositorios/) sit next to index.html. */
+export const LIBRARY_ROOT = './';
 export const APP_VERSION: string = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
 
 /** Upper limits for imported files (memory safety on school computers). */

@@ -644,6 +644,13 @@ kbd {
   max-width: 360px;
 }
 
+.toast-action {
+  min-height: 28px;
+  color: inherit;
+  border: 1px solid currentColor;
+  margin-inline-start: var(--space-2);
+}
+
 .toast.error {
   background: var(--color-danger);
   color: #fff;

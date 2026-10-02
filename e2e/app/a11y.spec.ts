@@ -10,7 +10,7 @@ async function audit(page: Page) {
 }
 
 test('start screen', async ({ page }) => {
-  await page.goto('./next/');
+  await page.goto('./');
   await expect(page.getByRole('dialog', { name: 'Nuevo dibujo' })).toBeVisible();
   expect(await audit(page)).toEqual([]);
 });

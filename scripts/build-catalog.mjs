@@ -11,12 +11,12 @@ const ROOT = 'repositorios';
 const HEADER = 'tongaappcabecera';
 const BACKGROUND = 'tongaappfondo';
 const IMAGE = /\.(png|jpe?g|webp|svg)$/i;
-// Evidence: legacy-app/creditos.html states all content belongs to the Gobierno de Canarias
+// Evidence: creditos.html in the upstream branch states all content belongs to the Gobierno de Canarias
 // under CC BY-NC-SA 4.0. No per-image attribution exists in the repository.
 const DEFAULT_RIGHTS = {
   license: 'CC-BY-NC-SA-4.0',
   creator: 'Gobierno de Canarias',
-  source: 'legacy-app/creditos.html',
+  source: 'https://github.com/ateeducacion/tonga/blob/upstream/creditos.html',
 };
 
 /** Splits a lista.txt into trimmed fields per non-empty line (BOM, CRLF and trailing blanks tolerated). */

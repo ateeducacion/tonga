@@ -1,0 +1,52 @@
+# Builds, checks and publishes a release ZIP of dist/ for tags v*.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # create the GitHub release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run audit
+      - run: npm run licenses
+      - run: pipx run reuse==6.2.0 lint
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run e2e
+      - run: npm run sbom
+
+      - name: Package dist/
+        run: |
+          set -euo pipefail
+          name="tonga-${GITHUB_REF_NAME#v}"
+          (cd dist && zip -qr "../${name}.zip" .)
+          echo "ZIP=${name}.zip" >> "$GITHUB_ENV"
+
+      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          files: |
+            ${{ env.ZIP }}
+            dist/sbom.spdx.json
+          generate_release_notes: true
