@@ -13,6 +13,7 @@ import { announce, byId, confirmDialog, download, hydrateIcons, openDialog, toas
 import { renderInspector } from '../ui/inspector';
 import { renderLayers } from '../ui/layers';
 import { Library } from '../ui/library';
+import { setupTabs } from '../ui/tabs';
 import { commandFor, type Command } from '../ui/shortcuts';
 
 type Tool = 'select' | 'hand' | 'draw';
@@ -38,6 +39,7 @@ export class App {
       setBackground: (a) => this.serial(() => this.backgroundFromLibrary(a)),
     });
     hydrateIcons();
+    setupTabs(document.querySelector('.panel-tabs') as HTMLElement);
     byId('about-version').textContent = APP_VERSION;
     this.editor.subscribe(() => this.render());
     this.bindActions();

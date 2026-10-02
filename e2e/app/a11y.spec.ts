@@ -15,9 +15,11 @@ test('start screen', async ({ page }) => {
   expect(await audit(page)).toEqual([]);
 });
 
-test('editor with a selection', async ({ page }) => {
+test('editor with a selection, both side panel tabs', async ({ page }) => {
   await newDrawing(page);
   await page.getByRole('button', { name: 'Añadir texto' }).click();
+  expect(await audit(page)).toEqual([]);
+  await page.getByRole('tab', { name: /Capas/ }).click();
   expect(await audit(page)).toEqual([]);
 });
 
