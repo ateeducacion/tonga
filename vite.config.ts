@@ -9,7 +9,7 @@ function serviceWorker(): Plugin {
     name: 'tonga-service-worker',
     apply: 'build',
     generateBundle(_options, bundle) {
-      const publicFiles = ['theme-init.js', 'favicon.svg', 'manifest.webmanifest', ...readdirSync('public/icons').map((f) => `icons/${f}`)];
+      const publicFiles = ['theme-init.js', 'favicon.svg', 'ate-logo.png', 'manifest.webmanifest', ...readdirSync('public/icons').map((f) => `icons/${f}`)];
       const files = [...new Set(['index.html', ...publicFiles, ...Object.keys(bundle).filter((f) => !f.endsWith('.map'))])].sort();
       const hash = createHash('sha256');
       for (const f of publicFiles) hash.update(f).update(readFileSync(`public/${f}`));
@@ -50,7 +50,7 @@ export default defineConfig({
       // Logic modules. The DOM wiring (src/app, src/ui widgets, main, storage) is covered by the
       // Playwright suite in three browsers instead (docs/TESTING.md).
       include: ['src/project/**', 'src/history/**', 'src/canvas/**', 'src/export/**', 'src/import/sniff.ts', 'src/import/svg.ts', 'src/assets/catalog.ts', 'src/ui/shortcuts.ts'],
-      thresholds: { lines: 85, statements: 80, functions: 85, branches: 65 },
+      thresholds: { lines: 98, statements: 97, functions: 97, branches: 90 },
       reporter: ['text-summary', 'lcov'],
     },
   },
