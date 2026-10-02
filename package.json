@@ -24,7 +24,9 @@
     "check": "node scripts/check-dist.mjs",
     "metrics": "node scripts/metrics.mjs",
     "catalog": "node scripts/build-catalog.mjs --report",
-    "audit": "npm audit --audit-level=high"
+    "audit": "npm audit --audit-level=high",
+    "licenses": "node scripts/licenses.mjs",
+    "sbom": "npm sbom --sbom-format spdx --omit dev > dist/sbom.spdx.json"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

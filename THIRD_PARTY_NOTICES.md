@@ -1,3 +1,45 @@
+# Avisos de terceros
+
+Componentes de terceros que **se distribuyen** con Tonga (están dentro de `dist/`). Las herramientas de desarrollo (Vite, TypeScript, Vitest, Playwright, ESLint, axe-core…) no se distribuyen; su inventario lo da `npm run licenses`.
+
+| Componente | Versión | Uso | Licencia | Origen |
+|---|---|---|---|---|
+| Fabric.js | 7.4.0 | Motor del lienzo (incluido en el bundle JS) | MIT | https://github.com/fabricjs/fabric.js |
+| Lucide | 1.50.0 (lucide-static) | 50 iconos copiados como SVG en `src/ui/icons.ts` | ISC; parte derivada de Feather, MIT | https://github.com/lucide-icons/lucide |
+| Imágenes de `repositorios/` | — | Biblioteca de imágenes | CC BY-NC-SA 4.0, © Gobierno de Canarias | Créditos originales (rama `upstream`, `creditos.html`) |
+
+Ningún código de TOAST UI Image Editor, jQuery, jQuery UI, axios, FileSaver, X2JS, jsPDF ni de la extensión `customiseControls` forma parte de esta versión: se usaron solo en la versión original (rama `upstream`).
+
+## Fabric.js — MIT
+
+```
+MIT License
+
+Copyright (c) 2008-2015 Printio (Juriy Zaytsev, Maxim Chernyak)
+Copyright (c) 2016-present Andrea Bogazzi, Shachar Nen and Fabric.js contributors (https://github.com/fabricjs/fabric.js/graphs/contributors)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## Lucide (ISC) y Feather (MIT)
+
+```
 ISC License
 
 Copyright (c) 2026 Lucide Icons and Contributors
@@ -41,3 +83,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
