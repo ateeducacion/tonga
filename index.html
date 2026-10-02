@@ -92,13 +92,15 @@
 
     <aside id="sidepanel" class="sidepanel" aria-label="Propiedades y capas">
       <button type="button" class="btn panel-close" data-action="panel" data-icon="x">Cerrar panel</button>
-      <section class="panel-section" aria-labelledby="inspector-title">
-        <h2 id="inspector-title">Propiedades</h2>
+      <div class="panel-tabs" role="tablist" aria-label="Panel lateral">
+        <button type="button" role="tab" id="tab-props" class="panel-tab" aria-selected="true" aria-controls="panel-props">Propiedades</button>
+        <button type="button" role="tab" id="tab-layers" class="panel-tab" aria-selected="false" aria-controls="panel-layers" tabindex="-1">Capas <span id="layers-count" class="count">0</span></button>
+      </div>
+      <section id="panel-props" class="panel-section" role="tabpanel" aria-labelledby="tab-props">
         <form id="inspector" class="inspector" autocomplete="off" novalidate></form>
       </section>
-      <section class="panel-section layers-section" aria-labelledby="layers-title">
-        <h2 id="layers-title">Capas</h2>
-        <ul id="layers" class="layers"></ul>
+      <section id="panel-layers" class="panel-section" role="tabpanel" aria-labelledby="tab-layers" hidden>
+        <ul id="layers" class="layers" role="list"></ul>
         <p id="layers-empty" class="muted">El lienzo está vacío. Añade un texto, una forma o una imagen.</p>
       </section>
     </aside>
@@ -230,6 +232,7 @@
         <h2 id="dlg-about-title">Acerca de Tonga</h2>
         <p>Versión <span id="about-version"></span>. Aplicación de dibujo para el aula promovida por el Gobierno de Canarias. Desarrollo original de Altia; mantenimiento y versión 2 del Área de Tecnología Educativa (ATE).</p>
         <p>Tonga es software libre. No usa analítica, cookies ni servicios externos: tus dibujos se procesan y se guardan solo en este navegador.</p>
+        <p class="ate-signature"><img class="ate-logo" src="./ate-logo.png" alt="" width="40" height="41" /> <span>Área de Tecnología Educativa · Gobierno de Canarias</span></p>
         <p class="help-links">
           <a class="btn link-btn" data-icon="github" href="https://github.com/ateeducacion/tonga" rel="noopener noreferrer" target="_blank">Código fuente en GitHub<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
           <button type="button" class="btn link-btn" data-action="licences" data-icon="fileText">Licencias</button>

@@ -67,10 +67,10 @@ precedence = "override"
 SPDX-FileCopyrightText = "2019-2026 Gobierno de Canarias"
 SPDX-License-Identifier = "AGPL-3.0-or-later AND CC-BY-NC-SA-4.0"
 
-# Logo of the Área de Tecnología Educativa, used only to render the link-preview card
+# Logo of the Área de Tecnología Educativa, shown in the Info dialog and the link-preview card
 # (taken from ateeducacion/elpx-optimizer, src/web/assets/ate-logo.png).
 [[annotations]]
-path = ["scripts/assets/ate-logo.png"]
+path = ["public/ate-logo.png"]
 precedence = "override"
 SPDX-FileCopyrightText = "Gobierno de Canarias (Área de Tecnología Educativa)"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
