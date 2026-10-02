@@ -60,6 +60,16 @@ El `Makefile` repite lo mismo con atajos: `make up`, `make build`, `make test`, 
 2. Fusiona en `main`.
 3. `git tag v2.x.y && git push origin v2.x.y`. El workflow `release.yml` crea la release con el ZIP de `dist/` y el SBOM.
 
+## Vista previa al compartir (WhatsApp, Telegram, redes)
+
+`index.html` lleva etiquetas Open Graph y Twitter. La imagen `public/og-image.jpg` (1200 × 630, menos de 300 KB) es una captura de una escena real de la app y se regenera con:
+
+```bash
+npm run build && node scripts/make-og-image.mjs
+```
+
+Las URL de las vistas previas tienen que ser absolutas; salen de `VITE_SITE_URL` (por defecto, la demo de GitHub Pages; ver `vite.config.ts`). Para otro despliegue: `VITE_SITE_URL=https://ejemplo.org/tonga/ npm run build`. WhatsApp guarda la vista previa en caché: para comprobar un cambio, comparte la URL con un parámetro nuevo (por ejemplo `?v=2`).
+
 ## Métricas
 
 - `node scripts/metrics.mjs origin/upstream HEAD`: métricas del repositorio entre dos refs.

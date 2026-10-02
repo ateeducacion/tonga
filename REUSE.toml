@@ -59,3 +59,10 @@ path = [".agents/licenses/**"]
 precedence = "override"
 SPDX-FileCopyrightText = ["GitHub, Inc.", "Cloudflare, Inc.", "Microsoft Corporation"]
 SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+# Link-preview screenshot: it shows library images.
+[[annotations]]
+path = ["public/og-image.jpg"]
+precedence = "override"
+SPDX-FileCopyrightText = "2019-2026 Gobierno de Canarias"
+SPDX-License-Identifier = "LicenseRef-Tonga-AGPL-3.0 AND CC-BY-NC-SA-4.0"

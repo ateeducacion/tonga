@@ -21,6 +21,10 @@ function serviceWorker(): Plugin {
   };
 }
 
+// Public URL of the deployment: link previews (WhatsApp, social networks) need absolute URLs.
+// Override for other deployments: VITE_SITE_URL=https://example.org/tonga/ npm run build
+process.env.VITE_SITE_URL ??= 'https://ateeducacion.github.io/tonga/';
+
 const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
 
 // dist/ is fully static; scripts/copy-collections.mjs adds repositorios/ next to the app.
