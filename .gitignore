@@ -146,3 +146,4 @@ playwright-report/
 .aider*
 analysis/tonga/packets/
 analysis/tonga/REPORT.html
+public/catalog.json

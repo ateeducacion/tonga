@@ -1,0 +1,47 @@
+import { describe, expect, it } from 'vitest';
+import { normalize, searchAssets, type Catalog } from '../src/assets/catalog';
+// @ts-expect-error plain ESM build script without types
+import { buildCatalog, parseLines } from '../scripts/build-catalog.mjs';
+
+const asset = (id: string, title: string, collection: string) => ({
+  id, title, collection, category: 'c', file: `repositorios/${id}`, thumbnail: '', background: false, license: '', creator: '', source: '',
+});
+const catalog: Catalog = {
+  version: 1,
+  categories: [],
+  collections: [{ id: 'aves', title: 'Aves', category: 'fauna' }, { id: 'mapas', title: 'Mapas', category: 'fondos' }],
+  assets: [asset('aves/aguila_real.png', 'Águila real', 'aves'), asset('aves/canario.png', 'Canario', 'aves'), asset('mapas/Mapa-Europa.png', 'Mapa Europa', 'mapas')],
+};
+
+describe('library search', () => {
+  it('ignores accents, case and separators', () => {
+    expect(normalize('  Águila_Real-1 ')).toBe('aguila real 1');
+    expect(searchAssets(catalog, 'AGUILA').map((a) => a.id)).toEqual(['aves/aguila_real.png']);
+  });
+
+  it('requires every word and can match the collection title', () => {
+    expect(searchAssets(catalog, 'mapa europa')).toHaveLength(1);
+    expect(searchAssets(catalog, 'aves').map((a) => a.id)).toEqual(['aves/aguila_real.png', 'aves/canario.png']);
+    expect(searchAssets(catalog, 'mapa aguila')).toHaveLength(0);
+  });
+
+  it('filters by collection', () => {
+    expect(searchAssets(catalog, '', 'mapas')).toHaveLength(1);
+  });
+});
+
+describe('catalogue builder (RULE-105/044/112)', () => {
+  it('tolerates BOM, CRLF and blank lines', () => {
+    expect(parseLines('\uFEFFa.png|A\r\n\r\nb.png|B|tongaappfondo\r\n')).toEqual([['a.png', 'A'], null, ['b.png', 'B', 'tongaappfondo'], null]);
+  });
+
+  it('builds the real catalogue without errors: sections, collections, background flag and rights', () => {
+    const { catalog: real, errors } = buildCatalog();
+    expect(errors).toEqual([]);
+    expect(real.categories[0]).toMatchObject({ id: 'fauna', title: 'Fauna' });
+    expect(real.collections.find((c: { id: string }) => c.id === 'aves')).toMatchObject({ title: 'Aves', category: 'fauna' });
+    const bg = real.assets.find((a: { id: string }) => a.id === 'escenarios/Auditorio_fondo.png');
+    expect(bg).toMatchObject({ title: 'Auditorio', background: true, license: 'CC-BY-NC-SA-4.0', creator: 'Gobierno de Canarias' });
+    expect(new Set(real.assets.map((a: { id: string }) => a.id)).size).toBe(real.assets.length);
+  });
+});
