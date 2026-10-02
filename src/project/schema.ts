@@ -1,3 +1,5 @@
+import { UserError } from '../errors';
+
 // The Tonga project format (.tonga). It is Tonga's own document, not a dump of Fabric's canvas:
 // order, visibility, lock and names belong to Tonga; each layer carries the Fabric object data
 // of that single object. Migrations upgrade older documents step by step.
@@ -33,7 +35,7 @@ export interface Project {
 export const MAX_CANVAS_SIDE = 8192;
 export const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
-export class ProjectError extends Error {}
+export class ProjectError extends UserError {}
 
 type Migration = (doc: Record<string, unknown>) => Record<string, unknown>;
 // MIGRATIONS[n] upgrades a version-n document to version n+1. Add v1 -> v2 here when v2 exists.
