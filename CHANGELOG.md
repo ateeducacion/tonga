@@ -4,7 +4,14 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Añadido
+
+- Menú contextual en el lienzo (botón derecho, tecla Menú o Mayús+F10): cortar, copiar, pegar, duplicar, orden de capas, agrupar o desagrupar, bloquear, seleccionar todo y borrar.
+- Cortar con Ctrl/⌘+X.
+
 ### Cambiado
+
+- El asa de giro es redonda, y las asas de selección usan el color de Tonga con un tamaño cómodo para pantallas táctiles.
 
 - La versión que muestra la aplicación sale de la etiqueta de git (`v2.1.1` → «2.1.1»). Al publicar una etiqueta `v*` se vuelve a desplegar la web con esa versión, y la PWA ofrece actualizarse.
 

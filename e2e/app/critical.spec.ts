@@ -260,3 +260,34 @@ test('the side panel shows Propiedades or Capas as tabs', async ({ page }) => {
   await page.keyboard.press('Home');
   await expect(props).toHaveAttribute('aria-selected', 'true');
 });
+
+test('right-click menu on the canvas; also with the Menu key (keyboard)', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
+  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Elipse 1', 'Rectángulo 1']);
+
+  // Right-click the selected ellipse (centre of the canvas) and send it to the back.
+  const canvas = page.locator('.upper-canvas');
+  const box = (await canvas.boundingBox())!;
+  await canvas.click({ button: 'right', position: { x: box.width / 2, y: box.height / 2 } });
+  const menu = page.getByRole('menu', { name: 'Acciones' });
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /Pegar/ })).toBeDisabled();
+  await menu.getByRole('menuitem', { name: /Enviar al fondo/ }).click();
+  await expect(menu).toBeHidden();
+  await expect(layers(page)).toHaveText(['Rectángulo 1', 'Elipse 1']);
+
+  // Keyboard: Menu key, arrows move inside the menu (not the object), Enter runs, Esc closes.
+  await page.locator('body').press('ContextMenu');
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /Cortar/ })).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(menu.getByRole('menuitem', { name: /Copiar/ })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+  await page.locator('body').press('Shift+F10');
+  await menu.getByRole('menuitem', { name: /Duplicar/ }).press('Enter');
+  await expect(layers(page)).toHaveCount(3);
+});

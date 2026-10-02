@@ -1,7 +1,7 @@
 // Keyboard shortcuts. Pure mapping from a key event to a command, so it can be tested.
 
 export type Command =
-  | 'undo' | 'redo' | 'copy' | 'paste' | 'duplicate' | 'delete' | 'deselect' | 'select-all'
+  | 'undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'context-menu' | 'duplicate' | 'delete' | 'deselect' | 'select-all'
   | 'zoom-in' | 'zoom-out' | 'zoom-fit' | 'zoom-100'
   | 'tool-select' | 'tool-hand' | 'tool-draw'
   | 'add-text' | 'add-rect' | 'add-ellipse' | 'add-line' | 'import' | 'library'
@@ -31,6 +31,7 @@ export function commandFor(e: KeyLike, editingText = false): Command | null {
   if (mod) {
     if (key === 'z') return e.shiftKey ? 'redo' : 'undo';
     if (key === 'y') return 'redo';
+    if (key === 'x') return 'cut';
     if (key === 'c') return 'copy';
     if (key === 'v') return 'paste';
     if (key === 'd') return 'duplicate';
@@ -41,6 +42,7 @@ export function commandFor(e: KeyLike, editingText = false): Command | null {
   // them for the canvas: after clicking «Añadir rectángulo», Delete must still delete it.
   if (e.target instanceof Element && e.target.closest('input, select, textarea, [role="listbox"]')) return null;
   const step = e.shiftKey ? 10 : 1;
+  if (key === 'ContextMenu' || (key === 'F10' && e.shiftKey)) return 'context-menu';
   switch (key) {
     case 'Delete':
     case 'Backspace':

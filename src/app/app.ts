@@ -12,6 +12,7 @@ import { newProject, parseProject, type Background } from '../project/schema';
 import { announce, byId, confirmDialog, download, hydrateIcons, openDialog, toast } from '../ui/dom';
 import { renderInspector } from '../ui/inspector';
 import { renderLayers } from '../ui/layers';
+import { ContextMenu, type MenuEntry } from '../ui/context-menu';
 import { Library } from '../ui/library';
 import { setupTabs } from '../ui/tabs';
 import { commandFor, type Command } from '../ui/shortcuts';
@@ -23,6 +24,7 @@ const AUTOSAVE_DELAY = 1500;
 export class App {
   private readonly editor: Editor;
   private readonly library: Library;
+  private readonly menu = new ContextMenu();
   private readonly workspace = byId('workspace');
   private tool: Tool = 'select';
   private savedRevision = 0;
@@ -42,6 +44,7 @@ export class App {
     setupTabs(document.querySelector('.panel-tabs') as HTMLElement);
     byId('about-version').textContent = APP_VERSION;
     this.editor.subscribe(() => this.render());
+    this.editor.onContextMenu((x, y) => this.menu.open(x, y, this.menuEntries()));
     this.bindActions();
     this.bindTools();
     this.bindDialogs();
@@ -419,11 +422,51 @@ export class App {
     else toggle?.focus();
   }
 
+  // ---- Context menu -------------------------------------------------------------------------
+
+  private menuEntries(): MenuEntry[] {
+    const e = this.editor;
+    const selection = e.selected();
+    const none = selection.length === 0;
+    const mod = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl+';
+    const isGroup = e.inspect()?.type === 'group';
+    const run = (fn: () => void | Promise<void>) => () => void this.serial(fn).catch((err) => this.fail(err));
+    return [
+      { label: 'Cortar', icon: 'scissors', shortcut: `${mod}X`, disabled: none, run: run(() => e.cut()) },
+      { label: 'Copiar', icon: 'copy', shortcut: `${mod}C`, disabled: none, run: run(() => e.copy()) },
+      { label: 'Pegar', icon: 'clipboardPaste', shortcut: `${mod}V`, disabled: !e.hasClipboard, run: run(() => e.paste()) },
+      { label: 'Duplicar', icon: 'copyPlus', shortcut: `${mod}D`, disabled: none, run: run(() => e.duplicate()) },
+      'separator',
+      { label: 'Traer al frente', icon: 'chevronsUp', disabled: none, run: run(() => e.order('front')) },
+      { label: 'Subir una capa', icon: 'arrowUp', disabled: none, run: run(() => e.order('forward')) },
+      { label: 'Bajar una capa', icon: 'arrowDown', disabled: none, run: run(() => e.order('backward')) },
+      { label: 'Enviar al fondo', icon: 'chevronsDown', disabled: none, run: run(() => e.order('back')) },
+      'separator',
+      isGroup
+        ? { label: 'Desagrupar', icon: 'ungroup', run: run(() => e.ungroup()) }
+        : { label: 'Agrupar', icon: 'group', disabled: selection.length < 2, run: run(() => e.group()) },
+      { label: 'Bloquear', icon: 'lock', disabled: none, run: run(() => selection.forEach((o) => e.setLocked(o.id ?? '', true))) },
+      { label: 'Seleccionar todo', icon: 'mousePointer2', shortcut: `${mod}A`, run: run(() => e.selectAll()) },
+      'separator',
+      { label: 'Borrar', icon: 'trash2', shortcut: 'Supr', danger: true, disabled: none, run: run(() => e.removeSelected()) },
+    ];
+  }
+
+  /** Menu key / Shift+F10: open the menu over the selection (or the canvas centre). */
+  private openMenuFromKeyboard(): void {
+    const rect = this.editor.canvas.getElement().getBoundingClientRect();
+    const active = this.editor.canvas.getActiveObject();
+    const zoom = this.editor.zoomLevel;
+    const p = active ? active.getCenterPoint() : { x: this.editor.size.width / 2, y: this.editor.size.height / 2 };
+    this.menu.open(rect.left + p.x * zoom, rect.top + p.y * zoom, this.menuEntries());
+  }
+
   // ---- Keyboard ---------------------------------------------------------------------------
 
   private bindKeyboard(): void {
     document.addEventListener('keydown', (e) => {
       if (document.querySelector('dialog[open]')) return;
+      if (e.target instanceof Element && e.target.closest('#context-menu')) return; // the menu handles its own keys
       if (e.key === 'Escape' && byId('sidepanel').classList.contains('open')) {
         this.togglePanel(false);
         return;
@@ -447,7 +490,13 @@ export class App {
         await e.redo();
         announce('Rehecho');
       },
+      cut: () => {
+        const n = e.selected().length;
+        e.cut();
+        if (n) announce(n === 1 ? 'Objeto cortado' : `${n} objetos cortados`);
+      },
       copy: () => e.copy(),
+      'context-menu': () => this.openMenuFromKeyboard(),
       paste: () => e.paste(),
       duplicate: () => e.duplicate(),
       delete: () => {

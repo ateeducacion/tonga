@@ -62,3 +62,11 @@ test('information and licences dialogs', async ({ page }) => {
   await page.getByRole('button', { name: 'Licencias', exact: true }).click();
   expect(await audit(page)).toEqual([]);
 });
+
+test('canvas context menu', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
+  await page.locator('body').press('ContextMenu');
+  await expect(page.getByRole('menu', { name: 'Acciones' })).toBeVisible();
+  expect(await audit(page)).toEqual([]);
+});
