@@ -633,6 +633,12 @@ kbd {
   display: grid;
   gap: var(--space-2);
   z-index: 20;
+  /* Status messages never block the controls underneath; only their own button is clickable. */
+  pointer-events: none;
+}
+
+.toast-action {
+  pointer-events: auto;
 }
 
 .toast {
@@ -716,6 +722,14 @@ kbd {
   .panel-toggle,
   .panel-close {
     display: inline-flex;
+  }
+
+  /* The bottom of the screen is the tool bar: messages go under the top bar instead. */
+  .toasts {
+    top: calc(var(--control-size-md) + var(--space-3));
+    bottom: auto;
+    left: var(--space-2);
+    right: var(--space-2);
   }
 
   .panel-close {
