@@ -3,15 +3,15 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const failures = [];
-const must = ['dist/index.html', 'dist/next/index.html', 'dist/repositorios/lista.txt'];
+const must = ['dist/index.html', 'dist/catalog.json', 'dist/repositorios/lista.txt', 'dist/next/index.html'];
 for (const f of must) if (!existsSync(f)) failures.push(`missing ${f}`);
 
-const html = existsSync('dist/next/index.html') ? readFileSync('dist/next/index.html', 'utf8') : '';
-if (/(src|href)="\//.test(html)) failures.push('dist/next/index.html uses root-absolute URLs (breaks subdirectory hosting)');
-if (/<script(?![^>]*\bsrc=)[^>]*>/.test(html)) failures.push('dist/next/index.html has an inline script (blocks a strict CSP)');
+const html = existsSync('dist/index.html') ? readFileSync('dist/index.html', 'utf8') : '';
+if (/(src|href)="\//.test(html)) failures.push('dist/index.html uses root-absolute URLs (breaks subdirectory hosting)');
+if (/<script(?![^>]*\bsrc=)[^>]*>/.test(html)) failures.push('dist/index.html has an inline script (blocks a strict CSP)');
 
 const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]));
-for (const f of walk('dist/next')) if (f.endsWith('.map') || f.endsWith('.ts')) failures.push(`dev file shipped: ${f}`);
+for (const f of walk('dist').filter((f) => !f.startsWith('dist/repositorios/'))) if (f.endsWith('.map') || f.endsWith('.ts')) failures.push(`dev file shipped: ${f}`);
 
 if (failures.length) {
   console.error(failures.join('\n'));

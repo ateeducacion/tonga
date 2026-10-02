@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['dist/', 'coverage/', 'legacy-app/', 'legacy/', 'analysis/', 'playwright-report/', 'test-results/'] },
+  { ignores: ['dist/', 'coverage/', 'legacy/', 'analysis/', 'playwright-report/', 'test-results/'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -26,6 +26,10 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', { paths: [{ name: 'fabric', message: 'Only src/canvas/, src/export/ and src/import/ import fabric.' }] }],
     },
+  },
+  {
+    files: ['src/sw.js'],
+    languageOptions: { globals: { ...globals.serviceworker, __PRECACHE__: 'readonly' } },
   },
   {
     files: ['scripts/**', '*.config.*'],

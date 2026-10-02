@@ -13,8 +13,6 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    // The legacy app is characterized in one engine: the fixtures it exports are the contract.
-    { name: 'legacy', testDir: 'e2e/legacy', use: { ...devices['Desktop Chrome'] } },
     { name: 'chromium', testDir: 'e2e/app', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', testDir: 'e2e/app', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', testDir: 'e2e/app', use: { ...devices['Desktop Safari'] } },

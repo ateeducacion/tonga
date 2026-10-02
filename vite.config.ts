@@ -3,18 +3,15 @@ import { defineConfig } from 'vitest/config';
 
 const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
 
-// Until the cutover the rebuilt app is published under next/ next to the legacy one;
-// scripts/assemble.mjs adds legacy-app/ and repositorios/ around it.
-export default defineConfig(({ command }) => ({
+// dist/ is fully static; scripts/copy-collections.mjs adds repositorios/ next to the app.
+export default defineConfig({
   base: './',
   define: {
-    // Dev serves the repository root; the build lives in next/ beside repositorios/.
-    __LIBRARY_ROOT__: JSON.stringify(command === 'serve' ? './' : '../'),
     __APP_VERSION__: JSON.stringify(version),
   },
   publicDir: 'public',
   build: {
-    outDir: 'dist/next',
+    outDir: 'dist',
     emptyOutDir: true,
     target: 'es2022',
   },
@@ -27,4 +24,4 @@ export default defineConfig(({ command }) => ({
       reporter: ['text-summary', 'lcov'],
     },
   },
-}));
+});

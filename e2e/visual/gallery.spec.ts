@@ -7,7 +7,7 @@ const VIEWPORTS = { desktop: [1600, 900], laptop: [1366, 768], tablet: [1024, 13
 for (const [name, [width, height]] of Object.entries(VIEWPORTS)) {
   test(`gallery ${name}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
-    await page.goto('./next/');
+    await page.goto('./');
     await expect(page.getByRole('dialog', { name: 'Nuevo dibujo' })).toBeVisible();
     await page.screenshot({ path: `docs/screenshots/${name}-1-new.png` });
     await page.getByRole('button', { name: 'Crear' }).click();
