@@ -89,9 +89,19 @@ function num(label: string, name: string, attrs: Record<string, string | number>
   return h('label', {}, label, h('input', { type: 'number', name, inputmode: 'decimal', step: 1, ...attrs }));
 }
 
+/** The last colour picked with the browser's picker, kept as a swatch to return to it. */
+let customColour: string | null = null;
+
+/** Light colours get a dark check mark, dark ones a white one. */
+function isLight(hex: string): boolean {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  return 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0) > 0.6;
+}
+
 /**
- * A colour: preset swatches (plus «Transparente» where it makes sense), the browser's own picker
- * for any other colour and an accessible HEX field. The current colour is always marked.
+ * A colour, as in most drawing apps: preset swatches (plus «Transparente» where it makes sense),
+ * the last custom colour and the browser's own picker for any other. The current colour is
+ * marked with a ring and a check mark, so it is not told by colour alone.
  */
 function colour(label: string, name: string, onChange: (value: string) => void, opts: { transparent?: boolean } = {}): HTMLDivElement {
   const group = h('div', { class: 'colour', role: 'group', 'aria-label': label, 'data-colour': name });
@@ -102,44 +112,51 @@ function colour(label: string, name: string, onChange: (value: string) => void, 
   };
   const swatch = (value: string, text: string) => {
     const b = h('button', { type: 'button', class: `swatch${value === TRANSPARENT ? ' none' : ''}`, 'data-value': value, 'aria-label': text, title: text, 'aria-pressed': 'false' });
-    if (value !== TRANSPARENT) b.style.background = value;
+    if (value !== TRANSPARENT) {
+      b.style.background = value;
+      b.classList.toggle('light', isLight(value));
+    }
     b.addEventListener('click', () => pick(value));
     return b;
   };
   if (opts.transparent) swatches.append(swatch(TRANSPARENT, 'Transparente'));
   swatches.append(...PALETTE.map(([value, text]) => swatch(value, text)));
-  const picker = h('input', { type: 'color', name, class: 'swatch picker', 'aria-label': `${label} (selector)`, title: 'Otro color' });
-  picker.addEventListener('input', () => pick(picker.value));
-  swatches.append(picker);
-  const hex = h('input', { type: 'text', name: `${name}Hex`, 'aria-label': `${label} (hexadecimal)`, maxlength: 7, spellcheck: 'false', pattern: '#[0-9a-fA-F]{6}' });
-  hex.addEventListener('change', () => {
-    const v = hex.value.trim().startsWith('#') ? hex.value.trim() : `#${hex.value.trim()}`;
-    if (HEX_COLOR.test(v)) pick(v.toLowerCase());
+  const custom = h('button', { type: 'button', class: 'swatch custom', 'aria-pressed': 'false', hidden: true });
+  custom.addEventListener('click', () => customColour && pick(customColour));
+  const picker = h('input', { type: 'color', name, class: 'swatch picker', 'aria-label': `${label}: otro color`, title: 'Otro color' });
+  picker.addEventListener('input', () => {
+    customColour = picker.value;
+    pick(picker.value);
   });
-  group.append(h('span', { class: 'field-title' }, label), swatches, hex);
+  swatches.append(custom, picker);
+  group.append(h('span', { class: 'field-title' }, label), swatches);
   return group;
 }
 
-/** Marks the current colour: its swatch, or the picker when it is not a preset. */
+/** Marks the current colour: its preset swatch, or the custom one. */
 function syncColour(group: HTMLElement, value: string): void {
   const v = value.toLowerCase();
-  const none = !v || v === TRANSPARENT;
+  const current = !v || v === TRANSPARENT ? TRANSPARENT : v;
   let preset = false;
   for (const b of group.querySelectorAll<HTMLButtonElement>('.swatch[data-value]')) {
-    const on = b.dataset.value === (none ? TRANSPARENT : v);
+    const on = b.dataset.value === current;
     preset ||= on;
     b.setAttribute('aria-pressed', String(on));
   }
+  if (!preset && HEX_COLOR.test(v)) customColour = v;
+  const custom = group.querySelector<HTMLButtonElement>('.swatch.custom');
+  if (custom) {
+    custom.hidden = !customColour;
+    if (customColour) {
+      custom.style.background = customColour;
+      custom.classList.toggle('light', isLight(customColour));
+      custom.setAttribute('aria-label', `Color personalizado ${customColour}`);
+      custom.title = `Color personalizado ${customColour}`;
+    }
+    custom.setAttribute('aria-pressed', String(!preset && customColour === v));
+  }
   const picker = group.querySelector<HTMLInputElement>('input[type="color"]');
-  const hex = group.querySelector<HTMLInputElement>('input[type="text"]');
-  if (picker) {
-    if (HEX_COLOR.test(v)) picker.value = v;
-    picker.classList.toggle('current', !preset && HEX_COLOR.test(v));
-  }
-  if (hex && hex !== document.activeElement) {
-    hex.value = HEX_COLOR.test(v) ? v : '';
-    hex.placeholder = none ? 'Transparente' : '';
-  }
+  if (picker && HEX_COLOR.test(v)) picker.value = v;
 }
 
 /** Stroke width as drawn lines; the exact value stays one field away. */
