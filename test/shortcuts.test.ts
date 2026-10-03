@@ -38,6 +38,14 @@ describe('keyboard shortcuts (RULE-100)', () => {
     expect(commandFor(key('Delete'), true)).toBeNull();
   });
 
+  it('leaves keys inside a popover menu to the menu', () => {
+    const menu = document.createElement('div');
+    menu.setAttribute('popover', '');
+    const item = menu.appendChild(document.createElement('button'));
+    expect(commandFor(key('Escape', { target: item }))).toBeNull();
+    expect(commandFor(key('Escape'))).not.toBeNull();
+  });
+
   it('keeps Ctrl shortcuts on non-text controls ; arrows go to form controls, Delete on a button still deletes', () => {
     const range = Object.assign(document.createElement('input'), { type: 'range' });
     expect(commandFor(key('z', { ctrlKey: true, target: range }))).toBe('undo');

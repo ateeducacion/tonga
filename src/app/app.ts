@@ -1,5 +1,5 @@
 // Wires the UI to the editor: tools, dialogs, shortcuts, zoom, import/export, autosave.
-import { Editor } from '../canvas/editor';
+import { Editor, type ShapeKind } from '../canvas/editor';
 import type { CatalogAsset } from '../assets/catalog';
 import { resolveSource, resolveToDataUrl } from '../assets/sources';
 import { APP_BUILD, APP_VERSION } from '../config';
@@ -14,6 +14,7 @@ import { renderInspector } from '../ui/inspector';
 import { renderLayers } from '../ui/layers';
 import { ContextMenu, type MenuEntry } from '../ui/context-menu';
 import { Library } from '../ui/library';
+import { setupShapesMenu } from '../ui/shapes-menu';
 import { setupTabs } from '../ui/tabs';
 import { commandFor, type Command } from '../ui/shortcuts';
 
@@ -51,6 +52,7 @@ export class App {
       this.menu.open(e.clientX, e.clientY, this.menuEntries());
     }, { capture: true });
     this.bindActions();
+    setupShapesMenu();
     this.bindTools();
     this.bindDialogs();
     this.bindKeyboard();
@@ -274,7 +276,7 @@ export class App {
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-add]')) {
       b.addEventListener('click', () => {
         this.setTool('select');
-        const kind = b.dataset.add as 'text' | 'rect' | 'ellipse' | 'triangle' | 'line';
+        const kind = b.dataset.add as 'text' | ShapeKind;
         if (kind === 'text') this.editor.addText();
         else this.editor.addShape(kind);
         announce(`${b.getAttribute('aria-label')?.replace('Añadir ', '') ?? ''} añadido en el centro del lienzo`);

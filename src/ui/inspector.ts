@@ -153,7 +153,7 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
     parts.push(t);
   } else if (shape) {
     const s = h('div', { class: 'inspector' });
-    if (info.type !== 'line' && info.type !== 'path') s.append(colour('Relleno', 'fill', (c) => editor.setProps({ fill: c }, key('fill'))));
+    if (info.type !== 'line' && (info.type !== 'path' || info.fill)) s.append(colour('Relleno', 'fill', (c) => editor.setProps({ fill: c }, key('fill'))));
     s.append(colour('Trazo', 'stroke', (c) => editor.setProps({ stroke: c }, key('stroke'))), num('Grosor del trazo', 'strokeWidth', { min: 0, max: 100 }));
     bind(s, 'strokeWidth', (v) => Number(v) >= 0 && editor.setProps({ strokeWidth: Number(v) }, key('strokeWidth')));
     parts.push(s);

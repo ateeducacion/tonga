@@ -1,7 +1,7 @@
 // The interactive editor: a Fabric canvas plus Tonga's document rules (ids, names, lock,
 // background, snapshot history). The UI talks to this class only.
 import {
-  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, Group, Line, PencilBrush, Point, Rect, Textbox, Triangle, util,
+  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, Group, Line, Path, PencilBrush, Point, Rect, Textbox, Triangle, util,
 } from 'fabric';
 import { History } from '../history/history';
 import { LAYER_LABEL } from '../i18n/es';
@@ -9,9 +9,10 @@ import type { Background, Layer, LayerType, Project } from '../project/schema';
 import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
+import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
 import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, type ImageAdjustments, type ImageCrop } from './image';
 
-export type ShapeKind = 'rect' | 'ellipse' | 'triangle' | 'line';
+export type { ShapeKind } from './shapes';
 export type AlignEdge = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
 
 export interface LayerInfo {
@@ -319,18 +320,17 @@ export class Editor {
   // ---- Creating objects -------------------------------------------------------------------
 
   /** Gives a new object an id and the next free automatic name ("Texto 3"). */
-  private identify(obj: FabricObject, type: LayerType, name?: string): void {
+  private identify(obj: FabricObject, type: LayerType, name?: string, label = LAYER_LABEL[type]): void {
     if (name?.trim()) {
       obj.set({ id: newId(), name: name.trim().slice(0, 200) });
       return;
     }
-    const label = LAYER_LABEL[type];
     const used = this.canvas.getObjects().map((o) => o.name ?? '').map((n) => (n.startsWith(`${label} `) ? Number(n.slice(label.length + 1)) : 0));
     obj.set({ id: newId(), name: `${label} ${Math.max(0, ...used.filter(Number.isFinite)) + 1}` });
   }
 
-  private place(obj: FabricObject, type: LayerType, name?: string): void {
-    this.identify(obj, type, name);
+  private place(obj: FabricObject, type: LayerType, name?: string, label?: string): void {
+    this.identify(obj, type, name, label);
     // RULE-007: new objects start at the centre of the canvas.
     if (obj.left === 0 && obj.top === 0) obj.set({ left: this.width / 2, top: this.height / 2 });
     obj.setCoords();
@@ -368,11 +368,22 @@ export class Editor {
   addShape(kind: ShapeKind): void {
     const u = this.unit();
     const style = { fill: DEFAULT_FILL, stroke: DEFAULT_STROKE, strokeWidth: 2, strokeUniform: true };
+    // kind is a ShapeKind, so it is always in the catalogue.
+    const shape = SHAPES.find((x) => x.kind === kind) as ShapeDef;
     if (kind === 'rect') this.place(new Rect({ width: u, height: u, ...style }), 'rect');
-    else if (kind === 'ellipse') this.place(new Ellipse({ rx: u / 2, ry: u / 2, ...style }), 'ellipse');
+    else if (kind === 'roundRect') this.place(new Rect({ width: u, height: u * 0.7, rx: u / 8, ry: u / 8, ...style }), 'rect', undefined, shape.label);
+    else if (kind === 'ellipse') this.place(new Ellipse({ rx: u / 2, ry: u / 3, ...style }), 'ellipse');
+    else if (kind === 'circle') this.place(new Ellipse({ rx: u / 2, ry: u / 2, ...style }), 'ellipse', undefined, shape.label);
     else if (kind === 'triangle') this.place(new Triangle({ width: u, height: u, ...style }), 'triangle');
-    else this.place(new Line([-u / 2, 0, u / 2, 0], { stroke: DEFAULT_STROKE, strokeWidth: 4, strokeUniform: true }), 'line');
+    else if (kind === 'line') this.place(new Line([-u / 2, 0, u / 2, 0], { stroke: DEFAULT_STROKE, strokeWidth: 4, strokeUniform: true }), 'line');
+    else {
+      // A closed path with a fill: the inspector offers its fill colour like any other shape.
+      const path = new Path(shape.d, { ...style, scaleX: u / 100, scaleY: u / 100 });
+      path.set({ left: this.width / 2, top: this.height / 2 });
+      this.place(path, 'path', undefined, shape.label);
+    }
   }
+
 
   /** Adds an image from a canonical source, scaled down to fit inside the canvas. */
   async addImage(canonical: string, name?: string): Promise<void> {
