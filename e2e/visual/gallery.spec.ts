@@ -21,9 +21,9 @@ for (const [name, [width, height]] of Object.entries(VIEWPORTS)) {
     await page.locator('#library-grid [role="option"]').first().dblclick();
     await page.getByRole('button', { name: 'Añadir texto' }).click();
     const phone = name === 'phone';
-    if (phone) await page.getByRole('button', { name: 'Mostrar propiedades y capas' }).click();
+    if (phone) await page.getByRole('tab', { name: 'Propiedades' }).click();
     await page.locator('#inspector textarea').fill('El cuervo canario');
-    if (phone) await page.getByRole('button', { name: 'Cerrar panel' }).click();
+    if (phone) await page.getByRole('button', { name: 'Ocultar panel' }).click();
     await page.waitForTimeout(300);
     await page.screenshot({ path: `docs/screenshots/${name}-3-editor.png` });
     await page.emulateMedia({ colorScheme: 'dark' });

@@ -44,7 +44,7 @@ test('phone layout with the drawer open, dark theme', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await newDrawing(page);
   await addShape(page, 'rectángulo');
-  await page.getByRole('button', { name: 'Mostrar propiedades y capas' }).click();
+  await page.getByRole('tab', { name: 'Propiedades' }).click();
   expect(await audit(page)).toEqual([]);
 });
 

@@ -203,15 +203,30 @@ test('recovers an autosaved drawing after a reload, only when asked', async ({ p
   await expect(layers(page)).toHaveText(['Elipse 1']);
 });
 
-test('shows the properties panel as a drawer on a phone', async ({ page }) => {
+test('on a phone the panel tabs are always on screen and unfold the panel', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await newDrawing(page);
   await page.getByRole('button', { name: 'Añadir texto' }).click();
-  await expect(page.locator('#sidepanel')).toBeHidden();
-  await page.getByRole('button', { name: 'Mostrar propiedades y capas' }).click();
+  const props = page.getByRole('tab', { name: 'Propiedades' });
+  const layersTab = page.getByRole('tab', { name: /Capas/ });
+  await expect(props).toBeInViewport();
+  await expect(layersTab).toBeInViewport();
+  await expect(inspector(page)).toBeHidden(); // folded: only the tabs
+
+  await props.click();
   await expect(inspector(page).getByLabel('Texto', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Cerrar panel' }).click();
-  await expect(page.locator('#sidepanel')).toBeHidden();
+  await layersTab.click(); // another tab switches, the panel stays open
+  await expect(layers(page)).toHaveText(['Texto 1']);
+  await layersTab.click(); // the open tab folds it
+  await expect(layers(page).first()).toBeHidden();
+  await expect(layersTab).toBeInViewport();
+
+  await props.click();
+  await page.getByRole('button', { name: 'Ocultar panel' }).click();
+  await expect(inspector(page)).toBeHidden();
+  await props.click();
+  await page.keyboard.press('Escape');
+  await expect(inspector(page)).toBeHidden();
   await expect(page.getByRole('button', { name: 'Exportar' })).toBeInViewport();
 });
 
@@ -236,7 +251,7 @@ test('phone: the top bar fits, project actions are in «Más acciones», the pan
   await expect(more.getByRole('button', { name: 'Nuevo' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(more).toBeHidden();
-  await page.getByRole('button', { name: 'Mostrar propiedades y capas' }).click();
+  await page.getByRole('tab', { name: 'Propiedades' }).click();
   await expect(page.locator('#inspector').getByLabel('Texto', { exact: true })).toBeVisible();
   const panel = (await page.locator('#sidepanel').boundingBox())!;
   const tools = (await page.locator('.tools').boundingBox())!;

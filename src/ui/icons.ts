@@ -58,7 +58,6 @@ export const ICONS = {
   x: '<path d="M18 6 6 18"/> <path d="m6 6 12 12"/>',
   info: '<circle cx="12" cy="12" r="10"/> <path d="M12 16v-4"/> <path d="M12 8h.01"/>',
   search: '<path d="m21 21-4.34-4.34"/> <circle cx="11" cy="11" r="8"/>',
-  panelRight: '<rect width="18" height="18" x="3" y="3" rx="2"/> <path d="M15 3v18"/>',
   plus: '<path d="M5 12h14"/> <path d="M12 5v14"/>',
   clipboardPaste: '<path d="M11 14h10"/> <path d="M16 4h2a2 2 0 0 1 2 2v1.344"/> <path d="m17 18 4-4-4-4"/> <path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113"/> <rect x="8" y="2" width="8" height="4" rx="1"/>',
   upload: '<path d="M12 3v12"/> <path d="m17 8-5-5-5 5"/> <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
