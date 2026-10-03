@@ -216,6 +216,38 @@ test('shows the properties panel as a drawer on a phone', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Exportar' })).toBeInViewport();
 });
 
+test('phone: the top bar fits, project actions are in «Más acciones», the panel covers neither canvas nor tool bar', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await newDrawing(page);
+  await expect(page.getByRole('button', { name: 'Exportar' })).toBeInViewport({ ratio: 1 });
+  const zoom = (await page.locator('.zoom-value').boundingBox())!;
+  expect(zoom.height).toBeLessThanOrEqual(40); // «30 %» on one line
+
+  await page.getByRole('button', { name: 'Más acciones' }).click();
+  const more = page.getByRole('group', { name: 'Más acciones' });
+  await expect(more.getByRole('button', { name: 'Guardar' })).toBeVisible();
+  await more.getByRole('button', { name: 'Ayuda y atajos' }).click();
+  await expect(more).toBeHidden();
+  await expect(page.getByRole('dialog', { name: /Ayuda/ })).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  // Escape closes the menu and leaves the selection alone.
+  await page.getByRole('button', { name: 'Más acciones' }).click();
+  await expect(more.getByRole('button', { name: 'Nuevo' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(more).toBeHidden();
+  await page.getByRole('button', { name: 'Mostrar propiedades y capas' }).click();
+  await expect(page.locator('#inspector').getByLabel('Texto', { exact: true })).toBeVisible();
+  const panel = (await page.locator('#sidepanel').boundingBox())!;
+  const tools = (await page.locator('.tools').boundingBox())!;
+  const stage = (await page.locator('#workspace').boundingBox())!;
+  expect(panel.y + panel.height).toBeLessThanOrEqual(tools.y + 1);
+  expect(stage.y + stage.height).toBeLessThanOrEqual(panel.y + 1);
+  await addShape(page, 'estrella'); // the tool bar is still usable with the panel open
+  await expect(page.locator('#sidepanel')).toBeVisible();
+});
+
 test('status messages never cover the phone tool bar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await newDrawing(page);

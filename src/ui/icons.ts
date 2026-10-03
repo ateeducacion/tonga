@@ -39,6 +39,7 @@ export const ICONS = {
   textAlignStart: '<path d="M21 5H3"/> <path d="M15 12H3"/> <path d="M17 19H3"/>',
   textAlignCenter: '<path d="M21 5H3"/> <path d="M17 12H7"/> <path d="M19 19H5"/>',
   textAlignEnd: '<path d="M21 5H3"/> <path d="M21 12H9"/> <path d="M21 19H7"/>',
+  ellipsis: '<circle cx="12" cy="12" r="1"/> <circle cx="19" cy="12" r="1"/> <circle cx="5" cy="12" r="1"/>',
   minus: '<path d="M5 12h14"/>',
   arrowUp: '<path d="m5 12 7-7 7 7"/> <path d="M12 19V5"/>',
   arrowDown: '<path d="M12 5v14"/> <path d="m19 12-7 7-7-7"/>',

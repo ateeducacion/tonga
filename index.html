@@ -59,6 +59,15 @@
         <button type="button" class="btn icon-only" data-action="help" data-icon="circleHelp" aria-label="Ayuda y atajos" title="Ayuda"></button>
         <button type="button" class="btn icon-only" data-action="about" data-icon="info" aria-label="Información, licencias y aviso legal" title="Información"></button>
         <button type="button" class="btn primary" data-action="export" data-icon="download"><span class="label">Exportar</span></button>
+        <button type="button" class="btn icon-only more-toggle" popovertarget="more-menu" data-icon="ellipsis" aria-label="Más acciones" title="Más acciones"></button>
+        <div id="more-menu" class="more-menu" popover role="group" aria-label="Más acciones">
+          <button type="button" class="menu-item" data-action="new" data-icon="filePlus">Nuevo</button>
+          <button type="button" class="menu-item" data-action="open" data-icon="folderOpen">Abrir</button>
+          <button type="button" class="menu-item" data-action="save" data-icon="save">Guardar</button>
+          <button type="button" class="menu-item" data-action="theme" data-icon="sunMoon" aria-pressed="false">Tema claro u oscuro</button>
+          <button type="button" class="menu-item" data-action="help" data-icon="circleHelp">Ayuda y atajos</button>
+          <button type="button" class="menu-item" data-action="about" data-icon="info">Información y licencias</button>
+        </div>
       </nav>
     </header>
 

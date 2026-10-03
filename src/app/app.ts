@@ -344,6 +344,15 @@ export class App {
       library: () => this.library.open(),
       panel: () => this.togglePanel(),
     };
+    // On phones the project actions live in the «Más acciones» menu: it closes once one is chosen.
+    const more = byId('more-menu');
+    more.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('[data-action]')) more.hidePopover();
+    });
+    // Focus inside the menu, so its keys (Escape) are not taken as canvas shortcuts.
+    more.addEventListener('toggle', (e) => {
+      if ((e as ToggleEvent).newState === 'open') more.querySelector<HTMLElement>('button')?.focus();
+    });
     document.addEventListener('click', (e) => {
       const el = (e.target as Element).closest<HTMLElement>('[data-action]');
       const fn = el && actions[el.dataset.action ?? ''];
@@ -559,7 +568,7 @@ export class App {
   }
 
   private syncThemeButton(): void {
-    document.querySelector('[data-action="theme"]')?.setAttribute('aria-pressed', String(!!getPref('color-scheme')));
+    for (const b of document.querySelectorAll('[data-action="theme"]')) b.setAttribute('aria-pressed', String(!!getPref('color-scheme')));
   }
 
   // ---- Errors -----------------------------------------------------------------------------
