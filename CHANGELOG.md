@@ -4,6 +4,8 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-10-03
+
 ### Cambiado
 
 - Panel de propiedades más sencillo: primero lo que más se cambia (texto o colores) y la posición, el tamaño, la alineación y el recorte plegados.
