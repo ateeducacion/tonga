@@ -300,8 +300,15 @@ test('layers are renamed in place and reordered by dragging the grip', async ({ 
 
   // Double click renames; Escape cancels; F2 renames by keyboard.
   await layers(page).first().dblclick();
-  await page.getByLabel('Nombre de Elipse 1').fill('Sol');
+  await page.getByLabel('Nombre de Elipse 1').fill('Un sol muy grande que brilla sobre las montañas');
   await page.getByLabel('Nombre de Elipse 1').press('Enter');
+  // A long name truncates: the lock stays inside the panel.
+  const panel = (await page.locator('#panel-layers').boundingBox())!;
+  const lock = (await page.getByRole('button', { name: /^Bloquear Un sol/ }).boundingBox())!;
+  expect(lock.x + lock.width).toBeLessThanOrEqual(panel.x + panel.width);
+  await layers(page).first().press('F2');
+  await page.getByLabel(/^Nombre de Un sol/).fill('Sol');
+  await page.getByLabel(/^Nombre de Un sol/).press('Enter');
   await expect(layers(page)).toHaveText(['Sol', 'Rectángulo 1']);
   await layers(page).nth(1).press('F2');
   await page.getByLabel('Nombre de Rectángulo 1').fill('Nada');
