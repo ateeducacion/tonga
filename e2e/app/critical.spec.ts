@@ -362,6 +362,21 @@ test('the Formas menu adds predefined shapes with a fill, and closes with Escape
   await expect(inspector(page).getByLabel('Relleno (hexadecimal)')).toBeVisible();
 });
 
+test('only the selected layer shows the up and down arrows; every layer shows its type', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(page.locator('#layers .layer-type')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: /^Subir / })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Bajar Texto 1' })).toBeVisible();
+  await layers(page).nth(1).click();
+  await expect(page.getByRole('button', { name: 'Subir Rectángulo 1' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Bajar Texto 1' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Subir Rectángulo 1' }).click();
+  await expect(layers(page)).toHaveText(['Rectángulo 1', 'Texto 1']);
+});
+
 test('layers are renamed in place and reordered by dragging the grip', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'rectángulo');

@@ -4,7 +4,12 @@
 import type { Editor } from '../canvas/editor';
 import { LAYER_LABEL } from '../i18n/es';
 import { announce, byId, h, iconButton } from './dom';
-import { icon } from './icons';
+import type { LayerType } from '../project/schema';
+import { icon, type IconName } from './icons';
+
+const TYPE_ICON: Record<LayerType, IconName> = {
+  image: 'image', text: 'type', rect: 'square', ellipse: 'circle', triangle: 'triangle', line: 'slash', path: 'shapes', group: 'group',
+};
 
 let dragged: string | null = null;
 
@@ -105,7 +110,10 @@ export function renderLayers(editor: Editor): void {
         const slot = dropSlot(row, i, e.clientY);
         editor.moveLayer(dragged, slot > from ? slot - 1 : slot);
       });
-      row.append(grip, select, up, down, eye, lock);
+      const kind = h('span', { class: 'layer-type', 'aria-hidden': 'true' });
+      kind.append(icon(TYPE_ICON[l.type]));
+      // Only the selected layer shows the arrows: the other rows stay short and readable.
+      row.append(grip, kind, select, ...(l.selected ? [up, down] : []), eye, lock);
       return row;
     }),
   );

@@ -11,6 +11,7 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 - Grosor del trazo con cinco botones que dibujan la línea (ninguno, fino, medio, grueso, muy grueso), además del valor exacto.
 - Opacidad con deslizador. Los ajustes de imagen muestran el valor junto al nombre en lugar de una caja de número repetida.
 - Texto: tamaño con − y +, negrita y cursiva como botones y alineación con iconos.
+- Capas: cada capa muestra un icono de su tipo, y las flechas para subir y bajar solo aparecen en la capa seleccionada.
 
 ## [2.3.0] - 2026-10-03
 

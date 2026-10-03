@@ -760,6 +760,23 @@ h3 {
   text-align: left;
 }
 
+.layer-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  inline-size: 26px;
+  block-size: 26px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  background: var(--color-surface-2);
+}
+
+.layer-type svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
 .layer .layer-rename {
   flex: 1;
   min-width: 0;
