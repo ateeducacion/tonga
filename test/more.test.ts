@@ -99,6 +99,12 @@ describe('Editor (more operations)', () => {
     ed.setLocked(id('Elipse 1'), true);
     ed.moveLayer(id('Elipse 1'), 0);
     expect(names()).toEqual(['Rectángulo 1', 'Triángulo 1', 'Elipse 1']);
+    // Dropping a layer where it already is, or an unknown id, adds no undo step.
+    ed.moveLayer(id('Rectángulo 1'), 0);
+    ed.moveLayer('nope', 0);
+    expect(names()).toEqual(['Rectángulo 1', 'Triángulo 1', 'Elipse 1']);
+    await ed.undo(); // undoes the lock, the last real change
+    expect(ed.layers().find((l) => l.name === 'Elipse 1')?.locked).toBe(false);
   });
 
   it('switches free drawing on and off and fits the zoom to a box', async () => {
