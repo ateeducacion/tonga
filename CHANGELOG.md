@@ -4,6 +4,16 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-03
+
+### Añadido
+
+- Exportar a eXeLearning (`.elpx`): un proyecto con una página que contiene el dibujo en una diapositiva (iDevice «slide») editable en eXeLearning. Incluye `content.xml`, `content.dtd`, la captura `screenshot.png`, las imágenes y el estilo `base`. El lienzo se ajusta a los límites de la diapositiva, las capas ocultas no se exportan y los grupos con imágenes se desagrupan.
+
+### Corregido
+
+- El diálogo de exportar mostraba la escala, la calidad JPEG y el fondo transparente aunque el formato elegido (PDF) no los usara.
+
 ## [2.1.2] - 2026-10-03
 
 ### Añadido
