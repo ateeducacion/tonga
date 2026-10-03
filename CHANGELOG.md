@@ -4,16 +4,21 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-10-03
+
 ### Añadido
 
 - Menú contextual en el lienzo (botón derecho, tecla Menú o Mayús+F10): cortar, copiar, pegar, duplicar, orden de capas, agrupar o desagrupar, bloquear, seleccionar todo y borrar.
 - Cortar con Ctrl/⌘+X.
 
+### Corregido
+
+- El menú contextual aparecía y desaparecía al pulsar en el lienzo vacío, y sobre un objeto se mostraba también el menú del navegador.
+
 ### Cambiado
 
 - El asa de giro es redonda, y las asas de selección usan el color de Tonga con un tamaño cómodo para pantallas táctiles.
-
-- La versión que muestra la aplicación sale de la etiqueta de git (`v2.1.1` → «2.1.1»). Al publicar una etiqueta `v*` se vuelve a desplegar la web con esa versión, y la PWA ofrece actualizarse.
+- La versión que muestra la aplicación sale de la última etiqueta de git (`v2.1.2` → «2.1.2»); el build exacto solo aparece como texto emergente. Al publicar una etiqueta `v*` se vuelve a desplegar la web con esa versión, y la PWA ofrece actualizarse.
 
 ## [2.1.1] - 2026-10-03
 
