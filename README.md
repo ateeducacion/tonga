@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/ateeducacion/tonga/graph/badge.svg)](https://codecov.io/gh/ateeducacion/tonga)
 [![REUSE](https://img.shields.io/badge/REUSE-conforme-green)](docs/LICENSING.md)
 
-**Tonga** es una aplicación de dibujo para el aula que funciona en el navegador. Permite crear un lienzo, añadir textos, formas, dibujo libre e imágenes de una biblioteca de más de 1.600 ilustraciones educativas, y exportar el resultado a PNG, JPEG, SVG o PDF.
+**Tonga** es una aplicación de dibujo para el aula que funciona en el navegador. Permite crear un lienzo, añadir textos, formas, dibujo libre e imágenes de una biblioteca de más de 1.600 ilustraciones educativas, y exportar el resultado a PNG, JPEG, SVG, PDF o eXeLearning.
 
 **Demo:** <https://ateeducacion.github.io/tonga/>
 
@@ -19,7 +19,7 @@ Tonga es software estático: no tiene servidor, base de datos ni cuentas. **Tus 
 - Añadir tus propias imágenes (PNG, JPEG, WebP, SVG), recortarlas y ajustarlas: escala de grises, sepia, negativo, brillo, contraste, saturación y desenfoque.
 - Deshacer y rehacer, con atajos de teclado (ver *Ayuda* dentro de la aplicación).
 - Guardar el trabajo como proyecto `.tonga` para continuar otro día. Hay además un autoguardado en el navegador que se ofrece recuperar tras un cierre accidental.
-- Exportar a PNG, JPEG, SVG (vectorial y autocontenido) o PDF (A4).
+- Exportar a PNG, JPEG, SVG (vectorial y autocontenido), PDF (A4) o eXeLearning (`.elpx`, con el dibujo en una diapositiva editable).
 - Instalarla como aplicación (PWA) y usarla sin conexión una vez cargada.
 - Usarla con teclado y lector de pantalla: el panel *Capas* describe el dibujo y *Propiedades* permite editarlo sin ratón. Temas claro y oscuro.
 

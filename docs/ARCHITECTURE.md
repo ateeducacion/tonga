@@ -28,7 +28,7 @@ flowchart TD
 | Historial | `src/history/history.ts` | Snapshots del documento serializado, con una clave para agrupar interacciones continuas (arrastre, slider), y límites de 100 pasos y 20 MB. Ver [ADR 0007](adr/0007-snapshot-history.md). |
 | Biblioteca | `scripts/build-catalog.mjs`, `src/assets/catalog.ts`, `src/ui/library.ts` | `catalog.json` se genera en el build desde los `lista.txt`, con búsqueda sin acentos y miniaturas perezosas. |
 | Importar | `src/import/*` | Tipo detectado por los bytes, límites de tamaño, SVG saneado y SVG de Tonga 1 con su fondo. |
-| Exportar | `src/export/*` | Render fuera de pantalla a escala 1:1: PNG/JPEG con `toBlob`, SVG autocontenido y PDF con un escritor propio ([ADR 0006](adr/0006-own-pdf-writer.md)). |
+| Exportar | `src/export/*` | Render fuera de pantalla a escala 1:1: PNG/JPEG con `toBlob`, SVG autocontenido, PDF con un escritor propio ([ADR 0006](adr/0006-own-pdf-writer.md)) y `.elpx` de eXeLearning: una página con un iDevice «slide» cuya escena es el JSON de Fabric (editable en eXeLearning), más `content.dtd`, `screenshot.png` y el estilo `base` de `vendor/exelearning/`, empaquetados con un escritor ZIP propio (`zip.ts`, entradas sin comprimir). |
 | Persistencia | `src/persistence/store.ts`, `src/assets/sources.ts` | IndexedDB para las imágenes (`asset:<sha256>`, guardadas como `ArrayBuffer`) y el autoguardado; `localStorage` solo para el tema. |
 | Offline | `src/sw.js`, `vite.config.ts` | Service worker con precache del *shell* por versión y caché bajo demanda de la biblioteca ([ADR 0008](adr/0008-pwa.md)). |
 

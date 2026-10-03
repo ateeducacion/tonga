@@ -55,12 +55,16 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     target: 'es2022',
+    // The eXeLearning files are fetched and zipped as they are: never inline them as data: URLs.
+    assetsInlineLimit: (file) => (file.includes('/vendor/exelearning/') ? false : undefined),
   },
   test: {
     environment: 'jsdom',
     // Let jsdom decode <img> sources (with node-canvas), so image layers can be tested.
     environmentOptions: { jsdom: { resources: 'usable' } },
     include: ['test/**/*.test.ts'],
+    // Vitest empties CSS by default, even ?raw imports; the eXeLearning theme must arrive intact.
+    css: { include: [/vendor\/exelearning\//] },
     coverage: {
       provider: 'v8',
       // Logic modules. The DOM wiring (src/app, src/ui widgets, main, storage) is covered by the
