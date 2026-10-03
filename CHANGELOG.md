@@ -4,12 +4,22 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-03
+
+### Añadido
+
+- Menú «Formas» en la barra de herramientas, agrupado como en eXeLearning: rectángulo, rectángulo redondeado, círculo, elipse, triángulo, rombo, pentágono, hexágono, estrella, paralelogramo, corazón y línea; flechas en las cuatro direcciones; bocadillo de diálogo y de pensamiento. Las formas nuevas tienen color de relleno y se guardan sin cambiar el formato `.tonga`.
+- Capas: cambiar el nombre en el propio panel (doble clic o F2; Intro guarda, Escape cancela) y reordenar arrastrando el asa que aparece con ratón.
+
 ### Cambiado
 
 - Actions: una etiqueta `v*` ya no repite CI ni redespliega Pages (ni Lighthouse); solo lanza Release, que ahora exige también los umbrales de cobertura y que la etiqueta coincida con `package.json`. La versión que muestra la app sale de `package.json` y el texto emergente muestra el commit («2.x.y+abc1234»).
+- La «Elipse» se crea ovalada, para distinguirla del nuevo «Círculo».
 
 ### Corregido
 
+- Las cajas de texto tenían el tirador de giro cuadrado en lugar de redondo.
+- En el panel de capas, un nombre largo empujaba el candado fuera del panel; ahora se recorta con «…».
 - PWA: una imagen de la biblioteca sustituida con el mismo nombre podía seguir saliendo de la caché para siempre. Ahora el catálogo lleva la revisión (hash del contenido) de cada imagen y miniatura, y la app las pide con `?v=<revisión>`; las URL sin revisión se piden a la red y la caché solo se usa sin conexión.
 
 ## [2.2.0] - 2026-10-03
