@@ -518,6 +518,18 @@ export class Editor {
     this.commit();
   }
 
+  /** Moves a layer to a position of the layers panel (0 = top-most). Locked layers stay put. */
+  moveLayer(id: string, index: number): void {
+    const obj = this.byId(id);
+    const count = this.canvas.getObjects().length;
+    if (!obj || obj.selectable === false) return;
+    const target = count - 1 - Math.max(0, Math.min(index, count - 1));
+    if (this.canvas.getObjects().indexOf(obj) === target) return;
+    this.canvas.moveObjectTo(obj, target);
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
   group(): void {
     const objs = this.selected();
     if (objs.length < 2) return;

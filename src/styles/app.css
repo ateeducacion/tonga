@@ -456,6 +456,8 @@ h3 {
   display: flex;
   align-items: center;
   gap: 2px;
+  /* A grid item never shrinks below its content: long names must truncate, not push the lock out. */
+  min-width: 0;
   border-radius: var(--radius-sm);
 }
 
@@ -476,6 +478,41 @@ h3 {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
+}
+
+.layer .layer-rename {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+}
+
+/* Dragging needs a mouse; touch and keyboard use the arrows. */
+.layer-grip {
+  display: none;
+  color: var(--color-muted);
+  cursor: grab;
+}
+
+@media (pointer: fine) {
+  .layer-grip {
+    display: inline-flex;
+  }
+}
+
+.layer-grip:not([draggable]) {
+  visibility: hidden;
+}
+
+.layer.dragging {
+  opacity: 0.5;
+}
+
+.layer.drop-before {
+  box-shadow: inset 0 2px 0 var(--color-accent);
+}
+
+.layer.drop-after {
+  box-shadow: inset 0 -2px 0 var(--color-accent);
 }
 
 .layer.hidden-layer .layer-name {
