@@ -31,6 +31,12 @@ export async function newDrawing(page: Page, preset = 'A4 horizontal'): Promise<
   await expect(dialog).toBeHidden();
 }
 
+/** Adds a shape from the «Formas» menu, e.g. addShape(page, 'rectángulo'). */
+export async function addShape(page: Page, shape: string, options: { timeout?: number } = {}): Promise<void> {
+  await page.getByRole('button', { name: 'Añadir forma' }).click(options);
+  await page.getByRole('group', { name: 'Formas' }).getByRole('button', { name: `Añadir ${shape}`, exact: true }).click();
+}
+
 export function layers(page: Page) {
   return page.locator('#layers .layer-name');
 }

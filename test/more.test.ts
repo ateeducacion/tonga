@@ -83,6 +83,22 @@ describe('Editor (more operations)', () => {
     expect(ed.layers().map((l) => l.name)).toEqual(['Triángulo 1', 'Montaña']);
   });
 
+  it('adds every predefined shape, named after it', async () => {
+    const { SHAPES } = await import('../src/canvas/shapes');
+    expect(new Set(SHAPES.map((x) => x.kind)).size).toBe(SHAPES.length);
+    const ed = await editor();
+    for (const s of SHAPES) ed.addShape(s.kind);
+    const layers = ed.layers().reverse();
+    expect(layers.map((l) => l.name)).toEqual(SHAPES.map((s) => `${s.label} 1`));
+    expect(layers.find((l) => l.name === 'Estrella 1')?.type).toBe('path');
+    expect(layers.find((l) => l.name === 'Círculo 1')?.type).toBe('ellipse');
+    // A path shape offers its fill colour and is saved as a Fabric Path.
+    ed.select([layers.find((l) => l.name === 'Estrella 1')?.id ?? '']);
+    expect(ed.inspect()).toMatchObject({ fill: expect.stringMatching(/^#/) });
+    const star = ed.toProject().layers.find((l) => l.name === 'Estrella 1');
+    expect(star?.object).toMatchObject({ type: 'Path' });
+  });
+
   it('moves a layer to a position of the layers panel, never a locked one', async () => {
     const ed = await editor();
     ed.addShape('rect');

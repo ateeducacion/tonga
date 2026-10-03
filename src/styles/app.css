@@ -442,6 +442,63 @@ h3 {
   font-size: var(--font-size-sm);
 }
 
+/* ---- Shapes menu ------------------------------------------------------------------------- */
+
+.shapes-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: var(--space-3);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+}
+
+.shapes-menu:popover-open {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.shapes-section + .shapes-section {
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-border);
+}
+
+.shapes-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+}
+
+.shapes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: var(--space-1);
+}
+
+.shapes-section:not(:first-child) .shapes-grid {
+  grid-template-columns: repeat(2, auto);
+}
+
+@media (max-width: 860px) {
+  .shapes-menu:popover-open {
+    flex-direction: column;
+  }
+
+  .shapes-section + .shapes-section {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .shapes-section:not(:first-child) .shapes-grid {
+    grid-template-columns: repeat(4, auto);
+  }
+}
+
 /* ---- Layers ------------------------------------------------------------------------------- */
 
 .layers {

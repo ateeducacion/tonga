@@ -1,7 +1,7 @@
 // Critical user flows of the rebuilt app (prompt §41, brief §5 behaviour contract).
 import { readFile, writeFile } from 'node:fs/promises';
 import type { Page } from '@playwright/test';
-import { expect, layers, newDrawing, test } from './fixtures';
+import { addShape, expect, layers, newDrawing, test } from './fixtures';
 
 const inspector = (page: Page) => page.locator('#inspector');
 
@@ -28,7 +28,7 @@ test('creates a drawing with text and a shape, edits them and undoes/redoes (RUL
 
   await page.getByRole('button', { name: 'Añadir texto' }).click();
   await inspector(page).getByLabel('Texto', { exact: true }).fill('Hola, clase');
-  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
+  await addShape(page, 'rectángulo');
   await expect(layers(page)).toHaveText(['Rectángulo 1', 'Texto 1']);
 
   // Colour via the accessible hex field, position, size and rotation via the inspector.
@@ -75,7 +75,7 @@ test('a background item from the library becomes the canvas background (RULE-112
 
 test('exports PNG, JPEG, SVG and PDF in the browser (RULE-108/101/114/022/086)', async ({ page }) => {
   await newDrawing(page, 'Cuadrado');
-  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await addShape(page, 'elipse');
   await page.getByRole('button', { name: 'Abrir la biblioteca de imágenes' }).click();
   await page.getByLabel('Buscar en la biblioteca').fill('cuervo volando');
   await expect(page.locator('#library-grid').getByRole('option')).toHaveCount(1);
@@ -106,7 +106,7 @@ test('exports PNG, JPEG, SVG and PDF in the browser (RULE-108/101/114/022/086)',
 
 test('exports an eXeLearning package with an editable Slide, the screenshot and the base theme', async ({ page }, info) => {
   await newDrawing(page, 'Cuadrado');
-  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await addShape(page, 'elipse');
   await page.getByRole('button', { name: 'Abrir la biblioteca de imágenes' }).click();
   await page.getByLabel('Buscar en la biblioteca').fill('cuervo volando');
   await page.locator('#library-grid').getByRole('option').first().dblclick();
@@ -137,7 +137,7 @@ test('exports an eXeLearning package with an editable Slide, the screenshot and 
 test('saves a .tonga project and opens it again (prompt §16)', async ({ page }) => {
   await newDrawing(page);
   await page.getByRole('button', { name: 'Añadir texto' }).click();
-  await page.getByRole('button', { name: 'Añadir triángulo' }).click();
+  await addShape(page, 'triángulo');
   const saved = await downloadFrom(page, () => page.getByRole('button', { name: 'Guardar' }).click());
   expect(saved.name).toMatch(/\.tonga$/);
   const project = JSON.parse(saved.bytes.toString('utf8'));
@@ -190,7 +190,7 @@ test('works with the keyboard only: add, move, delete, undo (RULE-100)', async (
 
 test('recovers an autosaved drawing after a reload, only when asked', async ({ page }) => {
   await newDrawing(page);
-  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await addShape(page, 'elipse');
   await page.waitForTimeout(2000); // autosave debounce
   await page.reload();
   const ask = page.getByRole('dialog', { name: 'Hay un dibujo sin guardar' });
@@ -215,7 +215,7 @@ test('status messages never cover the phone tool bar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await newDrawing(page);
   await expect(page.locator('.toast').first()).toBeVisible(); // «Nuevo dibujo…» is still on screen
-  await page.getByRole('button', { name: 'Añadir rectángulo' }).click({ timeout: 2000 });
+  await addShape(page, 'rectángulo', { timeout: 2000 });
   await expect(layers(page)).toHaveCount(1);
 });
 
@@ -274,7 +274,7 @@ test('Info shows the source link, legal notices and a licences panel; nothing is
 test('the side panel shows Propiedades or Capas as tabs', async ({ page }) => {
   await newDrawing(page);
   await page.getByRole('button', { name: 'Añadir texto' }).click();
-  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await addShape(page, 'elipse');
   const props = page.getByRole('tab', { name: 'Propiedades' });
   const capas = page.getByRole('tab', { name: 'Capas 2' });
   await expect(props).toHaveAttribute('aria-selected', 'true');
@@ -291,10 +291,28 @@ test('the side panel shows Propiedades or Capas as tabs', async ({ page }) => {
   await expect(props).toHaveAttribute('aria-selected', 'true');
 });
 
+test('the Formas menu adds predefined shapes with a fill, and closes with Escape', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Añadir forma' }).click();
+  const menu = page.getByRole('group', { name: 'Formas' });
+  await expect(menu.getByRole('heading')).toHaveText(['Formas', 'Flechas', 'Bocadillos']);
+  await expect(menu.getByRole('button', { name: 'Añadir rectángulo', exact: true })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+
+  await addShape(page, 'estrella');
+  await expect(menu).toBeHidden();
+  await addShape(page, 'bocadillo');
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Bocadillo 1', 'Estrella 1']);
+  await page.getByRole('tab', { name: 'Propiedades' }).click();
+  await expect(inspector(page).getByLabel('Relleno (hexadecimal)')).toBeVisible();
+});
+
 test('layers are renamed in place and reordered by dragging the grip', async ({ page }) => {
   await newDrawing(page);
-  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
-  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await addShape(page, 'rectángulo');
+  await addShape(page, 'elipse');
   await page.getByRole('tab', { name: /Capas/ }).click();
   await expect(layers(page)).toHaveText(['Elipse 1', 'Rectángulo 1']);
 
@@ -325,8 +343,8 @@ test('layers are renamed in place and reordered by dragging the grip', async ({ 
 
 test('right-click menu on the canvas; also with the Menu key (keyboard)', async ({ page }) => {
   await newDrawing(page);
-  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
-  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await addShape(page, 'rectángulo');
+  await addShape(page, 'elipse');
   await page.getByRole('tab', { name: /Capas/ }).click();
   await expect(layers(page)).toHaveText(['Elipse 1', 'Rectángulo 1']);
 
@@ -381,7 +399,7 @@ test('a real right click keeps our menu open and never shows the browser menu', 
   await expect(menu).toBeHidden();
 
   // On an object: only our menu.
-  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
+  await addShape(page, 'rectángulo');
   await rightClick(box.x + box.width / 2, box.y + box.height / 2);
   await expect(menu).toBeVisible();
   await expect(menu.getByRole('menuitem', { name: /Borrar/ })).toBeEnabled();

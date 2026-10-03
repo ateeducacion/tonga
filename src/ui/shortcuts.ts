@@ -26,6 +26,8 @@ export function isTyping(target: EventTarget | null): boolean {
 
 export function commandFor(e: KeyLike, editingText = false): Command | null {
   if (editingText || isTyping(e.target) || e.altKey) return null;
+  // Keys inside a menu (a popover) belong to it: Escape must close it, not deselect.
+  if (e.target instanceof Element && e.target.closest('[popover]')) return null;
   const mod = e.ctrlKey || e.metaKey;
   const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   if (mod) {
