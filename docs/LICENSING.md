@@ -11,6 +11,7 @@ Este documento separa **software**, **contenidos gráficos**, **iconos**, **fuen
 | Iconos de la interfaz (`src/ui/icons.ts`) | ISC (Lucide); algunos MIT (Feather) | Licencia de `lucide-static` 1.50.0 | Atribuido en `THIRD_PARTY_NOTICES.md` |
 | Logo e iconos PWA (`public/favicon.svg`, `public/icons/`) | Igual que el código | Dibujados para Tonga 2.0 | — |
 | Fabric.js 7.4.0 (en el bundle) | MIT | `node_modules/fabric/LICENSE` | Atribuido en `THIRD_PARTY_NOTICES.md` |
+| Ficheros de eXeLearning (`vendor/exelearning/`) | `content.dtd`: AGPL-3.0-or-later; estilo `base`: CC BY-SA 4.0 | `LICENSE` y `config.xml` del estilo en el repositorio de eXeLearning | Copiados sin cambios para la exportación `.elpx`; atribuidos en `THIRD_PARTY_NOTICES.md` |
 | Fuentes | — | Tonga 2.0 usa fuentes del sistema; no distribuye ninguna | — |
 | Sonidos | — | Tonga 2.0 no distribuye sonidos (el `button-22.mp3` de Tonga 1 queda solo en `upstream`) | — |
 | Documentación (`*.md`, `docs/`, `analysis/`) | Igual que el código | No hay una licencia de documentación declarada | **Duda** |

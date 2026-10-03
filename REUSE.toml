@@ -35,6 +35,21 @@ precedence = "override"
 SPDX-FileCopyrightText = ["2019-2026 Gobierno de Canarias", "2026 Lucide Icons and Contributors", "2013-present Cole Bemis", "2026 GitHub Inc."]
 SPDX-License-Identifier = "AGPL-3.0-or-later AND ISC AND MIT"
 
+# Files copied verbatim from eXeLearning (commit 68d6cd53d) for the .elpx export (THIRD_PARTY_NOTICES.md).
+[[annotations]]
+path = ["vendor/exelearning/content.dtd"]
+precedence = "override"
+SPDX-FileCopyrightText = "eXeLearning contributors"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+# The "base" style: Ignacio Gros for eXeLearning; iDevice icons by Francisco Javier Pulido Cuadrado.
+# img/licenses.gif holds Creative Commons badges (trademarks used under the CC policy).
+[[annotations]]
+path = ["vendor/exelearning/theme/**"]
+precedence = "override"
+SPDX-FileCopyrightText = ["Ignacio Gros for eXeLearning", "Francisco Javier Pulido Cuadrado"]
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
 # Third-party agent skills, installed verbatim with `gh skill add` (.agents/upstream-skills.txt).
 [[annotations]]
 path = [".agents/skills/github-actions-hardening/**", ".agents/skills/test-gap-audit/**", ".claude/skills/github-actions-hardening/**", ".claude/skills/test-gap-audit/**"]
