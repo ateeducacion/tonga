@@ -4,6 +4,10 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Cambiado
+
+- Actions: una etiqueta `v*` ya no repite CI ni redespliega Pages (ni Lighthouse); solo lanza Release, que ahora exige también los umbrales de cobertura y que la etiqueta coincida con `package.json`. La versión que muestra la app sale de `package.json` y el texto emergente muestra el commit («2.x.y+abc1234»).
+
 ## [2.2.0] - 2026-10-03
 
 ### Añadido

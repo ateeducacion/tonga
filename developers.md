@@ -56,14 +56,13 @@ El `Makefile` repite lo mismo con atajos: `make up`, `make build`, `make test`, 
 
 ## Publicar una versión
 
-1. Pasa las entradas de `[Unreleased]` de `CHANGELOG.md` a la nueva versión y fusiona en `main`.
+1. Pasa las entradas de `[Unreleased]` de `CHANGELOG.md` a la nueva versión, sube `version` en `package.json` (`npm version 2.x.y --no-git-tag-version`) y fusiona en `main`. Al fusionar, CI y Pages ya publican la web con el número nuevo.
 2. Etiqueta ese commit de `main`: `git tag v2.x.y && git push origin v2.x.y`.
 
-Con la etiqueta:
+Con la etiqueta, `release.yml` comprueba que coincide con `package.json`, repite el gate completo de CI (con los umbrales de cobertura) y crea la release con el ZIP de `dist/` y el SBOM. La etiqueta no vuelve a lanzar CI ni Pages.
 
-- `release.yml` crea la release con el ZIP de `dist/` y el SBOM.
-- CI y Pages vuelven a desplegar la web. Pages solo publica commits que están en `main`.
-- La versión que muestra la app (*Información*) es la última etiqueta `v*` («2.x.y»). El build exacto («2.x.y-N-gabc1234», de `git describe`) solo aparece como texto emergente sobre el número, para reportar fallos. `version` de `package.json` solo se usa si no hay historial de git.
+- La versión que muestra la app (*Información*) es `version` de `package.json` («2.x.y»). El build exacto («2.x.y+abc1234», con el commit) solo aparece como texto emergente sobre el número, para reportar fallos.
+- Flujo de Actions: un pull request lanza CI; un push a `main` lanza CI y, si pasa, Pages y después Lighthouse; una etiqueta `v*` lanza solo Release. Un push nuevo a la misma rama o PR cancela el CI que estuviera en marcha; un despliegue de Pages en curso nunca se corta, pero el siguiente sustituye a los que esperan.
 - La PWA se actualiza sola: el service worker tiene un nombre de caché derivado del contenido del build, así que cualquier versión nueva, incluido un cambio de número, se instala, borra la caché anterior y ofrece «Actualizar» sin recargar a la fuerza.
 
 ## Vista previa al compartir (WhatsApp, Telegram, redes)

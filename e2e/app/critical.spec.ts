@@ -257,7 +257,10 @@ test('Info shows the source link, legal notices and a licences panel; nothing is
   await expect(page.locator('body > footer')).toHaveCount(0);
   await page.getByRole('button', { name: 'Información, licencias y aviso legal' }).click();
   const about = page.getByRole('dialog', { name: 'Acerca de Tonga' });
-  await expect(about.getByText(/Versión \d+\.\d+\.\d+/)).toBeVisible();
+  // The release commit bumps package.json, so main shows the new number before the tag exists.
+  const { version } = JSON.parse(await readFile('package.json', 'utf8')) as { version: string };
+  await expect(page.locator('#about-version')).toHaveText(version);
+  await expect(page.locator('#about-version')).toHaveAttribute('title', new RegExp(`^Compilación ${version.replaceAll('.', '\\.')}\\+[0-9a-f]{7,}$`));
   await expect(about.getByRole('link', { name: /Código fuente en GitHub/ })).toHaveAttribute('href', 'https://github.com/ateeducacion/tonga');
   await expect(about.getByRole('link', { name: /Aviso legal/ })).toHaveAttribute('href', /gobiernodecanarias\.org/);
   await expect(about.getByRole('link', { name: /Política de privacidad/ })).toHaveAttribute('rel', 'noopener noreferrer');

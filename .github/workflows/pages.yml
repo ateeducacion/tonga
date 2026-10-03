@@ -5,12 +5,13 @@ on:
   workflow_run:
     workflows: [CI]
     types: [completed]
-    branches: [main, 'v*'] # tags v* run CI too: a release redeploys with its version
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# A deployment in progress is never cut; a newer one waits and replaces any older pending run.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -24,7 +25,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-          fetch-depth: 0 # tags, for the version shown in the app
+          fetch-depth: 0 # origin/main, for the check below
           persist-credentials: false
 
       - name: Deploy only commits that are on main

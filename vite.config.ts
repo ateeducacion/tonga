@@ -27,20 +27,20 @@ function serviceWorker(): Plugin {
 process.env.VITE_SITE_URL ??= 'https://ateeducacion.github.io/tonga/';
 
 /**
- * The version shown in the app is the latest v* git tag ("2.1.1"), so tagging is enough.
- * The exact build ("2.1.1-3-gabc1234", from git describe) is only a tooltip, for bug reports.
- * TONGA_VERSION overrides both (release CI); package.json is the fallback without git history.
+ * The version shown in the app is package.json's: the release commit bumps it, so main is
+ * deployed with the new number before the tag exists and tagging needs no redeploy.
+ * The exact build ("2.2.0+abc1234", the commit) is only a tooltip, for bug reports.
  */
-function describe(...args: string[]): string | null {
+function commit(): string | null {
   try {
-    return execFileSync('git', ['describe', '--tags', '--match', 'v[0-9]*', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().replace(/^v/, '');
+    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
   } catch {
     return null;
   }
 }
-const fallback = (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
-const version = process.env.TONGA_VERSION?.replace(/^v/, '') ?? describe('--abbrev=0') ?? fallback;
-const build = process.env.TONGA_VERSION?.replace(/^v/, '') ?? describe() ?? fallback;
+const version = (JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }).version;
+const sha = commit();
+const build = sha ? `${version}+${sha}` : version;
 
 // dist/ is fully static; scripts/copy-collections.mjs adds repositorios/ next to the app.
 export default defineConfig({
