@@ -31,7 +31,7 @@ La cobertura se publica en [Codecov](https://codecov.io/gh/ateeducacion/tonga) d
 - `critical.spec.ts`: crear, editar desde el inspector, deshacer y rehacer, biblioteca (búsqueda, filtro, botón explícito), fondo de biblioteca, exportar PNG/JPEG/SVG/PDF/`.elpx` comprobando firma, dimensiones y estructura, guardar y abrir `.tonga`, subir un PNG real (`setInputFiles`), abrir un SVG de Tonga 1, flujo solo con teclado, recuperación del autoguardado y panel en móvil.
 - `security.spec.ts`: SVG con script y URL de rastreo, entidades XML, proyecto de una versión futura, proyecto con imagen remota y PNG falso. La app falla de forma controlada, sin diálogos ni peticiones.
 - `a11y.spec.ts`: axe (WCAG 2.0/2.1/2.2 A y AA) en el inicio, el editor, la biblioteca, los diálogos y el móvil con tema oscuro.
-- `pwa.spec.ts`: manifest y shell sin conexión (Chromium y Firefox; Playwright no ejecuta service workers en WebKit).
+- `pwa.spec.ts`: manifest y shell sin conexión (Chromium y Firefox; Playwright no ejecuta service workers en WebKit), y la caché de la biblioteca: una URL con `?v=` sale de la caché y una sin revisión se pide a la red (solo Chromium, el único motor en que Playwright intercepta las peticiones del service worker).
 
 Las descargas se esperan registrando `page.waitForEvent('download')` **antes** del clic. Los ficheros se validan por estructura (firma, tamaño en píxeles, `MediaBox`, contenido del SVG), nunca píxel a píxel.
 

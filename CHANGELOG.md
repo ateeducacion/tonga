@@ -8,6 +8,10 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 - Actions: una etiqueta `v*` ya no repite CI ni redespliega Pages (ni Lighthouse); solo lanza Release, que ahora exige también los umbrales de cobertura y que la etiqueta coincida con `package.json`. La versión que muestra la app sale de `package.json` y el texto emergente muestra el commit («2.x.y+abc1234»).
 
+### Corregido
+
+- PWA: una imagen de la biblioteca sustituida con el mismo nombre podía seguir saliendo de la caché para siempre. Ahora el catálogo lleva la revisión (hash del contenido) de cada imagen y miniatura, y la app las pide con `?v=<revisión>`; las URL sin revisión se piden a la red y la caché solo se usa sin conexión.
+
 ## [2.2.0] - 2026-10-03
 
 ### Añadido

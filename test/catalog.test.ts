@@ -44,4 +44,20 @@ describe('catalogue builder (RULE-105/044/112)', () => {
     expect(bg).toMatchObject({ title: 'Auditorio', background: true, license: 'CC-BY-NC-SA-4.0', creator: 'Gobierno de Canarias' });
     expect(new Set(real.assets.map((a: { id: string }) => a.id)).size).toBe(real.assets.length);
   });
+
+  it('gives every image and thumbnail a content revision for cache busting', () => {
+    const { catalog: real } = buildCatalog();
+    for (const a of real.assets) expect(a).toMatchObject({ revision: expect.stringMatching(/^[0-9a-f]{12}$/), thumbnailRevision: expect.stringMatching(/^[0-9a-f]{12}$/) });
+    expect(real.assets[0].revision).not.toBe(real.assets[0].thumbnailRevision);
+  });
+});
+
+describe('library URLs', () => {
+  it('carry the revision when the catalogue knows it, and are plain otherwise', async () => {
+    const { resolveSource, setRevisions, libraryUrl } = await import('../src/assets/sources');
+    setRevisions([{ file: 'repositorios/aves/Cuervo.png', revision: '80abd5000000', thumbnail: 'repositorios/aves/thumbnails/Cuervo.png' }]);
+    await expect(resolveSource('repositorios/aves/Cuervo.png')).resolves.toBe('./repositorios/aves/Cuervo.png?v=80abd5000000');
+    await expect(resolveSource('./repositorios/aves/Cuervo.png')).resolves.toBe('./repositorios/aves/Cuervo.png?v=80abd5000000');
+    expect(libraryUrl('repositorios/aves/thumbnails/Cuervo.png')).toBe('./repositorios/aves/thumbnails/Cuervo.png');
+  });
 });
