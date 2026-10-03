@@ -332,7 +332,7 @@ h3 {
 
 .inspector {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .inspector .grid2 {
@@ -368,22 +368,11 @@ h3 {
   width: 100%;
 }
 
-.inspector input[type='color'] {
-  padding: 2px;
-  inline-size: 100%;
-}
-
 .inspector input[type='range'],
 .field input[type='range'] {
   padding: 0;
   border: 0;
   background: none;
-}
-
-.inspector .color-row {
-  display: grid;
-  grid-template-columns: 44px 1fr;
-  gap: var(--space-1);
 }
 
 .inspector .actions {
@@ -422,11 +411,6 @@ h3 {
   padding: 0 var(--space-1);
 }
 
-.inspector .slider-row {
-  grid-template-columns: 64px 1fr;
-  align-items: center;
-}
-
 .inspector label.check,
 .check {
   display: flex;
@@ -440,6 +424,253 @@ h3 {
   align-items: center;
   gap: var(--space-2);
   font-size: var(--font-size-sm);
+}
+
+/* Colours: presets, «Transparente», the browser's picker and the HEX field. */
+.field-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.colour,
+.stroke-width {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 32px);
+  gap: 8px;
+}
+
+.inspector .swatches .swatch {
+  position: relative;
+  inline-size: 32px;
+  block-size: 32px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.inspector .swatches .swatch[hidden] {
+  display: none;
+}
+
+/* The current colour: a ring around it and a check mark inside (not told by colour alone). */
+.swatch[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent);
+}
+
+.swatch[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  inline-size: 7px;
+  block-size: 13px;
+  border-right: 2.5px solid #ffffff;
+  border-bottom: 2.5px solid #ffffff;
+  transform: translate(0, -2px) rotate(45deg);
+}
+
+.swatch.light[aria-pressed='true']::after,
+.swatch.none[aria-pressed='true']::after {
+  border-color: #1b1d22;
+}
+
+/* Transparent: a checkerboard crossed by a red line. */
+.swatch.none {
+  background:
+    linear-gradient(to top right, transparent calc(50% - 1.5px), #d92d20 calc(50% - 1.5px), #d92d20 calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    repeating-conic-gradient(#d5d8df 0% 25%, #ffffff 0% 50%) 50% / 10px 10px;
+}
+
+/* The browser's picker for any other colour, drawn as a rainbow swatch. */
+.inspector .swatches .swatch.picker {
+  appearance: none;
+  background: conic-gradient(#e11d48, #f5c518, #16a34a, #2563eb, #7c3aed, #e11d48);
+}
+
+.swatch.picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+/* One rule per engine: an unknown pseudo-element would drop the whole rule. */
+.swatch.picker::-webkit-color-swatch {
+  opacity: 0;
+}
+
+.swatch.picker::-moz-color-swatch {
+  opacity: 0;
+}
+
+/* Stroke width as drawn lines. */
+.widths {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.width {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: var(--space-1) 2px;
+  font: inherit;
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.width[aria-pressed='true'] {
+  color: var(--color-text);
+  background: var(--color-selected);
+  border-color: var(--color-accent);
+}
+
+.width-line {
+  inline-size: 28px;
+  block-size: 1px;
+  border-radius: 4px;
+  background: currentcolor;
+  color: var(--color-text);
+}
+
+.width-line.none {
+  block-size: 0;
+  background: none;
+  border-top: 2px dashed var(--color-muted);
+}
+
+/* Sliders: label and value on one line, the bar below. */
+.slider {
+  display: grid;
+  gap: 2px;
+}
+
+.slider-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--font-size-sm);
+}
+
+.inspector .slider-head label {
+  color: var(--color-text);
+}
+
+.inspector input[type='range'] {
+  accent-color: var(--color-accent);
+  min-height: var(--control-size-sm);
+}
+
+/* Text: font and size on one row, style and alignment as toggles. */
+.font-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  align-items: end;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.inspector .stepper input {
+  inline-size: 3.5rem;
+  text-align: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.segmented .btn.icon-only {
+  border-radius: 0;
+}
+
+.inspector .btn[aria-pressed='true'] {
+  color: var(--color-text);
+  background: var(--color-selected);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+/* Folded sections: position, size, alignment and crop. */
+.placement {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+}
+
+.placement > summary {
+  min-height: var(--control-size-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  list-style: none;
+}
+
+.placement > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* A chevron that points down when folded and up when open. */
+.placement > summary::after {
+  content: '';
+  margin-inline-start: auto;
+  margin-inline-end: var(--space-2);
+  inline-size: 7px;
+  block-size: 7px;
+  border-right: 2px solid currentcolor;
+  border-bottom: 2px solid currentcolor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.placement[open] > summary::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+.placement .grid2 > .check {
+  grid-column: 1 / -1;
+}
+
+.placement[open] > summary {
+  margin-bottom: var(--space-2);
+}
+
+.placement > :not(summary) + :not(summary) {
+  margin-top: var(--space-2);
 }
 
 /* ---- Shapes menu ------------------------------------------------------------------------- */
