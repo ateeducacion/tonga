@@ -1,4 +1,5 @@
-# Builds, checks and publishes a release ZIP of dist/ for tags v*.
+# Builds, checks and publishes a release ZIP of dist/ for tags v*. The same gate as CI: Pages
+# already deployed this commit from main, so the tag never redeploys it.
 name: Release
 
 on:
@@ -17,8 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
+
+      - name: Tag matches package.json
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          [ "$version" = "$GITHUB_REF_NAME" ] || { echo "::error::Tag $GITHUB_REF_NAME does not match package.json ($version)"; exit 1; }
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -31,10 +36,8 @@ jobs:
       - run: pipx run reuse==6.2.0 lint
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test
+      - run: npm run coverage
       - run: npm run build
-        env:
-          TONGA_VERSION: ${{ github.ref_name }}
       - run: npm run check
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run e2e
