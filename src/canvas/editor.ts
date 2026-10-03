@@ -9,7 +9,7 @@ import type { Background, Layer, LayerType, Project } from '../project/schema';
 import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
-import { SHAPES, type ShapeKind } from './shapes';
+import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
 import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, type ImageAdjustments, type ImageCrop } from './image';
 
 export type { ShapeKind } from './shapes';
@@ -368,7 +368,8 @@ export class Editor {
   addShape(kind: ShapeKind): void {
     const u = this.unit();
     const style = { fill: DEFAULT_FILL, stroke: DEFAULT_STROKE, strokeWidth: 2, strokeUniform: true };
-    const shape = SHAPES.find((x) => x.kind === kind) ?? SHAPES[0];
+    // kind is a ShapeKind, so it is always in the catalogue.
+    const shape = SHAPES.find((x) => x.kind === kind) as ShapeDef;
     if (kind === 'rect') this.place(new Rect({ width: u, height: u, ...style }), 'rect');
     else if (kind === 'roundRect') this.place(new Rect({ width: u, height: u * 0.7, rx: u / 8, ry: u / 8, ...style }), 'rect', undefined, shape.label);
     else if (kind === 'ellipse') this.place(new Ellipse({ rx: u / 2, ry: u / 3, ...style }), 'ellipse');
