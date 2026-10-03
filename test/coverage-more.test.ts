@@ -408,6 +408,13 @@ describe('selection handles and right click', () => {
     expect(rect.cornerStrokeColor).toBe('#b9480f');
   });
 
+  it('gives text boxes the same round rotation handle', async () => {
+    const { controlsUtils, Textbox } = await import('fabric');
+    const text = new Textbox('Texto');
+    expect(text.controls.mtr?.render).toBe(controlsUtils.renderCircleControl);
+    expect(text.controls.mtr?.offsetY).toBe(-30);
+  });
+
   it('a right click selects the object under the pointer, keeping a multiple selection', async () => {
     document.body.innerHTML = '<canvas id="c"></canvas>';
     const ed = new Editor(document.getElementById('c') as HTMLCanvasElement, identity);
