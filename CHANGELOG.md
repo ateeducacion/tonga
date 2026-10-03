@@ -11,6 +11,12 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 - Grosor del trazo con cinco botones que dibujan la línea (ninguno, fino, medio, grueso, muy grueso), además del valor exacto.
 - Opacidad con deslizador. Los ajustes de imagen muestran el valor junto al nombre en lugar de una caja de número repetida.
 - Texto: tamaño con − y +, negrita y cursiva como botones y alineación con iconos.
+- Capas: cada capa muestra un icono de su tipo, y las flechas para subir y bajar solo aparecen en la capa seleccionada.
+- Móvil: Nuevo, Abrir, Guardar, tema, ayuda e información pasan a un menú «Más acciones» (⋯). Las pestañas «Propiedades» y «Capas» están siempre visibles encima de la barra de herramientas: una pestaña despliega el panel entre el lienzo y la barra, sin taparlos, y la pestaña abierta, «Ocultar panel» o Escape lo recogen. Desaparece el botón del panel de la barra, que quedaba medio oculto.
+
+### Corregido
+
+- Móvil: el botón «Exportar» se salía por la derecha y el zoom («30 %») se partía en dos líneas.
 
 ## [2.3.0] - 2026-10-03
 

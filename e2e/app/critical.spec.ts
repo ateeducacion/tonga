@@ -203,16 +203,63 @@ test('recovers an autosaved drawing after a reload, only when asked', async ({ p
   await expect(layers(page)).toHaveText(['Elipse 1']);
 });
 
-test('shows the properties panel as a drawer on a phone', async ({ page }) => {
+test('on a phone the panel tabs are always on screen and unfold the panel', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await newDrawing(page);
   await page.getByRole('button', { name: 'Añadir texto' }).click();
-  await expect(page.locator('#sidepanel')).toBeHidden();
-  await page.getByRole('button', { name: 'Mostrar propiedades y capas' }).click();
+  const props = page.getByRole('tab', { name: 'Propiedades' });
+  const layersTab = page.getByRole('tab', { name: /Capas/ });
+  await expect(props).toBeInViewport();
+  await expect(layersTab).toBeInViewport();
+  await expect(inspector(page)).toBeHidden(); // folded: only the tabs
+
+  await props.click();
   await expect(inspector(page).getByLabel('Texto', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Cerrar panel' }).click();
-  await expect(page.locator('#sidepanel')).toBeHidden();
+  await layersTab.click(); // another tab switches, the panel stays open
+  await expect(layers(page)).toHaveText(['Texto 1']);
+  await layersTab.click(); // the open tab folds it
+  await expect(layers(page).first()).toBeHidden();
+  await expect(layersTab).toBeInViewport();
+
+  await props.click();
+  await page.getByRole('button', { name: 'Ocultar panel' }).click();
+  await expect(inspector(page)).toBeHidden();
+  await props.click();
+  await page.keyboard.press('Escape');
+  await expect(inspector(page)).toBeHidden();
   await expect(page.getByRole('button', { name: 'Exportar' })).toBeInViewport();
+});
+
+test('phone: the top bar fits, project actions are in «Más acciones», the panel covers neither canvas nor tool bar', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await newDrawing(page);
+  await expect(page.getByRole('button', { name: 'Exportar' })).toBeInViewport({ ratio: 1 });
+  const zoom = (await page.locator('.zoom-value').boundingBox())!;
+  expect(zoom.height).toBeLessThanOrEqual(40); // «30 %» on one line
+
+  await page.getByRole('button', { name: 'Más acciones' }).click();
+  const more = page.getByRole('group', { name: 'Más acciones' });
+  await expect(more.getByRole('button', { name: 'Guardar' })).toBeVisible();
+  await more.getByRole('button', { name: 'Ayuda y atajos' }).click();
+  await expect(more).toBeHidden();
+  await expect(page.getByRole('dialog', { name: /Ayuda/ })).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  // Escape closes the menu and leaves the selection alone.
+  await page.getByRole('button', { name: 'Más acciones' }).click();
+  await expect(more.getByRole('button', { name: 'Nuevo' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(more).toBeHidden();
+  await page.getByRole('tab', { name: 'Propiedades' }).click();
+  await expect(page.locator('#inspector').getByLabel('Texto', { exact: true })).toBeVisible();
+  const panel = (await page.locator('#sidepanel').boundingBox())!;
+  const tools = (await page.locator('.tools').boundingBox())!;
+  const stage = (await page.locator('#workspace').boundingBox())!;
+  expect(panel.y + panel.height).toBeLessThanOrEqual(tools.y + 1);
+  expect(stage.y + stage.height).toBeLessThanOrEqual(panel.y + 1);
+  await addShape(page, 'estrella'); // the tool bar is still usable with the panel open
+  await expect(page.locator('#sidepanel')).toBeVisible();
 });
 
 test('status messages never cover the phone tool bar', async ({ page }) => {
@@ -364,6 +411,21 @@ test('the Formas menu adds predefined shapes with a fill, and closes with Escape
   await expect(layers(page)).toHaveText(['Bocadillo 1', 'Estrella 1']);
   await page.getByRole('tab', { name: 'Propiedades' }).click();
   await expect(inspector(page).getByRole('group', { name: 'Relleno', exact: true })).toBeVisible();
+});
+
+test('only the selected layer shows the up and down arrows; every layer shows its type', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(page.locator('#layers .layer-type')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: /^Subir / })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Bajar Texto 1' })).toBeVisible();
+  await layers(page).nth(1).click();
+  await expect(page.getByRole('button', { name: 'Subir Rectángulo 1' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Bajar Texto 1' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Subir Rectángulo 1' }).click();
+  await expect(layers(page)).toHaveText(['Rectángulo 1', 'Texto 1']);
 });
 
 test('layers are renamed in place and reordered by dragging the grip', async ({ page }) => {

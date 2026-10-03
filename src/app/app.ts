@@ -42,7 +42,16 @@ export class App {
       setBackground: (a) => this.serial(() => this.backgroundFromLibrary(a)),
     });
     hydrateIcons();
-    setupTabs(document.querySelector('.panel-tabs') as HTMLElement);
+    const tablist = document.querySelector('.panel-tabs') as HTMLElement;
+    setupTabs(tablist);
+    // Capture phase: decide before the tab is selected whether it was the open one.
+    const narrow = matchMedia('(max-width: 860px)');
+    tablist.addEventListener('click', (e) => {
+      const tab = (e.target as Element).closest('[role="tab"]');
+      if (!tab || !narrow.matches) return;
+      if (!byId('sidepanel').classList.contains('open')) this.togglePanel(true);
+      else if (tab.getAttribute('aria-selected') === 'true') this.togglePanel(false);
+    }, { capture: true });
     byId('about-version').textContent = APP_VERSION;
     if (APP_BUILD !== APP_VERSION) byId('about-version').title = `Compilación ${APP_BUILD}`;
     this.editor.subscribe(() => this.render());
@@ -344,6 +353,15 @@ export class App {
       library: () => this.library.open(),
       panel: () => this.togglePanel(),
     };
+    // On phones the project actions live in the «Más acciones» menu: it closes once one is chosen.
+    const more = byId('more-menu');
+    more.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('[data-action]')) more.hidePopover();
+    });
+    // Focus inside the menu, so its keys (Escape) are not taken as canvas shortcuts.
+    more.addEventListener('toggle', (e) => {
+      if ((e as ToggleEvent).newState === 'open') more.querySelector<HTMLElement>('button')?.focus();
+    });
     document.addEventListener('click', (e) => {
       const el = (e.target as Element).closest<HTMLElement>('[data-action]');
       const fn = el && actions[el.dataset.action ?? ''];
@@ -420,14 +438,14 @@ export class App {
     }
   }
 
-  /** Small screens: the properties panel is a drawer. Focus moves into it and back. */
+  /**
+   * Small screens: the panel folds down to its tabs, always on screen above the tool bar.
+   * A tab unfolds it; the open tab, «Ocultar panel» or Escape fold it again.
+   */
   private togglePanel(force?: boolean): void {
     const panel = byId('sidepanel');
     const open = panel.classList.toggle('open', force);
-    const toggle = document.querySelector<HTMLButtonElement>('.panel-toggle');
-    toggle?.setAttribute('aria-expanded', String(open));
-    if (open) panel.querySelector<HTMLElement>('.panel-close')?.focus();
-    else toggle?.focus();
+    if (!open && panel.contains(document.activeElement)) panel.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')?.focus();
   }
 
   // ---- Context menu -------------------------------------------------------------------------
@@ -559,7 +577,7 @@ export class App {
   }
 
   private syncThemeButton(): void {
-    document.querySelector('[data-action="theme"]')?.setAttribute('aria-pressed', String(!!getPref('color-scheme')));
+    for (const b of document.querySelectorAll('[data-action="theme"]')) b.setAttribute('aria-pressed', String(!!getPref('color-scheme')));
   }
 
   // ---- Errors -----------------------------------------------------------------------------

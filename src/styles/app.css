@@ -214,7 +214,6 @@ h3 {
   align-self: center;
 }
 
-.panel-toggle,
 .panel-close {
   display: none;
 }
@@ -768,6 +767,23 @@ h3 {
   text-align: left;
 }
 
+.layer-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  inline-size: 26px;
+  block-size: 26px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  background: var(--color-surface-2);
+}
+
+.layer-type svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
 .layer .layer-rename {
   flex: 1;
   min-width: 0;
@@ -1166,11 +1182,39 @@ kbd {
 
 /* ---- Small screens: bottom toolbar, panel as a drawer --------------------------------------- */
 
+/* Project actions folded into «Más acciones»: only on phones (see the 520 px query). */
+.more-toggle {
+  display: none;
+}
+
+.more-menu {
+  position: fixed;
+  inset: calc(var(--control-size-md) + var(--space-3)) var(--space-2) auto auto;
+  margin: 0;
+  min-width: 220px;
+  padding: var(--space-1);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+}
+
+.more-menu .menu-item {
+  min-height: 44px;
+}
+
+.zoom-value {
+  white-space: nowrap;
+}
+
 @media (max-width: 860px) {
+  /* The panel is part of the layout, between the canvas and the tool bar: it covers neither. */
   body {
     grid-template:
       'top' auto
       'work' 1fr
+      'panel' auto
       'tools' auto / 1fr;
   }
 
@@ -1207,7 +1251,6 @@ kbd {
     align-self: stretch;
   }
 
-  .panel-toggle,
   .panel-close {
     display: inline-flex;
   }
@@ -1226,20 +1269,24 @@ kbd {
     border-color: var(--color-border);
   }
 
+  /* Folded, only the tabs show (always reachable); a tab unfolds the panel. */
   .sidepanel {
-    position: fixed;
-    inset: auto 0 0 0;
-    max-height: 70dvh;
-    z-index: 15;
-    border: 1px solid var(--color-border);
+    max-height: 45dvh;
+    border: 0;
+    border-top: 1px solid var(--color-border);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
-    box-shadow: var(--shadow-2);
-    display: none;
+    box-shadow: 0 -4px 16px rgb(0 0 0 / 0.08);
     overflow: auto;
   }
 
-  .sidepanel.open {
-    display: flex;
+  .sidepanel:not(.open) .panel-section,
+  .sidepanel:not(.open) .panel-close {
+    display: none;
+  }
+
+  .sidepanel:not(.open) .panel-tab[aria-selected='true'] {
+    color: var(--color-muted);
+    border-bottom-color: transparent;
   }
 
   .tool {
@@ -1260,9 +1307,18 @@ kbd {
 
   .zoom [data-action='zoom-in'],
   .zoom [data-action='zoom-out'],
-  .topbar [data-action='theme'],
-  .topbar .divider {
+  .topbar .divider,
+  .topbar-actions > [data-action='new'],
+  .topbar-actions > [data-action='open'],
+  .topbar-actions > [data-action='save'],
+  .topbar-actions > [data-action='theme'],
+  .topbar-actions > [data-action='help'],
+  .topbar-actions > [data-action='about'] {
     display: none;
+  }
+
+  .more-toggle {
+    display: inline-flex;
   }
 }
 

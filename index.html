@@ -59,6 +59,15 @@
         <button type="button" class="btn icon-only" data-action="help" data-icon="circleHelp" aria-label="Ayuda y atajos" title="Ayuda"></button>
         <button type="button" class="btn icon-only" data-action="about" data-icon="info" aria-label="Información, licencias y aviso legal" title="Información"></button>
         <button type="button" class="btn primary" data-action="export" data-icon="download"><span class="label">Exportar</span></button>
+        <button type="button" class="btn icon-only more-toggle" popovertarget="more-menu" data-icon="ellipsis" aria-label="Más acciones" title="Más acciones"></button>
+        <div id="more-menu" class="more-menu" popover role="group" aria-label="Más acciones">
+          <button type="button" class="menu-item" data-action="new" data-icon="filePlus">Nuevo</button>
+          <button type="button" class="menu-item" data-action="open" data-icon="folderOpen">Abrir</button>
+          <button type="button" class="menu-item" data-action="save" data-icon="save">Guardar</button>
+          <button type="button" class="menu-item" data-action="theme" data-icon="sunMoon" aria-pressed="false">Tema claro u oscuro</button>
+          <button type="button" class="menu-item" data-action="help" data-icon="circleHelp">Ayuda y atajos</button>
+          <button type="button" class="menu-item" data-action="about" data-icon="info">Información y licencias</button>
+        </div>
       </nav>
     </header>
 
@@ -76,7 +85,6 @@
       <button type="button" class="tool" data-action="import" data-icon="upload" aria-label="Añadir imagen desde tu equipo" title="Añadir imagen (I)"></button>
       <button type="button" class="tool" data-action="library" data-icon="images" aria-label="Abrir la biblioteca de imágenes" title="Biblioteca (K)"></button>
       <span class="spacer"></span>
-      <button type="button" class="tool panel-toggle" data-action="panel" data-icon="panelRight" aria-label="Mostrar propiedades y capas" aria-expanded="false" aria-controls="sidepanel"></button>
     </nav>
 
     <main id="workspace" class="workspace" tabindex="-1" aria-label="Área de trabajo">
@@ -89,7 +97,7 @@
     </main>
 
     <aside id="sidepanel" class="sidepanel" aria-label="Propiedades y capas">
-      <button type="button" class="btn panel-close" data-action="panel" data-icon="x">Cerrar panel</button>
+      <button type="button" class="btn panel-close" data-action="panel" data-icon="chevronsDown">Ocultar panel</button>
       <div class="panel-tabs" role="tablist" aria-label="Panel lateral">
         <button type="button" role="tab" id="tab-props" class="panel-tab" aria-selected="true" aria-controls="panel-props">Propiedades</button>
         <button type="button" role="tab" id="tab-layers" class="panel-tab" aria-selected="false" aria-controls="panel-layers" tabindex="-1">Capas <span id="layers-count" class="count">0</span></button>
