@@ -4,6 +4,14 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Cambiado
+
+- Panel de propiedades más sencillo: primero lo que más se cambia (texto o colores) y la posición, el tamaño, la alineación y el recorte plegados.
+- Colores con 8 muestras de un toque, la muestra «Transparente» (relleno, trazo y fondo del lienzo), el selector del navegador para cualquier otro color y el campo hexadecimal. El color actual queda siempre marcado. La casilla «Fondo transparente» del lienzo pasa a ser esa muestra.
+- Grosor del trazo con cinco botones que dibujan la línea (ninguno, fino, medio, grueso, muy grueso), además del valor exacto.
+- Opacidad con deslizador. Los ajustes de imagen muestran el valor junto al nombre en lugar de una caja de número repetida.
+- Texto: tamaño con − y +, negrita y cursiva como botones y alineación con iconos.
+
 ## [2.3.0] - 2026-10-03
 
 ### Añadido

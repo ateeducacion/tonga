@@ -34,6 +34,7 @@ test('creates a drawing with text and a shape, edits them and undoes/redoes (RUL
   // Colour via the accessible hex field, position, size and rotation via the inspector.
   await inspector(page).getByLabel('Relleno (hexadecimal)').fill('#336699');
   await inspector(page).getByLabel('Relleno (hexadecimal)').press('Enter');
+  await inspector(page).getByText('Posición, tamaño y alineación').click(); // folded by default
   await inspector(page).getByLabel('X', { exact: true }).fill('300');
   await inspector(page).getByLabel('Ancho', { exact: true }).fill('400');
   await inspector(page).getByLabel('Giro (°)', { exact: true }).fill('45');
@@ -239,16 +240,17 @@ test('crops and adjusts an image from the inspector, undoably', async ({ page })
   const image = page.getByRole('group', { name: 'Imagen' });
   const width = Number(await inspector(page).getByLabel('Ancho', { exact: true }).inputValue());
 
+  await image.getByText('Recortar (% de cada lado)').click(); // folded by default
   await image.getByLabel('Izquierda').fill('25');
   await image.getByLabel('Derecha').fill('25');
   await expect(inspector(page).getByLabel('Ancho', { exact: true })).toHaveValue(String(Math.round(width / 2)));
 
   await image.getByLabel('Escala de grises').check();
-  await image.getByLabel('Brillo (valor)').fill('40');
-  await expect(image.getByLabel('Brillo (deslizador)')).toHaveValue('40');
+  await image.getByLabel('Brillo').fill('40');
+  await expect(image.getByText('40', { exact: true })).toBeVisible(); // the value next to the label
 
   await page.getByRole('button', { name: 'Deshacer' }).click();
-  await expect(image.getByLabel('Brillo (valor)')).toHaveValue('0');
+  await expect(image.getByLabel('Brillo')).toHaveValue('0');
   await expect(image.getByLabel('Escala de grises')).toBeChecked();
 
   await image.getByRole('button', { name: 'Quitar recorte y ajustes' }).click();
@@ -296,6 +298,50 @@ test('the side panel shows Propiedades or Capas as tabs', async ({ page }) => {
   await expect(layers(page)).toHaveText(['Elipse 1', 'Texto 1']);
   await page.keyboard.press('Home');
   await expect(props).toHaveAttribute('aria-selected', 'true');
+});
+
+test('colours: presets, transparent and the browser picker; stroke width as drawn lines; opacity slider', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  const fill = inspector(page).getByRole('group', { name: 'Relleno', exact: true });
+  await fill.getByRole('button', { name: 'Azul' }).click();
+  await expect(fill.getByRole('button', { name: 'Azul' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveValue('#2563eb');
+
+  await fill.getByRole('button', { name: 'Transparente' }).click();
+  await expect(fill.getByRole('button', { name: 'Transparente' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveValue('');
+  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveAttribute('placeholder', 'Transparente');
+
+  // Any other colour comes from the browser's picker, which then shows it as the current one.
+  await fill.getByLabel('Relleno (selector)').fill('#123456');
+  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveValue('#123456');
+  await expect(fill.getByLabel('Relleno (selector)')).toHaveClass(/current/);
+  await expect(fill.locator('[aria-pressed="true"]')).toHaveCount(0);
+
+  const widths = inspector(page).getByRole('group', { name: 'Grosor del trazo' });
+  await widths.getByRole('button', { name: /^Grueso/ }).click();
+  await expect(widths.getByRole('button', { name: /^Grueso/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(inspector(page).getByLabel('Grosor exacto (px)')).toHaveValue('8');
+
+  await inspector(page).getByLabel('Opacidad (%)').fill('40');
+  await expect(inspector(page).getByText('40 %')).toBeVisible();
+  await page.getByRole('button', { name: 'Deshacer' }).click();
+  await expect(inspector(page).getByLabel('Opacidad (%)')).toHaveValue('100');
+});
+
+test('text: size with − and +, bold and alignment as toggles', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  const size = inspector(page).getByLabel('Tamaño', { exact: true });
+  const before = Number(await size.inputValue());
+  await inspector(page).getByRole('button', { name: 'Letra más grande' }).click();
+  await expect(size).toHaveValue(String(before + 4));
+  await inspector(page).getByRole('button', { name: 'Negrita' }).click();
+  await expect(inspector(page).getByRole('button', { name: 'Negrita' })).toHaveAttribute('aria-pressed', 'true');
+  await inspector(page).getByRole('button', { name: 'Alinear el texto a la derecha' }).click();
+  await expect(inspector(page).getByRole('button', { name: 'Alinear el texto a la derecha' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(inspector(page).getByRole('button', { name: 'Centrar el texto' })).toHaveAttribute('aria-pressed', 'false');
 });
 
 test('the Formas menu adds predefined shapes with a fill, and closes with Escape', async ({ page }) => {
