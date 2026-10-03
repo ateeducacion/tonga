@@ -440,14 +440,15 @@ h3 {
 }
 
 .swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(6, 32px);
+  gap: 8px;
 }
 
 .inspector .swatches .swatch {
-  inline-size: 24px;
-  block-size: 24px;
+  position: relative;
+  inline-size: 32px;
+  block-size: 32px;
   min-height: 0;
   padding: 0;
   border: 1px solid var(--color-border);
@@ -455,9 +456,30 @@ h3 {
   cursor: pointer;
 }
 
-.swatch[aria-pressed='true'],
-.inspector .swatches .swatch.picker.current {
+.inspector .swatches .swatch[hidden] {
+  display: none;
+}
+
+/* The current colour: a ring around it and a check mark inside (not told by colour alone). */
+.swatch[aria-pressed='true'] {
   box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent);
+}
+
+.swatch[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  inline-size: 7px;
+  block-size: 13px;
+  border-right: 2.5px solid #ffffff;
+  border-bottom: 2.5px solid #ffffff;
+  transform: translate(0, -2px) rotate(45deg);
+}
+
+.swatch.light[aria-pressed='true']::after,
+.swatch.none[aria-pressed='true']::after {
+  border-color: #1b1d22;
 }
 
 /* Transparent: a checkerboard crossed by a red line. */
@@ -467,14 +489,10 @@ h3 {
     repeating-conic-gradient(#d5d8df 0% 25%, #ffffff 0% 50%) 50% / 10px 10px;
 }
 
-/* The browser's picker, drawn as a rainbow swatch until it holds a custom colour. */
+/* The browser's picker for any other colour, drawn as a rainbow swatch. */
 .inspector .swatches .swatch.picker {
   appearance: none;
   background: conic-gradient(#e11d48, #f5c518, #16a34a, #2563eb, #7c3aed, #e11d48);
-}
-
-.inspector .swatches .swatch.picker.current {
-  background: none;
 }
 
 .swatch.picker::-webkit-color-swatch-wrapper {
@@ -483,20 +501,10 @@ h3 {
 
 /* One rule per engine: an unknown pseudo-element would drop the whole rule. */
 .swatch.picker::-webkit-color-swatch {
-  border: 0;
-  border-radius: 50%;
-}
-
-.swatch.picker::-moz-color-swatch {
-  border: 0;
-  border-radius: 50%;
-}
-
-.swatch.picker:not(.current)::-webkit-color-swatch {
   opacity: 0;
 }
 
-.swatch.picker:not(.current)::-moz-color-swatch {
+.swatch.picker::-moz-color-swatch {
   opacity: 0;
 }
 
