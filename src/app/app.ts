@@ -394,6 +394,7 @@ export class App {
     const scale = Number(data.get('scale'));
     byId('export-summary').textContent =
       format === 'pdf' ? 'Una página A4 con el dibujo ajustado (orientación según el lienzo).'
+        : format === 'elpx' ? 'Proyecto de eXeLearning: una página con el dibujo en una diapositiva editable.'
         : format === 'svg' ? `Vectorial, ${width} × ${height} px, con las imágenes incluidas.`
           : `${Math.round(width * scale)} × ${Math.round(height * scale)} px.`;
   }

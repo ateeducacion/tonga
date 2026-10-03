@@ -1,5 +1,5 @@
 // Critical user flows of the rebuilt app (prompt §41, brief §5 behaviour contract).
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import type { Page } from '@playwright/test';
 import { expect, layers, newDrawing, test } from './fixtures';
 
@@ -12,7 +12,7 @@ async function downloadFrom(page: Page, trigger: () => Promise<void>) {
   return { name: file.suggestedFilename(), bytes: await readFile(await file.path()) };
 }
 
-async function exportAs(page: Page, format: 'PNG' | 'JPEG' | 'SVG' | 'PDF (A4)', filename = 'prueba') {
+async function exportAs(page: Page, format: 'PNG' | 'JPEG' | 'SVG' | 'PDF (A4)' | 'eXeLearning', filename = 'prueba') {
   await page.getByRole('button', { name: 'Exportar' }).click();
   const dialog = page.getByRole('dialog', { name: 'Exportar' });
   await dialog.getByLabel(format, { exact: true }).check();
@@ -102,6 +102,36 @@ test('exports PNG, JPEG, SVG and PDF in the browser (RULE-108/101/114/022/086)',
   expect(pdf.name).toBe('prueba.pdf');
   expect(pdf.bytes.subarray(0, 5).toString()).toBe('%PDF-');
   expect(pdf.bytes.toString('latin1')).toContain('/MediaBox [0 0 595.28 841.89]');
+});
+
+test('exports an eXeLearning package with an editable Slide, the screenshot and the base theme', async ({ page }, info) => {
+  await newDrawing(page, 'Cuadrado');
+  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await page.getByRole('button', { name: 'Abrir la biblioteca de imágenes' }).click();
+  await page.getByLabel('Buscar en la biblioteca').fill('cuervo volando');
+  await page.locator('#library-grid').getByRole('option').first().dblclick();
+  await expect(layers(page)).toHaveCount(2);
+
+  // Raster-only options are hidden for this format (and for PDF).
+  await page.getByRole('button', { name: 'Exportar' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Exportar' });
+  for (const format of ['eXeLearning', 'PDF (A4)']) {
+    await dialog.getByLabel(format, { exact: true }).check();
+    for (const option of ['Escala', 'Calidad JPEG', 'Fondo transparente (si el lienzo no tiene fondo)']) await expect(dialog.getByLabel(option)).toBeHidden();
+  }
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
+
+  const elpx = await exportAs(page, 'eXeLearning');
+  await writeFile(info.outputPath(elpx.name), elpx.bytes); // kept for manual checks in eXeLearning
+  expect(elpx.name).toBe('prueba.elpx');
+  expect(elpx.bytes.readUInt32LE(0)).toBe(0x04034b50); // ZIP
+  const listing = elpx.bytes.toString('latin1');
+  for (const f of ['content.xml', 'content.dtd', 'screenshot.png', 'content/resources/imagen-1.png', 'theme/config.xml', 'theme/img/icons.png']) expect(listing).toContain(f);
+  // Stored entries: the theme files travel byte for byte, not reprocessed by the build.
+  expect(elpx.bytes.includes(await readFile('vendor/exelearning/theme/style.css'))).toBe(true);
+  expect(listing).toContain('<odeIdeviceTypeName>slide</odeIdeviceTypeName>');
+  expect(listing).toMatch(/"engine":"fabric".*"type":"Ellipse"/s);
+  expect(listing).toContain('"src":"{{context_path}}/content/resources/imagen-1.png"');
 });
 
 test('saves a .tonga project and opens it again (prompt §16)', async ({ page }) => {

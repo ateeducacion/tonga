@@ -1,11 +1,12 @@
-// Exports a project to PNG, JPEG, SVG or PDF. Everything is rendered off-screen at 1:1 from the
+// Exports a project to PNG, JPEG, SVG, PDF or eXeLearning (.elpx). Everything is rendered off-screen at 1:1 from the
 // document, so the live canvas (zoom, selection) is never touched (RULE-102).
 import type { StaticCanvas } from 'fabric';
 import { renderOffscreen, type SourceResolver } from '../canvas/document';
 import type { Project } from '../project/schema';
+import { exportElpx } from './elpx';
 import { jpegToPdf } from './pdf';
 
-export type ExportFormat = 'png' | 'jpeg' | 'svg' | 'pdf';
+export type ExportFormat = 'png' | 'jpeg' | 'svg' | 'pdf' | 'elpx';
 
 export interface ExportOptions {
   format: ExportFormat;
@@ -20,9 +21,10 @@ export const MIME: Record<ExportFormat, string> = {
   jpeg: 'image/jpeg',
   svg: 'image/svg+xml',
   pdf: 'application/pdf',
+  elpx: 'application/zip',
 };
 
-export const EXTENSION: Record<ExportFormat, string> = { png: 'png', jpeg: 'jpg', svg: 'svg', pdf: 'pdf' };
+export const EXTENSION: Record<ExportFormat, string> = { png: 'png', jpeg: 'jpg', svg: 'svg', pdf: 'pdf', elpx: 'elpx' };
 
 /** Safe file name: keeps letters (with accents), digits, spaces, dots, dashes; adds the right extension. */
 export function exportFileName(name: string, format: ExportFormat): string {
@@ -58,6 +60,7 @@ function toBlob(canvas: StaticCanvas, type: string, scale: number, quality: numb
  * @param resolveInline turns canonical sources into data: URLs, so the SVG is self-contained
  */
 export async function exportProject(project: Project, opts: ExportOptions, resolve: SourceResolver, resolveInline: SourceResolver): Promise<Blob> {
+  if (opts.format === 'elpx') return exportElpx(project, resolveInline);
   const doc = withBackground(project, opts);
   if (opts.format === 'svg') {
     const canvas = await renderOffscreen(doc, resolveInline);
