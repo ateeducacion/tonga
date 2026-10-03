@@ -32,8 +32,7 @@ test('creates a drawing with text and a shape, edits them and undoes/redoes (RUL
   await expect(layers(page)).toHaveText(['Rectángulo 1', 'Texto 1']);
 
   // Colour via the accessible hex field, position, size and rotation via the inspector.
-  await inspector(page).getByLabel('Relleno (hexadecimal)').fill('#336699');
-  await inspector(page).getByLabel('Relleno (hexadecimal)').press('Enter');
+  await inspector(page).getByLabel('Relleno: otro color').fill('#336699');
   await inspector(page).getByText('Posición, tamaño y alineación').click(); // folded by default
   await inspector(page).getByLabel('X', { exact: true }).fill('300');
   await inspector(page).getByLabel('Ancho', { exact: true }).fill('400');
@@ -305,19 +304,24 @@ test('colours: presets, transparent and the browser picker; stroke width as draw
   await addShape(page, 'rectángulo');
   const fill = inspector(page).getByRole('group', { name: 'Relleno', exact: true });
   await fill.getByRole('button', { name: 'Azul' }).click();
+  // Exactly one swatch is marked as the current colour.
   await expect(fill.getByRole('button', { name: 'Azul' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveValue('#2563eb');
+  await expect(fill.locator('[aria-pressed="true"]')).toHaveCount(1);
 
   await fill.getByRole('button', { name: 'Transparente' }).click();
   await expect(fill.getByRole('button', { name: 'Transparente' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveValue('');
-  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveAttribute('placeholder', 'Transparente');
+  await expect(fill.getByRole('button', { name: 'Azul' })).toHaveAttribute('aria-pressed', 'false');
 
-  // Any other colour comes from the browser's picker, which then shows it as the current one.
-  await fill.getByLabel('Relleno (selector)').fill('#123456');
-  await expect(fill.getByLabel('Relleno (hexadecimal)')).toHaveValue('#123456');
-  await expect(fill.getByLabel('Relleno (selector)')).toHaveClass(/current/);
-  await expect(fill.locator('[aria-pressed="true"]')).toHaveCount(0);
+  // Any other colour comes from the browser's picker and appears as a marked swatch of its own,
+  // which stays there to come back to after choosing a preset.
+  await fill.getByLabel('Relleno: otro color').fill('#123456');
+  const custom = fill.getByRole('button', { name: 'Color personalizado #123456' });
+  await expect(custom).toHaveAttribute('aria-pressed', 'true');
+  await expect(fill.locator('[aria-pressed="true"]')).toHaveCount(1);
+  await fill.getByRole('button', { name: 'Verde' }).click();
+  await expect(custom).toHaveAttribute('aria-pressed', 'false');
+  await custom.click();
+  await expect(custom).toHaveAttribute('aria-pressed', 'true');
 
   const widths = inspector(page).getByRole('group', { name: 'Grosor del trazo' });
   await widths.getByRole('button', { name: /^Grueso/ }).click();
@@ -359,7 +363,7 @@ test('the Formas menu adds predefined shapes with a fill, and closes with Escape
   await page.getByRole('tab', { name: /Capas/ }).click();
   await expect(layers(page)).toHaveText(['Bocadillo 1', 'Estrella 1']);
   await page.getByRole('tab', { name: 'Propiedades' }).click();
-  await expect(inspector(page).getByLabel('Relleno (hexadecimal)')).toBeVisible();
+  await expect(inspector(page).getByRole('group', { name: 'Relleno', exact: true })).toBeVisible();
 });
 
 test('layers are renamed in place and reordered by dragging the grip', async ({ page }) => {
