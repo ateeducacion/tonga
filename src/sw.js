@@ -1,7 +1,9 @@
 /* Tonga service worker. Template: vite.config.ts injects VERSION and PRECACHE at build time.
  * - App shell: precached per version; old versions are deleted on activate.
  * - catalog.json and page loads: network first, cache as offline fallback.
- * - repositorios/ (thousands of images): cached on demand, at most MAX_COLLECTION entries.
+ * - repositorios/ (thousands of images): cached on demand, at most MAX_COLLECTION entries. A URL with
+ *   ?v=<content hash> (from catalog.json) never changes, so it is cache first; without it the image
+ *   may have been replaced under the same name, so it is network first (cache only offline).
  * A new version waits until the page asks it to take over (no silent reloads). */
 const VERSION = '__VERSION__';
 const PRECACHE = __PRECACHE__;
@@ -39,11 +41,17 @@ async function networkFirst(request, cacheName) {
   }
 }
 
-async function collectionImage(request) {
+async function collectionImage(request, versioned) {
   const cache = await caches.open(COLLECTIONS);
   const cached = await cache.match(request);
-  if (cached) return cached;
-  const response = await fetch(request);
+  if (cached && versioned) return cached;
+  let response;
+  try {
+    response = await fetch(request);
+  } catch (err) {
+    if (cached) return cached;
+    throw err;
+  }
   if (response.ok) {
     await cache.put(request, response.clone());
     const keys = await cache.keys();
@@ -59,6 +67,6 @@ self.addEventListener('fetch', (event) => {
   const scope = new URL(self.registration.scope);
   const path = url.pathname.slice(scope.pathname.length);
   if (request.mode === 'navigate' || path === 'catalog.json') event.respondWith(networkFirst(request, SHELL));
-  else if (path.startsWith('repositorios/')) event.respondWith(collectionImage(request));
+  else if (path.startsWith('repositorios/')) event.respondWith(collectionImage(request, url.searchParams.has('v')));
   else event.respondWith(caches.match(request, { ignoreSearch: true }).then((hit) => hit ?? fetch(request)));
 });

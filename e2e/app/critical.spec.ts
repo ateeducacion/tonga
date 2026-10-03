@@ -54,8 +54,12 @@ test('adds an image from the library with search and an explicit button (RULE-10
   await expect(library.locator('#library-grid').getByRole('option')).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Añadir al lienzo' })).toBeDisabled();
   await library.locator('#library-grid').getByRole('option').first().click();
+  await expect(library.locator('#library-grid img').first()).toHaveAttribute('src', /thumbnails\/.+\.png\?v=[0-9a-f]{12}$/);
   await library.getByRole('button', { name: 'Añadir al lienzo' }).click();
   await expect(layers(page)).toHaveText(['Cuervo canario volando']);
+  // The image loads from a versioned URL, but the document keeps the canonical path.
+  const saved = await downloadFrom(page, () => page.getByRole('button', { name: 'Guardar' }).click());
+  expect(JSON.parse(saved.bytes.toString('utf8')).layers[0].object.src).toMatch(/^repositorios\/aves\/[^?]+\.png$/);
 
   await page.getByRole('button', { name: 'Abrir la biblioteca de imágenes' }).click();
   await library.getByLabel('Buscar en la biblioteca').fill('zzzz-no-existe');

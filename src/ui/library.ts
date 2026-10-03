@@ -1,7 +1,7 @@
 // Library dialog: search, filter by collection, preview, select, then «Añadir al lienzo».
 // Double-click (or Enter) is only a shortcut. Thumbnails load lazily and only when the dialog opens.
 import { loadCatalog, searchAssets, type Catalog, type CatalogAsset } from '../assets/catalog';
-import { LIBRARY_ROOT } from '../config';
+import { libraryUrl, setRevisions } from '../assets/sources';
 import { byId, h, openDialog } from './dom';
 
 const PAGE = 120;
@@ -58,6 +58,7 @@ export class Library {
       this.count.textContent = 'Cargando la biblioteca…';
       try {
         this.catalog = await loadCatalog(this.catalogUrl);
+        setRevisions(this.catalog.assets);
       } catch (err) {
         this.count.textContent = err instanceof Error ? err.message : 'No se pudo cargar la biblioteca.';
         return;
@@ -98,7 +99,7 @@ export class Library {
     const frag = document.createDocumentFragment();
     for (let i = this.shown; i < end; i++) {
       const a = this.results[i] as CatalogAsset;
-      const img = h('img', { src: LIBRARY_ROOT + a.thumbnail, alt: '', loading: 'lazy', decoding: 'async', width: 110, height: 96 });
+      const img = h('img', { src: libraryUrl(a.thumbnail), alt: '', loading: 'lazy', decoding: 'async', width: 110, height: 96 });
       img.addEventListener('error', () => img.replaceWith(h('span', { class: 'muted' }, 'Sin vista previa')), { once: true });
       frag.append(
         h('div', { class: 'asset', role: 'option', id: `asset-${i}`, 'data-index': i, 'aria-selected': 'false', title: a.title },

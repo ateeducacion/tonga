@@ -9,7 +9,10 @@ export interface CatalogAsset {
   category: string;
   /** Canonical path, e.g. "repositorios/aves/aguila.png". */
   file: string;
+  /** Content hash of file; the URL carries it (?v=) so a replaced image is never served stale. */
+  revision?: string;
   thumbnail: string;
+  thumbnailRevision?: string;
   background: boolean;
   license: string;
   creator: string;

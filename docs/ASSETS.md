@@ -40,7 +40,9 @@ Se toleran BOM UTF-8, finales de línea CRLF y líneas vacías.
   "collection": "aves",
   "category": "fauna",
   "file": "repositorios/aves/Abubilla.png",
+  "revision": "5150b8b428af",
   "thumbnail": "repositorios/aves/thumbnails/Abubilla.png",
+  "thumbnailRevision": "a24e4a5ac33f",
   "background": false,
   "license": "CC-BY-NC-SA-4.0",
   "creator": "Gobierno de Canarias",
@@ -66,6 +68,7 @@ La licencia y el autor se aplican igual a todas las imágenes, porque la única 
 - Las miniaturas se muestran en tandas de 120, con `loading="lazy"`.
 - La imagen completa solo se descarga al añadirla al lienzo.
 - Con la PWA instalada, las imágenes usadas quedan en una caché de como máximo 300 entradas.
+- `revision` y `thumbnailRevision` son los 12 primeros caracteres del SHA-256 del fichero. La app pide `…/Abubilla.png?v=<revision>`: esa URL no cambia mientras la imagen no cambie, así que el service worker la sirve de la caché sin preguntar a la red. Si se sustituye una imagen con el mismo nombre, cambia su revisión y su URL, y se descarga la nueva; las que no cambian siguen en caché aunque salga otra versión de Tonga. Una URL sin `?v=` (por ejemplo, un dibujo abierto antes de cargar el catálogo) se pide a la red y la caché solo se usa sin conexión. Los documentos `.tonga` guardan siempre la ruta sin `?v=`.
 
 ## Estado medido (`npm run catalog`, 2026-10-02)
 

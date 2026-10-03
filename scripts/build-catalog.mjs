@@ -33,6 +33,9 @@ function existsExact(path) {
   return listing.get(dir).has(path.slice(i + 1));
 }
 
+/** Content revision of a file: changes exactly when its bytes change (cache busting, ?v=). */
+const revision = (path) => (existsSync(path) ? createHash('sha256').update(readFileSync(path)).digest('hex').slice(0, 12) : undefined);
+
 const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export function buildCatalog(root = ROOT) {
@@ -84,7 +87,9 @@ export function buildCatalog(root = ROOT) {
         collection: key,
         category: category.id,
         file: path,
+        revision: revision(path),
         thumbnail: thumb,
+        thumbnailRevision: revision(thumb),
         background: flag === BACKGROUND,
         ...DEFAULT_RIGHTS,
       });

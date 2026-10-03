@@ -5,6 +5,26 @@ import { getAsset } from '../persistence/store';
 import { isSafeImageSrc } from '../project/schema';
 
 const objectUrls = new Map<string, string>();
+/** Library path -> content revision, from the catalogue. */
+const revisions = new Map<string, string>();
+
+/** Remembers the revisions of a catalogue, so library images resolve to versioned URLs. */
+export function setRevisions(assets: { file: string; revision?: string; thumbnail: string; thumbnailRevision?: string }[]): void {
+  for (const a of assets) {
+    if (a.revision) revisions.set(a.file, a.revision);
+    if (a.thumbnailRevision) revisions.set(a.thumbnail, a.thumbnailRevision);
+  }
+}
+
+/**
+ * URL of a library file. With a known revision it is "…/Cuervo.png?v=80abd5…": the service worker
+ * caches it for good, and a changed image gets a new URL. Without one, the worker asks the network.
+ */
+export function libraryUrl(path: string): string {
+  const clean = path.replace(/^\.\//, '');
+  const rev = revisions.get(clean);
+  return LIBRARY_ROOT + clean + (rev ? `?v=${rev}` : '');
+}
 
 export async function resolveSource(canonical: string): Promise<string> {
   if (!isSafeImageSrc(canonical)) throw new UserError('Origen de imagen no permitido.');
@@ -18,7 +38,7 @@ export async function resolveSource(canonical: string): Promise<string> {
     objectUrls.set(canonical, url);
     return url;
   }
-  return LIBRARY_ROOT + canonical.replace(/^\.\//, '');
+  return libraryUrl(canonical);
 }
 
 export async function sourceBlob(canonical: string): Promise<Blob> {
