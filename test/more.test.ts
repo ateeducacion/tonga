@@ -83,6 +83,24 @@ describe('Editor (more operations)', () => {
     expect(ed.layers().map((l) => l.name)).toEqual(['Triángulo 1', 'Montaña']);
   });
 
+  it('moves a layer to a position of the layers panel, never a locked one', async () => {
+    const ed = await editor();
+    ed.addShape('rect');
+    ed.addShape('ellipse');
+    ed.addShape('triangle');
+    const names = () => ed.layers().map((l) => l.name);
+    const id = (name: string) => ed.layers().find((l) => l.name === name)?.id ?? '';
+    ed.moveLayer(id('Rectángulo 1'), 0);
+    expect(names()).toEqual(['Rectángulo 1', 'Triángulo 1', 'Elipse 1']);
+    ed.moveLayer(id('Rectángulo 1'), 99);
+    expect(names()).toEqual(['Triángulo 1', 'Elipse 1', 'Rectángulo 1']);
+    await ed.undo();
+    expect(names()).toEqual(['Rectángulo 1', 'Triángulo 1', 'Elipse 1']);
+    ed.setLocked(id('Elipse 1'), true);
+    ed.moveLayer(id('Elipse 1'), 0);
+    expect(names()).toEqual(['Rectángulo 1', 'Triángulo 1', 'Elipse 1']);
+  });
+
   it('switches free drawing on and off and fits the zoom to a box', async () => {
     const ed = await editor();
     ed.setDrawing(true, '#ff0000', 8);

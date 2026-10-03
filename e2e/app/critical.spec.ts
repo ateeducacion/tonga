@@ -291,6 +291,31 @@ test('the side panel shows Propiedades or Capas as tabs', async ({ page }) => {
   await expect(props).toHaveAttribute('aria-selected', 'true');
 });
 
+test('layers are renamed in place and reordered by dragging the grip', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
+  await page.getByRole('button', { name: 'Añadir elipse' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Elipse 1', 'Rectángulo 1']);
+
+  // Double click renames; Escape cancels; F2 renames by keyboard.
+  await layers(page).first().dblclick();
+  await page.getByLabel('Nombre de Elipse 1').fill('Sol');
+  await page.getByLabel('Nombre de Elipse 1').press('Enter');
+  await expect(layers(page)).toHaveText(['Sol', 'Rectángulo 1']);
+  await layers(page).nth(1).press('F2');
+  await page.getByLabel('Nombre de Rectángulo 1').fill('Nada');
+  await page.getByLabel('Nombre de Rectángulo 1').press('Escape');
+  await expect(layers(page)).toHaveText(['Sol', 'Rectángulo 1']);
+
+  // Drag the bottom layer above the top one.
+  const rows = page.locator('#layers .layer');
+  await rows.nth(1).locator('.layer-grip').dragTo(rows.nth(0), { targetPosition: { x: 20, y: 2 } });
+  await expect(layers(page)).toHaveText(['Rectángulo 1', 'Sol']);
+  await page.getByRole('button', { name: 'Deshacer' }).click();
+  await expect(layers(page)).toHaveText(['Sol', 'Rectángulo 1']);
+});
+
 test('right-click menu on the canvas; also with the Menu key (keyboard)', async ({ page }) => {
   await newDrawing(page);
   await page.getByRole('button', { name: 'Añadir rectángulo' }).click();
