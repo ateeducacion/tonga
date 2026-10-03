@@ -53,7 +53,7 @@ function ungroupImages(canvas: StaticCanvas): void {
   }
 }
 
-function dataUrlBytes(url: string): { bytes: Uint8Array; ext: string } {
+export function dataUrlBytes(url: string): { bytes: Uint8Array; ext: string } {
   const m = /^data:image\/(png|jpeg|webp|svg\+xml)(;base64)?,(.*)$/s.exec(url);
   if (!m) throw new Error('Formato de imagen no admitido.');
   const [, type, base64, body] = m as unknown as [string, string, string | undefined, string];
@@ -143,15 +143,17 @@ async function toSlide(project: Project, resolve: SourceResolver): Promise<Slide
     const images = canvas.getObjects().filter((o): o is FabricImage => o instanceof FabricImage);
     const resources: Record<string, Uint8Array> = {};
     const names = new Map<string, string>();
+    // writeProject gives every image its canonical source (assetSrc), nested ones too.
+    const source = (img: FabricImage) => img.assetSrc as string;
     for (const img of images) {
-      const key = img.assetSrc ?? img.getSrc();
+      const key = source(img);
       if (names.has(key)) continue;
       const { bytes, ext } = dataUrlBytes(await resolve(key));
       const name = `imagen-${names.size + 1}.${ext}`;
       names.set(key, name);
       resources[RESOURCES + name] = bytes;
     }
-    const ref = (img: FabricImage) => CONTEXT + RESOURCES + names.get(img.assetSrc ?? img.getSrc());
+    const ref = (img: FabricImage) => CONTEXT + RESOURCES + names.get(source(img));
 
     const scene = canvas.toObject() as { objects: Record<string, unknown>[] } & Record<string, unknown>;
     scene.objects.forEach((o, i) => {

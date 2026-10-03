@@ -1,9 +1,9 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FabricImage, Group, Rect, StaticCanvas, Textbox } from 'fabric';
+import { FabricImage, filters, Group, Rect, StaticCanvas, Textbox } from 'fabric';
 import { readProject } from '../src/canvas/document';
-import { contentXml, exportElpx, odeId, slideScale } from '../src/export/elpx';
-import { exportFileName } from '../src/export/export';
+import { contentXml, dataUrlBytes, exportElpx, odeId, slideScale } from '../src/export/elpx';
+import { exportFileName, exportProject } from '../src/export/export';
 import { crc32, zip } from '../src/export/zip';
 
 /** Reads a stored (uncompressed) ZIP, checking every CRC. */
@@ -139,5 +139,46 @@ describe('eXeLearning export', () => {
       'xlink:href="{{context_path}}/content/resources/imagen-1.png"',
       'xlink:href="{{context_path}}/content/resources/imagen-2.png"',
     ]);
+  });
+
+  it('decodes the image formats Tonga stores', () => {
+    expect(dataUrlBytes('data:image/svg+xml,%3Csvg%2F%3E')).toEqual({ bytes: new TextEncoder().encode('<svg/>'), ext: 'svg' });
+    expect(dataUrlBytes('data:image/jpeg;base64,/9g=').ext).toBe('jpg');
+    expect(dataUrlBytes('data:image/webp;base64,AAAA').ext).toBe('webp');
+    expect(() => dataUrlBytes('data:text/html,<p>')).toThrow(/no admitido/);
+  });
+
+  it('shares one file per image source, keeps filtered pixels inline and plain groups intact', async () => {
+    const photo = pngDataUrl(10, 10, '#ff00ff');
+    const c = new StaticCanvas(undefined, { width: 800, height: 600 });
+    const a = await FabricImage.fromURL(photo, {}, { left: 100, top: 100, assetSrc: 'asset:same' });
+    const b = await FabricImage.fromURL(photo, {}, { left: 300, top: 100, assetSrc: 'asset:same' });
+    b.filters = [new filters.Grayscale()];
+    b.applyFilters();
+    const loose = await FabricImage.fromURL(photo, {}, { left: 500, top: 100 }); // its data: URL is its canonical source
+    c.add(a, b, loose, new Group([new Rect({ id: 'in', width: 5, height: 5 })], { id: 'plain' }));
+    const project = readProject(c, { width: 800, height: 600 }, { kind: 'color', color: '#ABCDEF' });
+
+    vi.stubGlobal('fetch', async (url: string) => new Response(readFileSync(`.${url}`)));
+    const blob = await exportProject(project, { format: 'elpx', scale: 1, quality: 1, transparent: true }, (s) => s, (s) => (s === 'asset:same' ? photo : s));
+    const files = unzip(new Uint8Array(await blob.arrayBuffer()));
+    expect(Object.keys(files).filter((f) => f.startsWith('content/resources/'))).toEqual(['content/resources/imagen-1.png', 'content/resources/imagen-2.png']);
+    const doc = new DOMParser().parseFromString(text(files['content.xml'] as Uint8Array), 'application/xml');
+    const payload = JSON.parse(doc.querySelector('jsonProperties')?.textContent ?? '');
+    expect(payload).toMatchObject({ width: 800, height: 600, background: '#abcdef' });
+    const objects = payload.fabric.objects as Record<string, unknown>[];
+    expect(objects.map((o) => o.src)).toEqual([
+      '{{context_path}}/content/resources/imagen-1.png', '{{context_path}}/content/resources/imagen-1.png', '{{context_path}}/content/resources/imagen-2.png', undefined,
+    ]);
+    expect(objects[3]).toMatchObject({ type: 'Group', objects: [{ type: 'Rect' }] });
+    expect(JSON.stringify(objects)).not.toMatch(/"id"/);
+    const hrefs = payload.svg.match(/xlink:href="([^"]{0,40})/g) as string[];
+    expect(hrefs[0]).toContain('{{context_path}}');
+    expect(hrefs[1]).toContain('data:image/png'); // grayscale pixels stay inline
+  });
+
+  it('refuses to build a package without the eXeLearning files', async () => {
+    const project = readProject(new StaticCanvas(undefined, { width: 400, height: 200 }), { width: 400, height: 200 }, { kind: 'transparent' });
+    await expect(exportElpx(project, (s) => s, async () => ({}))).rejects.toThrow(/Faltan ficheros/);
   });
 });
