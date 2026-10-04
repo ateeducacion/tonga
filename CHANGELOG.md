@@ -4,6 +4,8 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.3] - 2026-10-04
+
 ### Añadido
 
 - **Lápiz** con color, grosor y modo «Recta» (Mayús fija ángulos de 45°), en el panel mientras está activo. Tonga 1 lo tenía y se había perdido. Se mantienen para los siguientes trazos.
