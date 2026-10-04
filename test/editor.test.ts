@@ -41,7 +41,11 @@ describe('Pencil', () => {
     pointer('mouse:down', 50, 50);
     pointer('mouse:up', 50, 50);
     pointer('mouse:move', 60, 60); // moving after release draws nothing
+    pointer('mouse:down', 50, 50);
+    pointer('mouse:move', 51, 50); // a shaky click leaves no dot either
+    pointer('mouse:up', 51, 50);
     expect(names()).toEqual(['Línea 1']);
+    expect(editor.canvas.getObjects()).toHaveLength(1);
     await editor.undo();
     expect(names()).toEqual([]);
   });
