@@ -1,0 +1,6 @@
+# Every pull request must cover at least 90 % of the lines and branches it changes (AGENTS.md).
+coverage:
+  status:
+    patch:
+      default:
+        target: 90%

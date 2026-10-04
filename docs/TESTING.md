@@ -22,7 +22,7 @@ Cubren la lógica sin DOM o con un DOM mínimo:
 - **catálogo**: el catálogo real se construye sin errores, búsqueda sin acentos;
 - **atajos**: combinaciones, y que no actúen mientras se escribe.
 
-La cobertura se publica en [Codecov](https://codecov.io/gh/ateeducacion/tonga) desde el CI (subida por OIDC, sin token). `npm run coverage` exige umbrales sobre esos módulos de lógica (líneas ≥ 98 %, sentencias ≥ 97 %, funciones ≥ 97 %, ramas ≥ 90 %). La conexión con el DOM (`src/app`, los componentes de `src/ui`, `main.ts`, IndexedDB) no se mide con tests unitarios: la cubren los E2E en tres navegadores.
+La cobertura se publica en [Codecov](https://codecov.io/gh/ateeducacion/tonga) desde el CI (subida por OIDC, sin token). `npm run coverage` exige umbrales sobre esos módulos de lógica (líneas ≥ 98 %, sentencias ≥ 97 %, funciones ≥ 97 %, ramas ≥ 90 %). Además, cada pull request tiene que cubrir al menos el 90 % de lo que cambia: el check `codecov/patch` (objetivo en `codecov.yml`) falla por debajo de ese valor. La conexión con el DOM (`src/app`, los componentes de `src/ui`, `main.ts`, IndexedDB) no se mide con tests unitarios: la cubren los E2E en tres navegadores.
 
 ## End-to-end
 

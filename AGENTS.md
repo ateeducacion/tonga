@@ -54,7 +54,7 @@ reuse lint           # REUSE/SPDX
 
 ## Tests
 
-Un cambio de comportamiento lleva un test que lo fije. La lógica (formato, historial, editor, exportación, importación, catálogo, atajos) se prueba con Vitest; la interfaz, con Playwright en los tres motores. Los E2E fallan ante cualquier error de consola o petición fuera de la app. No se añaden tests vacíos ni `skip` para ideas futuras. Detalle en [docs/TESTING.md](docs/TESTING.md).
+Un cambio de comportamiento lleva un test que lo fije. La lógica (formato, historial, editor, exportación, importación, catálogo, atajos) se prueba con Vitest; la interfaz, con Playwright en los tres motores. Los E2E fallan ante cualquier error de consola o petición fuera de la app. Todo pull request cubre con tests unitarios **al menos el 90 % de las líneas y ramas que cambia** (`codecov/patch`, fijado en `codecov.yml`). Si el check queda por debajo, se añaden tests o se elimina la rama muerta antes de fusionar; nunca se baja el objetivo. No se añaden tests vacíos ni `skip` para ideas futuras. Detalle en [docs/TESTING.md](docs/TESTING.md).
 
 ## Licencias
 
