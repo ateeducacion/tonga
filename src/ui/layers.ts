@@ -41,12 +41,36 @@ function dropSlot(row: HTMLElement, index: number, clientY: number): number {
   return clientY < box.top + box.height / 2 ? index : index + 1;
 }
 
+/** Adds the layer to the selection, or takes it out (a locked layer cannot be chosen). */
+function toggle(editor: Editor, id: string, name: string, locked: boolean): void {
+  if (locked) return announce(`${name} está bloqueada`);
+  const ids = editor.layers().filter((x) => x.selected).map((x) => x.id);
+  const on = !ids.includes(id);
+  editor.select(on ? [...ids, id] : ids.filter((x) => x !== id));
+  announce(on ? `${name} añadida a la selección` : `${name} quitada de la selección`);
+}
+
+/** «Combinar capas»: wired once; it joins whatever is selected into one layer. */
+let combineWired = false;
+
 export function renderLayers(editor: Editor): void {
   const list = byId('layers');
   const focusedKey = (document.activeElement as HTMLElement | null)?.dataset.focusKey;
   const layers = editor.layers();
   byId('layers-empty').hidden = layers.length > 0;
+  byId('layers-hint').hidden = layers.length < 2;
   byId('layers-count').textContent = String(layers.length);
+  const selected = layers.filter((l) => l.selected).length;
+  byId('layers-bar').hidden = selected < 2;
+  byId('layers-selected').textContent = `${selected} capas seleccionadas`;
+  if (!combineWired) {
+    combineWired = true;
+    byId('layers-combine').addEventListener('click', () => {
+      const n = editor.selected().length;
+      editor.group();
+      announce(`${n} capas combinadas en una`);
+    });
+  }
   list.replaceChildren(
     ...layers.map((l, i) => {
       const name = l.name || LAYER_LABEL[l.type];
@@ -54,6 +78,8 @@ export function renderLayers(editor: Editor): void {
       const select = h('button', { type: 'button', class: 'btn layer-name', 'data-focus-key': `${l.id}:select`, 'aria-pressed': l.selected ? 'true' : 'false' }, name);
       select.setAttribute('aria-label', `${name} (${state})`);
       select.addEventListener('click', (e) => {
+        // Ctrl/⌘ or Shift + click adds or removes the layer: several can then be combined.
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return toggle(editor, l.id, name, l.locked);
         // The first click re-renders the list, so the second one lands on a new button and no
         // dblclick fires; the click count survives the swap.
         if (e.detail === 2) return startRename(editor, select, l.id, name);
@@ -61,6 +87,11 @@ export function renderLayers(editor: Editor): void {
         announce(l.locked ? `${name} está bloqueada` : `${name} seleccionada`);
       });
       select.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && (e.ctrlKey || e.metaKey || e.shiftKey)) {
+          e.preventDefault();
+          toggle(editor, l.id, name, l.locked);
+          return;
+        }
         if (e.key !== 'F2') return;
         e.preventDefault();
         startRename(editor, select, l.id, name);

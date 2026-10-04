@@ -737,6 +737,26 @@ h3 {
 
 /* ---- Layers ------------------------------------------------------------------------------- */
 
+/* Several layers chosen (Ctrl/Shift + click): how many, and the button that combines them. */
+.layers-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  margin-block-end: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-selected);
+}
+
+.layers-bar[hidden] {
+  display: none;
+}
+
+.inspector .btn.combine {
+  justify-content: center;
+}
+
 .layers {
   list-style: none;
   margin: 0;

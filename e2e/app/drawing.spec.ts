@@ -250,6 +250,41 @@ test('an eXeLearning project with several slides asks which one to open', async 
   await expect(layers(page)).toHaveText(['Texto 1']);
 });
 
+test('several layers are chosen with Ctrl or Shift + click and combined into one', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await addShape(page, 'elipse');
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  const bar = page.getByRole('group', { name: 'Capas seleccionadas' });
+  await expect(bar).toBeHidden();
+  await expect(page.getByText('Ctrl o Mayús + clic para elegir varias capas')).toBeVisible();
+
+  await page.getByRole('button', { name: /^Rectángulo 1/ }).click({ modifiers: ['ControlOrMeta'] });
+  await expect(bar).toContainText('2 capas seleccionadas');
+  await page.getByRole('button', { name: /^Elipse 1/ }).focus();
+  await page.keyboard.press('Shift+Enter'); // the keyboard way
+  await expect(bar).toContainText('3 capas seleccionadas');
+  await page.getByRole('button', { name: /^Texto 1/ }).click({ modifiers: ['Shift'] }); // and out again
+  await expect(bar).toContainText('2 capas seleccionadas');
+
+  await bar.getByRole('button', { name: 'Combinar capas' }).click();
+  await expect(layers(page)).toHaveText(['Texto 1', 'Grupo 1']);
+  await expect(bar).toBeHidden();
+  await page.getByRole('button', { name: 'Deshacer' }).click();
+  await expect(layers(page)).toHaveText(['Texto 1', 'Elipse 1', 'Rectángulo 1']);
+});
+
+test('objects selected on the canvas are combined with one visible button', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await addShape(page, 'estrella');
+  await page.keyboard.press('ControlOrMeta+A');
+  await inspector(page).getByRole('button', { name: 'Combinar 2 objetos en una capa' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Grupo 1']);
+});
+
 test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'línea con flecha');
