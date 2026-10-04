@@ -125,7 +125,9 @@ describe('Editor (more operations)', () => {
 
   it('switches free drawing on and off and fits the zoom to a box', async () => {
     const ed = await editor();
-    ed.setDrawing(true, '#ff0000', 8);
+    ed.setPencil({ color: '#ff0000', width: 8 });
+    ed.setDrawing(true);
+    expect(ed.isDrawing).toBe(true);
     expect(ed.canvas.isDrawingMode).toBe(true);
     expect(ed.canvas.freeDrawingBrush).toMatchObject({ color: '#ff0000', width: 8 });
     ed.setDrawing(false);

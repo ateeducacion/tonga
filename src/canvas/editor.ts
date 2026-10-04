@@ -46,6 +46,13 @@ export const DEFAULT_FILL = '#f28c28';
 export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
 
+/** The pencil: colour, width, and freehand or straight lines. */
+export interface DrawStyle {
+  color: string;
+  width: number;
+  straight: boolean;
+}
+
 export function newId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -63,6 +70,10 @@ export class Editor {
   private clipboard: Layer[] = [];
   private pasteCount = 0;
   private listeners = new Set<() => void>();
+  private drawing = false;
+  private drawStyle: DrawStyle = { color: DEFAULT_STROKE, width: 4, straight: false };
+  private lineStart: Point | null = null;
+  private lineDraft: Line | null = null;
 
   constructor(
     element: HTMLCanvasElement,
@@ -92,6 +103,39 @@ export class Editor {
       this.identify(path, 'path');
       this.commit();
     });
+    // Straight pencil: press, drag and release draws one line (Shift keeps it at 45° steps).
+    this.canvas.on('mouse:down', ({ scenePoint }) => {
+      if (this.drawing && this.drawStyle.straight) this.lineStart = scenePoint;
+    });
+    this.canvas.on('mouse:move', ({ e, scenePoint }) => {
+      if (this.lineStart) this.draftLine(this.lineStart, scenePoint, e.shiftKey);
+    });
+    this.canvas.on('mouse:up', () => this.finishLine());
+  }
+
+  private draftLine(from: Point, to: Point, snap: boolean): void {
+    if (this.lineDraft) this.canvas.remove(this.lineDraft);
+    const end = snap ? snapAngle(from, to) : to;
+    this.lineDraft = new Line([from.x, from.y, end.x, end.y], {
+      stroke: this.drawStyle.color, strokeWidth: this.drawStyle.width, strokeUniform: true, strokeLineCap: 'round',
+    });
+    this.canvas.add(this.lineDraft);
+    this.canvas.requestRenderAll();
+  }
+
+  private finishLine(): void {
+    const line = this.lineDraft;
+    this.lineStart = null;
+    this.lineDraft = null;
+    if (!line) return;
+    // A click without a drag leaves no dot behind.
+    if (Math.hypot(line.x2 - line.x1, line.y2 - line.y1) < 2) {
+      this.canvas.remove(line);
+      return;
+    }
+    this.identify(line, 'line');
+    line.setCoords();
+    this.commit();
   }
 
   /** Called on every document or selection change. */
@@ -394,15 +438,37 @@ export class Editor {
     this.place(img, 'image', name);
   }
 
-  setDrawing(on: boolean, color = DEFAULT_STROKE, width = 4): void {
-    this.canvas.isDrawingMode = on;
-    const brush = this.canvas.freeDrawingBrush;
-    if (brush) {
-      brush.color = color;
-      brush.width = width;
-    }
+  /** Turns the pencil on or off; it keeps its colour, width and mode between uses. */
+  setDrawing(on: boolean): void {
+    this.drawing = on;
+    this.applyDrawStyle();
     if (on) this.canvas.discardActiveObject();
     this.emit();
+  }
+
+  get isDrawing(): boolean {
+    return this.drawing;
+  }
+
+  get pencil(): DrawStyle {
+    return { ...this.drawStyle };
+  }
+
+  setPencil(style: Partial<DrawStyle>): void {
+    this.drawStyle = { ...this.drawStyle, ...style };
+    this.applyDrawStyle();
+    this.emit();
+  }
+
+  private applyDrawStyle(): void {
+    // Straight lines are drawn by the mouse handlers, not by Fabric's free-drawing brush.
+    this.canvas.isDrawingMode = this.drawing && !this.drawStyle.straight;
+    this.canvas.skipTargetFind = this.drawing;
+    const brush = this.canvas.freeDrawingBrush as PencilBrush;
+    brush.color = this.drawStyle.color;
+    brush.width = this.drawStyle.width;
+    brush.strokeLineCap = 'round';
+    brush.strokeLineJoin = 'round';
   }
 
   // ---- Operations on the selection ----------------------------------------------------------
@@ -621,6 +687,16 @@ export class Editor {
     this.listeners.clear();
     return this.canvas.dispose();
   }
+}
+
+/** The end point moved to the nearest 45° direction from `from`, keeping the length. */
+export function snapAngle(from: { x: number; y: number }, to: { x: number; y: number }): Point {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const step = Math.PI / 4;
+  const angle = Math.round(Math.atan2(dy, dx) / step) * step;
+  const length = Math.hypot(dx, dy);
+  return new Point(from.x + Math.round(length * Math.cos(angle) * 1000) / 1000, from.y + Math.round(length * Math.sin(angle) * 1000) / 1000);
 }
 
 /** Union of the objects' axis-aligned boxes, in canvas units. */

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { Editor } from '../src/canvas/editor';
+import { Point } from 'fabric';
+import { Editor, snapAngle } from '../src/canvas/editor';
 import { newProject } from '../src/project/schema';
 
 let editor: Editor;
@@ -11,6 +12,56 @@ beforeEach(async () => {
 });
 
 const names = () => editor.layers().map((l) => l.name);
+
+describe('Pencil', () => {
+  const pointer = (type: 'mouse:down' | 'mouse:move' | 'mouse:up', x: number, y: number, shiftKey = false) =>
+    editor.canvas.fire(type, { e: new MouseEvent('mousemove', { shiftKey }), scenePoint: new Point(x, y) } as never);
+
+  it('keeps its colour, width and mode between uses', () => {
+    editor.setPencil({ color: '#2563eb', width: 16 });
+    editor.setDrawing(true);
+    editor.setDrawing(false);
+    editor.setDrawing(true);
+    expect(editor.pencil).toEqual({ color: '#2563eb', width: 16, straight: false });
+    expect(editor.canvas.freeDrawingBrush).toMatchObject({ color: '#2563eb', width: 16 });
+    expect(editor.canvas.skipTargetFind).toBe(true);
+  });
+
+  it('draws one undoable straight line per drag in «Recta» mode, nothing for a click', async () => {
+    editor.setPencil({ straight: true, color: '#e11d48', width: 8 });
+    editor.setDrawing(true);
+    expect(editor.canvas.isDrawingMode).toBe(false);
+    pointer('mouse:down', 100, 100);
+    pointer('mouse:move', 150, 120);
+    pointer('mouse:move', 300, 100);
+    pointer('mouse:up', 300, 100);
+    expect(names()).toEqual(['Línea 1']);
+    expect(editor.toProject().layers[0]?.object).toMatchObject({ stroke: '#e11d48', strokeWidth: 8, left: 200, top: 100 });
+    pointer('mouse:down', 50, 50);
+    pointer('mouse:up', 50, 50);
+    pointer('mouse:move', 60, 60); // moving after release draws nothing
+    expect(names()).toEqual(['Línea 1']);
+    await editor.undo();
+    expect(names()).toEqual([]);
+  });
+
+  it('keeps a straight line at 45° steps with Shift', () => {
+    editor.setPencil({ straight: true });
+    editor.setDrawing(true);
+    pointer('mouse:down', 0, 0);
+    pointer('mouse:move', 100, 90, true);
+    pointer('mouse:up', 100, 90);
+    const line = editor.toProject().layers[0]?.object as { x1: number; y1: number; x2: number; y2: number };
+    expect(Math.abs(line.x2 - line.x1)).toBeCloseTo(Math.abs(line.y2 - line.y1), 3);
+    expect(snapAngle({ x: 0, y: 0 }, { x: 10, y: 1 })).toMatchObject({ x: 10.05, y: 0 });
+  });
+
+  it('a click without the pencil draws nothing', () => {
+    pointer('mouse:down', 0, 0);
+    pointer('mouse:up', 0, 0);
+    expect(names()).toEqual([]);
+  });
+});
 
 describe('Editor', () => {
   it('starts empty with nothing to undo (RULE-068)', () => {

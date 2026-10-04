@@ -274,7 +274,7 @@ export class App {
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-tool]')) b.setAttribute('aria-checked', String(b.dataset.tool === tool));
     this.editor.setDrawing(tool === 'draw');
     this.editor.canvas.selection = tool === 'select';
-    this.editor.canvas.skipTargetFind = tool === 'hand';
+    this.editor.canvas.skipTargetFind = tool !== 'select';
     const names: Record<Tool, string> = { select: 'Seleccionar', hand: 'Mover la vista', draw: 'Dibujo libre' };
     announce(`Herramienta: ${names[tool]}`);
     this.render();
@@ -319,7 +319,7 @@ export class App {
     window.addEventListener('keyup', (e) => {
       if (e.code === 'Space' && space) {
         space = false;
-        this.editor.canvas.skipTargetFind = this.tool === 'hand';
+        this.editor.canvas.skipTargetFind = this.tool !== 'select';
         this.workspace.classList.toggle('hand', this.tool === 'hand');
       }
     });

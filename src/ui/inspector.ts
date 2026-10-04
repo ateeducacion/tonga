@@ -16,6 +16,7 @@ const PALETTE: [string, string][] = [
 ];
 const TRANSPARENT = 'transparent';
 const WIDTHS: [number, string][] = [[0, 'Ninguno'], [2, 'Fino'], [4, 'Medio'], [8, 'Grueso'], [12, 'Muy grueso']];
+const PENCIL_WIDTHS: [number, string][] = [[2, 'Fino'], [4, 'Medio'], [8, 'Grueso'], [16, 'Muy grueso']];
 // The «Posición, tamaño y alineación» section stays as the user left it across selections.
 let placementOpen = false;
 
@@ -31,14 +32,34 @@ let signature = '';
 export function renderInspector(editor: Editor, actions: InspectorActions, force = false): void {
   const form = byId<HTMLFormElement>('inspector');
   const info = editor.inspect();
-  const sig = info ? `${info.type}:${info.ids.join(',')}` : `canvas:${editor.size.width}x${editor.size.height}:${JSON.stringify(editor.currentBackground)}`;
+  const pencil = !info && editor.isDrawing;
+  const sig = info ? `${info.type}:${info.ids.join(',')}` : pencil ? 'pencil' : `canvas:${editor.size.width}x${editor.size.height}:${JSON.stringify(editor.currentBackground)}`;
   if (sig === signature && !force) {
     syncValues(form, info, editor);
     return;
   }
   signature = sig;
-  form.replaceChildren(...(info ? selectionFields(editor, info) : canvasFields(editor, actions)));
+  form.replaceChildren(...(info ? selectionFields(editor, info) : pencil ? pencilFields(editor) : canvasFields(editor, actions)));
   syncValues(form, info, editor);
+}
+
+/** While the pencil is on, the inspector holds its colour, width and mode for the next strokes. */
+function pencilFields(editor: Editor): HTMLElement[] {
+  const color = colour('Color del lápiz', 'pencil', (c) => editor.setPencil({ color: c }));
+  const widths = strokeWidths((w) => editor.setPencil({ width: w }), { widths: PENCIL_WIDTHS, name: 'pencilWidth', title: 'Grosor del lápiz', min: 1 });
+  bind(widths, 'pencilWidth', (v) => Number(v) >= 1 && editor.setPencil({ width: Number(v) }));
+  const mode = (straight: boolean, text: string) => {
+    const b = h('button', { type: 'button', class: 'btn', 'data-straight': String(straight), 'aria-pressed': 'false' }, text);
+    b.addEventListener('click', () => editor.setPencil({ straight }));
+    return b;
+  };
+  return [
+    h('p', { class: 'muted' }, 'Lápiz: elige cómo dibujar y traza sobre el lienzo.'),
+    color,
+    widths,
+    h('div', { class: 'segmented', role: 'group', 'aria-label': 'Modo del lápiz' }, mode(false, 'Mano alzada'), mode(true, 'Recta')),
+    h('p', { class: 'muted' }, 'En «Recta», mantén Mayús para trazar en ángulos de 45°.'),
+  ];
 }
 
 function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: Editor): void {
@@ -49,7 +70,13 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
         strokeWidth: String(info.strokeWidth ?? 0),
         text: info.text?.text ?? '', fontFamily: info.text?.fontFamily ?? '', fontSize: String(info.text?.fontSize ?? ''), textAlign: info.text?.textAlign ?? '',
       }
-    : { cw: String(editor.size.width), ch: String(editor.size.height) };
+    : { cw: String(editor.size.width), ch: String(editor.size.height), pencilWidth: String(editor.pencil.width) };
+  if (!info && editor.isDrawing) {
+    const p = editor.pencil;
+    for (const group of form.querySelectorAll<HTMLElement>('[data-colour="pencil"]')) syncColour(group, p.color);
+    for (const b of form.querySelectorAll<HTMLButtonElement>('[data-width]')) b.setAttribute('aria-pressed', String(Number(b.dataset.width) === p.width));
+    for (const b of form.querySelectorAll<HTMLButtonElement>('[data-straight]')) b.setAttribute('aria-pressed', String(b.dataset.straight === String(p.straight)));
+  }
   for (const [name, value] of Object.entries(values)) {
     const el = form.elements.namedItem(name);
     if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
@@ -161,9 +188,12 @@ function syncColour(group: HTMLElement, value: string): void {
 }
 
 /** Stroke width as drawn lines; the exact value stays one field away. */
-function strokeWidths(onChange: (width: number) => void): HTMLDivElement {
+function strokeWidths(
+  onChange: (width: number) => void,
+  { widths = WIDTHS, name = 'strokeWidth', title = 'Grosor del trazo', min = 0 } = {},
+): HTMLDivElement {
   const chips = h('div', { class: 'widths' });
-  for (const [width, text] of WIDTHS) {
+  for (const [width, text] of widths) {
     const line = h('span', { class: 'width-line' });
     if (width) line.style.blockSize = `${Math.max(1, width / 1.5)}px`;
     else line.classList.add('none');
@@ -171,8 +201,8 @@ function strokeWidths(onChange: (width: number) => void): HTMLDivElement {
     b.addEventListener('click', () => onChange(width));
     chips.append(b);
   }
-  const exact = num('Grosor exacto (px)', 'strokeWidth', { min: 0, max: 100 });
-  return h('div', { class: 'stroke-width', role: 'group', 'aria-label': 'Grosor del trazo' }, h('span', { class: 'field-title' }, 'Grosor del trazo'), chips, exact);
+  const exact = num('Grosor exacto (px)', name, { min, max: 100 });
+  return h('div', { class: 'stroke-width', role: 'group', 'aria-label': title }, h('span', { class: 'field-title' }, title), chips, exact);
 }
 
 /** A labelled slider with its value next to the label. */
