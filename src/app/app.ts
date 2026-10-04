@@ -402,6 +402,7 @@ export class App {
   private openExport(): void {
     const form = byId<HTMLDialogElement>('dlg-export').querySelector('form') as HTMLFormElement;
     (form.elements.namedItem('filename') as HTMLInputElement).value = this.title || defaultFileName();
+    (form.elements.namedItem('transparent') as HTMLInputElement).checked = this.editor.currentBackground.kind === 'transparent';
     this.updateExportForm(form);
     openDialog(byId<HTMLDialogElement>('dlg-export'));
   }

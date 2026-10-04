@@ -75,6 +75,20 @@ test('a background item from the library becomes the canvas background (RULE-112
   await expect(library).toBeHidden();
   await expect(layers(page)).toHaveCount(0);
   await expect(inspector(page).getByText('El fondo es una imagen de la biblioteca.')).toBeVisible();
+
+  // Export keeps the background unless asked for a transparent one, which drops it (like Canva).
+  await page.getByRole('button', { name: 'Exportar' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Exportar' });
+  await expect(dialog.getByLabel('Fondo transparente')).not.toBeChecked();
+  await dialog.getByLabel('Fondo transparente').check();
+  const png = await downloadFrom(page, () => dialog.getByRole('button', { name: 'Descargar' }).click());
+  const alpha = await page.evaluate(async (b64) => {
+    const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))]));
+    const ctx = new OffscreenCanvas(bitmap.width, bitmap.height).getContext('2d') as OffscreenCanvasRenderingContext2D;
+    ctx.drawImage(bitmap, 0, 0);
+    return ctx.getImageData(0, 0, 1, 1).data[3];
+  }, png.bytes.toString('base64'));
+  expect(alpha).toBe(0);
 });
 
 test('exports PNG, JPEG, SVG and PDF in the browser (RULE-108/101/114/022/086)', async ({ page }) => {
@@ -121,7 +135,7 @@ test('exports an eXeLearning package with an editable Slide, the screenshot and 
   const dialog = page.getByRole('dialog', { name: 'Exportar' });
   for (const format of ['eXeLearning', 'PDF (A4)']) {
     await dialog.getByLabel(format, { exact: true }).check();
-    for (const option of ['Escala', 'Calidad JPEG', 'Fondo transparente (si el lienzo no tiene fondo)']) await expect(dialog.getByLabel(option)).toBeHidden();
+    for (const option of ['Escala', 'Calidad JPEG', 'Fondo transparente']) await expect(dialog.getByLabel(option)).toBeHidden();
   }
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
 
