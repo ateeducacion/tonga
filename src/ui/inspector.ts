@@ -6,7 +6,7 @@ import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '
 import { HEX_COLOR } from '../project/schema';
 import { putAsset } from '../persistence/store';
 import { announce, byId, h, iconButton, toast } from './dom';
-import type { IconName } from './icons';
+import { icon, type IconName } from './icons';
 
 const FONTS = ['Arial', 'Verdana', 'Georgia', 'Times New Roman', 'Courier New', 'Trebuchet MS', 'Comic Sans MS'];
 /** One-tap colours; any other colour comes from the browser's picker or the HEX field. */
@@ -301,6 +301,15 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
   const key = (p: string) => `${p}:${info.ids.join(',')}`;
   const multi = info.type === 'selection';
   const parts: HTMLElement[] = [];
+  if (multi) {
+    // The plain way to join several objects: one visible button, not only an icon.
+    const combine = h('button', { type: 'button', class: 'btn primary combine' }, icon('group'), `Combinar ${info.ids.length} objetos en una capa`);
+    combine.addEventListener('click', () => {
+      editor.group();
+      announce(`${info.ids.length} objetos combinados en una capa`);
+    });
+    parts.push(combine);
+  }
   if (!multi) {
     const name = h('label', {}, 'Nombre', h('input', { type: 'text', name: 'name', maxlength: 200 }));
     name.querySelector('input')?.addEventListener('change', (e) => editor.rename(info.ids[0] ?? '', (e.target as HTMLInputElement).value));
@@ -347,7 +356,6 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
     action('flipVertical2', 'Voltear en vertical', () => editor.flip('y')),
     action('chevronsUp', 'Traer al frente', () => editor.order('front')),
     action('chevronsDown', 'Enviar al fondo', () => editor.order('back')),
-    ...(multi ? [action('group', 'Agrupar', () => editor.group())] : []),
     ...(info.type === 'group' ? [action('ungroup', 'Desagrupar', () => editor.ungroup())] : []),
     action('trash2', 'Borrar (Supr)', () => editor.removeSelected())));
 

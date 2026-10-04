@@ -106,8 +106,13 @@
         <form id="inspector" class="inspector" autocomplete="off" novalidate></form>
       </section>
       <section id="panel-layers" class="panel-section" role="tabpanel" aria-labelledby="tab-layers" hidden>
+        <div id="layers-bar" class="layers-bar" role="group" aria-label="Capas seleccionadas" hidden>
+          <span id="layers-selected" aria-live="polite"></span>
+          <button type="button" class="btn primary" id="layers-combine" data-icon="group">Combinar capas</button>
+        </div>
         <ul id="layers" class="layers" role="list"></ul>
         <p id="layers-empty" class="muted">El lienzo está vacío. Añade un texto, una forma o una imagen.</p>
+        <p id="layers-hint" class="muted">Ctrl o Mayús + clic para elegir varias capas y combinarlas en una.</p>
       </section>
     </aside>
 
