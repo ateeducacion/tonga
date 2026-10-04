@@ -1,7 +1,7 @@
 // The interactive editor: a Fabric canvas plus Tonga's document rules (ids, names, lock,
 // background, snapshot history). The UI talks to this class only.
 import {
-  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, Group, Line, Path, PencilBrush, Point, Rect, Textbox, Triangle, util,
+  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, type FabricObjectProps, Gradient, Group, Line, Path, PencilBrush, Point, Rect, Shadow, Textbox, Triangle, util,
 } from 'fabric';
 import { History } from '../history/history';
 import { LAYER_LABEL } from '../i18n/es';
@@ -10,7 +10,9 @@ import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
-import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
+import { snapToGrid, snapToObjects, type Guide, type SnapResult, type Stuck } from './snap';
+import { followText, isConnector, makeConnector, refreshLinks } from './links';
+import { applyAdjustments, applyCrop, cropFromFrame, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
 
 export type { ShapeKind } from './shapes';
 export type AlignEdge = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
@@ -38,13 +40,107 @@ export interface SelectionInfo {
   fill: string | null;
   stroke: string | null;
   strokeWidth: number;
-  text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; textAlign: string };
+  shadow: ShadowStyle | null;
+  lineStyle: LineStyle;
+  /** The fill gradient; `fill` then holds its first colour. */
+  gradient: GradientFill | null;
+  connector?: { arrow: boolean };
+  text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; underline: boolean; textAlign: string };
   image?: { adjustments: ImageAdjustments; crop: ImageCrop };
 }
 
 export const DEFAULT_FILL = '#f28c28';
 export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
+
+// The snapping magnet, in screen pixels: an edge or centre jumps to a line closer than SNAP_PULL,
+// and stays on it until pulled more than SNAP_RELEASE away.
+const SNAP_PULL = 8;
+const SNAP_RELEASE = 20;
+/** Grid spacing for «Ajustar a la rejilla», in canvas pixels. */
+export const GRID_SIZE = 40;
+
+export interface Snapping {
+  grid: boolean;
+  objects: boolean;
+}
+
+export type LineStyle = 'solid' | 'dashed' | 'dotted';
+
+/** Dashes and dots grow with the stroke, so they keep their look at any width. */
+export function dashFor(style: LineStyle, width: number): number[] | null {
+  const w = Math.max(1, width);
+  if (style === 'dashed') return [w * 4, w * 2];
+  return style === 'dotted' ? [0, w * 2.5] : null;
+}
+
+export function lineStyleOf(o: FabricObject): LineStyle {
+  const dash = o.strokeDashArray;
+  if (!dash?.length) return 'solid';
+  return dash[0] === 0 ? 'dotted' : 'dashed';
+}
+
+export type GradientDirection = 'horizontal' | 'vertical' | 'diagonal';
+
+/** A two-colour linear gradient across the object's box. */
+export interface GradientFill {
+  from: string;
+  to: string;
+  direction: GradientDirection;
+}
+
+const GRADIENT_COORDS: Record<GradientDirection, { x1: number; y1: number; x2: number; y2: number }> = {
+  horizontal: { x1: 0, y1: 0, x2: 1, y2: 0 },
+  vertical: { x1: 0, y1: 0, x2: 0, y2: 1 },
+  diagonal: { x1: 0, y1: 0, x2: 1, y2: 1 },
+};
+
+export function makeGradient(g: GradientFill): Gradient<'linear'> {
+  return new Gradient({
+    type: 'linear', gradientUnits: 'percentage', coords: GRADIENT_COORDS[g.direction],
+    colorStops: [{ offset: 0, color: g.from }, { offset: 1, color: g.to }],
+  });
+}
+
+export function readGradient(fill: unknown): GradientFill | null {
+  if (!(fill instanceof Gradient) || fill.type !== 'linear' || fill.colorStops.length < 2) return null;
+  const { x1, y1, x2, y2 } = fill.coords;
+  const direction: GradientDirection = x1 === x2 ? 'vertical' : y1 === y2 ? 'horizontal' : 'diagonal';
+  const stops = [...fill.colorStops].sort((a, b) => a.offset - b.offset);
+  return { from: (stops[0] as { color: string }).color, to: (stops[stops.length - 1] as { color: string }).color, direction };
+}
+
+/** A simple drop shadow, in canvas pixels. */
+export interface ShadowStyle {
+  color: string;
+  blur: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+export const DEFAULT_SHADOW: ShadowStyle = { color: '#1f2937', blur: 12, offsetX: 4, offsetY: 6 };
+
+/** New objects of each kind start with the style last chosen for that kind. */
+type StyleKind = 'shape' | 'line' | 'text';
+const STYLE_KEYS: Record<StyleKind, string[]> = {
+  shape: ['fill', 'stroke', 'strokeWidth', 'strokeDashArray', 'strokeLineCap', 'shadow'],
+  line: ['stroke', 'strokeWidth', 'strokeDashArray', 'strokeLineCap', 'shadow'],
+  text: ['fill', 'fontFamily', 'fontWeight', 'fontStyle', 'underline', 'shadow'],
+};
+
+function styleKind(o: FabricObject): StyleKind | null {
+  if (o instanceof Textbox) return 'text';
+  const type = layerType(o);
+  if (type === 'line' || (type === 'path' && !o.fill)) return 'line';
+  return type === 'image' || type === 'group' ? null : 'shape';
+}
+
+/** The pencil: colour, width, and freehand or straight lines. */
+export interface DrawStyle {
+  color: string;
+  width: number;
+  straight: boolean;
+}
 
 export function newId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
@@ -63,6 +159,16 @@ export class Editor {
   private clipboard: Layer[] = [];
   private pasteCount = 0;
   private listeners = new Set<() => void>();
+  private drawing = false;
+  private drawStyle: DrawStyle = { color: DEFAULT_STROKE, width: 4, straight: false };
+  private lineStart: Point | null = null;
+  private lineDraft: Line | null = null;
+  private styles: Record<StyleKind, Record<string, unknown>> = { shape: {}, line: {}, text: {} };
+  private snap: Snapping = { grid: false, objects: false };
+  private dragging = false;
+  private gridStuck: Stuck = {};
+  private crop: { image: FabricImage; frame: Rect } | null = null;
+  private guides: Guide[] = [];
 
   constructor(
     element: HTMLCanvasElement,
@@ -70,7 +176,11 @@ export class Editor {
   ) {
     this.canvas = new Canvas(element, { preserveObjectStacking: true, selectionKey: 'shiftKey', fireRightClick: true, stopContextMenu: false });
     this.canvas.freeDrawingBrush = new PencilBrush(this.canvas);
-    const changed = () => this.emit();
+    const changed = () => {
+      // Selecting something else while cropping leaves the image as it was.
+      if (this.crop && this.canvas.getActiveObject() !== this.crop.frame) this.finishCrop(false);
+      else this.emit();
+    };
     this.canvas.on('selection:created', changed);
     this.canvas.on('selection:updated', changed);
     this.canvas.on('selection:cleared', changed);
@@ -92,6 +202,139 @@ export class Editor {
       this.identify(path, 'path');
       this.commit();
     });
+    // Straight pencil: press, drag and release draws one line (Shift keeps it at 45° steps).
+    this.canvas.on('mouse:down', ({ scenePoint }) => {
+      if (this.drawing && this.drawStyle.straight) this.lineStart = scenePoint;
+    });
+    this.canvas.on('mouse:move', ({ e, scenePoint }) => {
+      if (this.lineStart) this.draftLine(this.lineStart, scenePoint, e.shiftKey);
+    });
+    this.canvas.on('mouse:up', () => this.finishLine());
+    this.canvas.on('object:moving', ({ target, e }) => {
+      this.snapMoving(target, !!e && 'altKey' in e && e.altKey); // Alt: move freely
+      if (typeof target.attachedTo === 'string') followText(this.canvas, target); // dragging the text moves its shape
+      refreshLinks(this.canvas);
+    });
+    this.canvas.on('object:scaling', () => refreshLinks(this.canvas));
+    this.canvas.on('object:rotating', () => refreshLinks(this.canvas));
+    this.canvas.on('mouse:dblclick', ({ target }) => {
+      if (target && !this.drawing && styleKind(target) === 'shape' && !(target instanceof Textbox)) this.writeInside(target);
+    });
+    this.canvas.on('mouse:up', () => this.clearGuides());
+    this.canvas.on('after:render', ({ ctx }) => this.drawGuides(ctx));
+  }
+
+  get snapping(): Snapping {
+    return { ...this.snap };
+  }
+
+  setSnapping(snap: Partial<Snapping>): void {
+    this.snap = { ...this.snap, ...snap };
+  }
+
+  /**
+   * While dragging, pulls the object onto other objects' (and the canvas') edges and centres,
+   * else onto the grid. `free` (Alt held) moves it without snapping.
+   */
+  private snapMoving(target: FabricObject, free = false): void {
+    this.dragging = true;
+    // What it was snapped to on the previous move holds it until a clear pull (see snap.ts).
+    const stuck = { x: this.guides.find((g) => g.axis === 'x')?.at, y: this.guides.find((g) => g.axis === 'y')?.at };
+    const gridStuck = this.gridStuck;
+    this.guides = [];
+    this.gridStuck = {};
+    if (free || (!this.snap.grid && !this.snap.objects)) return;
+    const box = target.getBoundingRect();
+    const [pull, release] = [SNAP_PULL / this.zoom, SNAP_RELEASE / this.zoom];
+    let result: SnapResult = { dx: 0, dy: 0, guides: [] };
+    if (this.snap.objects) {
+      const moving = target instanceof ActiveSelection ? target.getObjects() : [target];
+      const others = this.canvas.getObjects().filter((o) => !moving.includes(o) && o.visible !== false && !o.excludeFromExport).map((o) => o.getBoundingRect());
+      others.push({ left: 0, top: 0, width: this.width, height: this.height });
+      result = snapToObjects(box, others, pull, stuck, release);
+    }
+    if (this.snap.grid) {
+      // An object line wins on its axis; otherwise the grid.
+      const grid = snapToGrid(box, GRID_SIZE, pull, gridStuck, release);
+      if (!result.guides.some((g) => g.axis === 'x')) {
+        result.dx = grid.dx;
+        this.gridStuck.x = grid.x;
+      }
+      if (!result.guides.some((g) => g.axis === 'y')) {
+        result.dy = grid.dy;
+        this.gridStuck.y = grid.y;
+      }
+    }
+    target.set({ left: target.left + result.dx, top: target.top + result.dy }).setCoords();
+    this.guides = result.guides;
+  }
+
+  private clearGuides(): void {
+    if (!this.dragging) return;
+    this.dragging = false;
+    this.guides = [];
+    this.gridStuck = {};
+    this.canvas.requestRenderAll();
+  }
+
+  /** While dragging: the grid (if snapping to it) and short guides between lined-up objects. */
+  private drawGuides(ctx: CanvasRenderingContext2D): void {
+    const grid = this.dragging && this.snap.grid;
+    if (!grid && !this.guides.length) return;
+    ctx.save();
+    ctx.transform(...(this.canvas.viewportTransform as [number, number, number, number, number, number]));
+    ctx.lineWidth = 1 / this.zoom;
+    if (grid) {
+      ctx.strokeStyle = 'rgba(37, 99, 235, 0.12)'; // over the objects (Fabric has no public layer below them), so faint
+      ctx.beginPath();
+      for (let x = GRID_SIZE; x < this.width; x += GRID_SIZE) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, this.height);
+      }
+      for (let y = GRID_SIZE; y < this.height; y += GRID_SIZE) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(this.width, y);
+      }
+      ctx.stroke();
+    }
+    ctx.strokeStyle = '#e11d48';
+    ctx.beginPath();
+    for (const g of this.guides) {
+      if (g.axis === 'x') {
+        ctx.moveTo(g.at, g.from);
+        ctx.lineTo(g.at, g.to);
+      } else {
+        ctx.moveTo(g.from, g.at);
+        ctx.lineTo(g.to, g.at);
+      }
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private draftLine(from: Point, to: Point, snap: boolean): void {
+    if (this.lineDraft) this.canvas.remove(this.lineDraft);
+    const end = snap ? snapAngle(from, to) : to;
+    this.lineDraft = new Line([from.x, from.y, end.x, end.y], {
+      stroke: this.drawStyle.color, strokeWidth: this.drawStyle.width, strokeUniform: true, strokeLineCap: 'round',
+    });
+    this.canvas.add(this.lineDraft);
+    this.canvas.requestRenderAll();
+  }
+
+  private finishLine(): void {
+    const line = this.lineDraft;
+    this.lineStart = null;
+    this.lineDraft = null;
+    if (!line) return;
+    // A click without a drag leaves no dot behind.
+    if (Math.hypot(line.x2 - line.x1, line.y2 - line.y1) < 2) {
+      this.canvas.remove(line);
+      return;
+    }
+    this.identify(line, 'line');
+    line.setCoords();
+    this.commit();
   }
 
   /** Called on every document or selection change. */
@@ -150,6 +393,7 @@ export class Editor {
   private async load(project: Project, selectIds: string[] = []): Promise<void> {
     this.restoring = true;
     try {
+      this.crop = null; // the frame goes with the old content
       this.canvas.discardActiveObject();
       this.width = project.canvas.width;
       this.height = project.canvas.height;
@@ -166,6 +410,7 @@ export class Editor {
   /** Records the current state as an undo step. Same `key` in a row = one step. */
   commit(key: string | null = null): void {
     if (this.restoring) return;
+    refreshLinks(this.canvas); // connectors and inside texts follow whatever changed
     const before = this.history.current;
     this.history.push(serializeProject(this.toProject()), key);
     if (this.history.current !== before) this.rev++;
@@ -231,7 +476,7 @@ export class Editor {
   /** Layers top-most first, as a layers panel lists them. */
   layers(): LayerInfo[] {
     const selected = new Set(this.selected());
-    return this.canvas.getObjects().map((o) => ({
+    return this.canvas.getObjects().filter((o) => !o.excludeFromExport).map((o) => ({
       id: o.id ?? '', type: layerType(o), name: o.name ?? '', visible: o.visible !== false, locked: o.selectable === false,
       selected: selected.has(o),
     })).reverse();
@@ -257,15 +502,19 @@ export class Editor {
       height: Math.round(o.getScaledHeight()),
       angle: Math.round(o.angle),
       opacity: o.opacity,
-      fill: multi ? null : colour(o.fill),
+      fill: multi ? null : (readGradient(o.fill)?.from ?? colour(o.fill)),
+      gradient: multi ? null : readGradient(o.fill),
       stroke: multi ? null : colour(o.stroke),
       strokeWidth: o.strokeWidth,
+      shadow: readShadow(multi ? this.selected()[0] : o),
+      lineStyle: lineStyleOf(multi ? (this.selected()[0] as FabricObject) : o),
     };
     if (isImage(o)) info.image = { adjustments: readAdjustments(o), crop: readCrop(o) };
+    if (isConnector(o)) info.connector = { arrow: o.connectArrow === true };
     if (o instanceof Textbox) {
       info.text = {
         text: o.text, fontFamily: o.fontFamily, fontSize: o.fontSize, bold: o.fontWeight === 'bold' || Number(o.fontWeight) >= 600,
-        italic: o.fontStyle === 'italic', textAlign: o.textAlign,
+        italic: o.fontStyle === 'italic', underline: o.underline, textAlign: o.textAlign,
       };
     }
     return info;
@@ -362,12 +611,13 @@ export class Editor {
 
   addText(text = 'Texto'): void {
     const size = Math.max(16, Math.round(this.unit() / 4));
-    this.place(new Textbox(text, { width: this.unit() * 2, fontSize: size, fontFamily: 'Arial', fill: DEFAULT_STROKE, textAlign: 'center' }), 'text');
+    this.place(new Textbox(text, { width: this.unit() * 2, fontSize: size, fontFamily: 'Arial', fill: DEFAULT_STROKE, textAlign: 'center', ...this.styleFor('text') }), 'text');
   }
 
   addShape(kind: ShapeKind): void {
     const u = this.unit();
-    const style = { fill: DEFAULT_FILL, stroke: DEFAULT_STROKE, strokeWidth: 2, strokeUniform: true };
+    const style = { fill: DEFAULT_FILL, stroke: DEFAULT_STROKE, strokeWidth: 2, strokeUniform: true, ...this.styleFor('shape') };
+    const lineStyle = { stroke: DEFAULT_STROKE, strokeWidth: 4, strokeUniform: true, strokeLineCap: 'round' as const, strokeLineJoin: 'round' as const, ...this.styleFor('line') };
     // kind is a ShapeKind, so it is always in the catalogue.
     const shape = SHAPES.find((x) => x.kind === kind) as ShapeDef;
     if (kind === 'rect') this.place(new Rect({ width: u, height: u, ...style }), 'rect');
@@ -375,13 +625,43 @@ export class Editor {
     else if (kind === 'ellipse') this.place(new Ellipse({ rx: u / 2, ry: u / 3, ...style }), 'ellipse');
     else if (kind === 'circle') this.place(new Ellipse({ rx: u / 2, ry: u / 2, ...style }), 'ellipse', undefined, shape.label);
     else if (kind === 'triangle') this.place(new Triangle({ width: u, height: u, ...style }), 'triangle');
-    else if (kind === 'line') this.place(new Line([-u / 2, 0, u / 2, 0], { stroke: DEFAULT_STROKE, strokeWidth: 4, strokeUniform: true }), 'line');
+    else if (kind === 'line') this.place(new Line([-u / 2, 0, u / 2, 0], lineStyle), 'line');
     else {
-      // A closed path with a fill: the inspector offers its fill colour like any other shape.
-      const path = new Path(shape.d, { ...style, scaleX: u / 100, scaleY: u / 100 });
+      // Closed shapes have a fill, like any other shape; open ones (arrow lines) are only a stroke.
+      const open = shape.open === true;
+      const look: Partial<FabricObjectProps> = open ? { ...lineStyle, fill: null } : style;
+      const path = new Path(shape.d, { ...look, scaleX: u / 100, scaleY: u / 100 });
       path.set({ left: this.width / 2, top: this.height / 2 });
       this.place(path, 'path', undefined, shape.label);
     }
+  }
+
+  /** The style last chosen for this kind of object, ready to give to a new one. */
+  private styleFor(kind: StyleKind): Record<string, unknown> {
+    const { shadow, ...rest } = this.styles[kind];
+    // Each new object gets its own shadow and gradient, never one shared with another object.
+    const gradient = readGradient(rest.fill);
+    if (gradient) rest.fill = makeGradient(gradient);
+    return shadow === undefined ? rest : { ...rest, shadow: shadow ? new Shadow(shadow as ShadowStyle) : null };
+  }
+
+  /** A gradient fill on every selected shape; null turns it back into its first colour. */
+  setGradient(gradient: GradientFill | null): void {
+    for (const o of this.selected()) {
+      const current = readGradient(o.fill);
+      const fill = gradient ? makeGradient(gradient) : current ? current.from : o.fill;
+      o.set({ fill });
+      this.remember(o, { fill });
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  /** Remembers the style properties the user just set on an object, for the next of its kind. */
+  private remember(o: FabricObject, props: Record<string, unknown>): void {
+    const kind = styleKind(o);
+    if (!kind) return;
+    for (const k of STYLE_KEYS[kind]) if (k in props) this.styles[kind][k] = props[k];
   }
 
 
@@ -394,15 +674,89 @@ export class Editor {
     this.place(img, 'image', name);
   }
 
-  setDrawing(on: boolean, color = DEFAULT_STROKE, width = 4): void {
-    this.canvas.isDrawingMode = on;
-    const brush = this.canvas.freeDrawingBrush;
-    if (brush) {
-      brush.color = color;
-      brush.width = width;
+  // ---- Connectors and text inside shapes ------------------------------------------------------
+
+  /**
+   * Joins the two selected objects with a connector (an arrow, or a plain line) that follows
+   * them when they move. It goes behind both. False if the selection is not two objects.
+   */
+  connect(arrow: boolean): boolean {
+    const objs = this.selected();
+    if (objs.length !== 2) return false;
+    const [from, to] = objs as [FabricObject, FabricObject];
+    this.canvas.discardActiveObject();
+    const look: Record<string, unknown> = { stroke: DEFAULT_STROKE, strokeWidth: 3, strokeLineCap: 'round', strokeLineJoin: 'round', ...this.styles.line };
+    delete look.shadow; // a connector looks like a line, without the remembered shadow
+    const connector = makeConnector(from, to, arrow, look);
+    this.identify(connector, 'path', undefined, 'Conector');
+    const objects = this.canvas.getObjects();
+    this.canvas.insertAt(Math.min(objects.indexOf(from), objects.indexOf(to)), connector);
+    this.canvas.setActiveObject(connector);
+    this.commit();
+    return true;
+  }
+
+  /** Arrow head on or off for the selected connector. */
+  setConnectorArrow(arrow: boolean): void {
+    const o = this.canvas.getActiveObject();
+    if (!o || !isConnector(o)) return;
+    o.set({ connectArrow: arrow, path: [] }); // forces the re-draw
+    this.commit();
+  }
+
+  /** Text inside the given (or selected) shape: edits the one it has, or writes a new one. */
+  writeInside(shape = this.canvas.getActiveObject()): void {
+    if (!shape || styleKind(shape) !== 'shape') return;
+    const existing = this.canvas.getObjects().find((o) => o.attachedTo === shape.id);
+    const text = (existing as Textbox | undefined) ?? new Textbox('Texto', {
+      fontSize: Math.max(14, Math.round(Math.min(shape.getScaledHeight() / 5, this.unit() / 6))), fontFamily: 'Arial',
+      fill: DEFAULT_STROKE, textAlign: 'center', ...this.styleFor('text'),
+    });
+    if (!existing) {
+      text.set({ attachedTo: shape.id });
+      this.identify(text, 'text');
+      this.canvas.insertAt(this.canvas.getObjects().indexOf(shape) + 1, text);
+      refreshLinks(this.canvas);
+      this.commit();
     }
+    this.canvas.setActiveObject(text);
+    text.enterEditing();
+    text.selectAll();
+    this.canvas.requestRenderAll();
+    this.emit();
+  }
+
+  /** Turns the pencil on or off; it keeps its colour, width and mode between uses. */
+  setDrawing(on: boolean): void {
+    this.drawing = on;
+    this.applyDrawStyle();
     if (on) this.canvas.discardActiveObject();
     this.emit();
+  }
+
+  get isDrawing(): boolean {
+    return this.drawing;
+  }
+
+  get pencil(): DrawStyle {
+    return { ...this.drawStyle };
+  }
+
+  setPencil(style: Partial<DrawStyle>): void {
+    this.drawStyle = { ...this.drawStyle, ...style };
+    this.applyDrawStyle();
+    this.emit();
+  }
+
+  private applyDrawStyle(): void {
+    // Straight lines are drawn by the mouse handlers, not by Fabric's free-drawing brush.
+    this.canvas.isDrawingMode = this.drawing && !this.drawStyle.straight;
+    this.canvas.skipTargetFind = this.drawing;
+    const brush = this.canvas.freeDrawingBrush as PencilBrush;
+    brush.color = this.drawStyle.color;
+    brush.width = this.drawStyle.width;
+    brush.strokeLineCap = 'round';
+    brush.strokeLineJoin = 'round';
   }
 
   // ---- Operations on the selection ----------------------------------------------------------
@@ -481,7 +835,64 @@ export class Editor {
     const targets = active instanceof ActiveSelection && !('left' in props || 'top' in props || 'angle' in props || 'scaleX' in props)
       ? active.getObjects()
       : [active];
-    for (const o of targets) o.set(props).setCoords();
+    for (const o of targets) {
+      o.set(props).setCoords();
+      // A dashed or dotted stroke keeps its pattern in proportion to the new width.
+      const own = 'strokeWidth' in props && lineStyleOf(o) !== 'solid' ? { strokeDashArray: dashFor(lineStyleOf(o), o.strokeWidth) } : {};
+      o.set(own);
+      this.remember(o, { ...props, ...own });
+    }
+    this.canvas.requestRenderAll();
+    this.commit(key);
+  }
+
+  /** Solid, dashed or dotted stroke on every selected object. Remembered for new ones. */
+  setLineStyle(style: LineStyle): void {
+    for (const o of this.selected()) {
+      const props = { strokeDashArray: dashFor(style, o.strokeWidth), strokeLineCap: style === 'dotted' || styleKind(o) === 'line' ? 'round' : 'butt' };
+      o.set(props as Partial<FabricObjectProps>);
+      this.remember(o, props);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  /**
+   * Spreads three or more selected objects evenly between the first and the last, leaving the
+   * same gap between neighbours (as in Draw and Inkscape). Fewer than three: nothing to do.
+   */
+  distribute(axis: 'x' | 'y'): void {
+    const objs = this.selected();
+    if (objs.length < 3) return;
+    this.canvas.discardActiveObject();
+    const items = objs.map((o) => {
+      const r = o.getBoundingRect();
+      return { o, start: axis === 'x' ? r.left : r.top, size: axis === 'x' ? r.width : r.height };
+    }).sort((a, b) => a.start - b.start);
+    const first = items[0] as (typeof items)[number];
+    const last = items[items.length - 1] as (typeof items)[number];
+    const used = items.reduce((sum, i) => sum + i.size, 0);
+    const gap = (last.start + last.size - first.start - used) / (items.length - 1);
+    let at = first.start;
+    for (const { o, size } of items) {
+      const c = o.getCenterPoint();
+      const centre = at + size / 2;
+      o.setPositionByOrigin(new Point(axis === 'x' ? centre : c.x, axis === 'y' ? centre : c.y), 'center', 'center');
+      o.setCoords();
+      at += size + gap;
+    }
+    this.select(objs.map((o) => o.id ?? ''));
+    this.commit();
+  }
+
+  /** A drop shadow on every selected object, or none. Remembered for new objects. */
+  setShadow(shadow: ShadowStyle | null, key: string | null = null): void {
+    const targets = this.selected();
+    if (!targets.length) return;
+    for (const o of targets) {
+      o.set({ shadow: shadow ? new Shadow(shadow) : null });
+      this.remember(o, { shadow: shadow && { ...shadow } });
+    }
     this.canvas.requestRenderAll();
     this.commit(key);
   }
@@ -521,6 +932,51 @@ export class Editor {
     this.canvas.requestRenderAll();
     this.commit();
     return true;
+  }
+
+  // ---- Visual crop ----------------------------------------------------------------------------
+
+  /**
+   * Shows a frame over the selected image to crop it with the mouse: resize the frame, then
+   * finishCrop(true). The frame is a helper, never part of the document.
+   */
+  startCrop(): boolean {
+    const img = this.canvas.getActiveObject();
+    if (!isImage(img) || this.crop) return false;
+    const c = img.getCenterPoint();
+    const frame = new Rect({
+      width: img.getScaledWidth(), height: img.getScaledHeight(), angle: img.angle,
+      // No stroke, so the frame's corners are exactly the kept area; its outline is the
+      // (always shown) selection border.
+      fill: 'rgba(37, 99, 235, 0.12)', strokeWidth: 0, borderColor: '#2563eb', borderDashArray: [6, 4], borderScaleFactor: 2,
+      lockRotation: true, excludeFromExport: true, transparentCorners: false, cornerColor: '#2563eb',
+    });
+    frame.setControlVisible('mtr', false);
+    frame.setPositionByOrigin(c, 'center', 'center');
+    this.crop = { image: img, frame };
+    this.canvas.add(frame);
+    this.canvas.setActiveObject(frame);
+    this.canvas.requestRenderAll();
+    this.emit();
+    return true;
+  }
+
+  get isCropping(): boolean {
+    return this.crop !== null;
+  }
+
+  /** Crops the image to the frame (apply) or leaves it as it was; the image ends selected. */
+  finishCrop(apply: boolean): void {
+    const crop = this.crop;
+    if (!crop) return;
+    this.crop = null;
+    const corners = crop.frame.getCoords();
+    this.canvas.remove(crop.frame);
+    if (apply) applyCrop(crop.image, cropFromFrame(crop.image, corners));
+    this.canvas.setActiveObject(crop.image);
+    this.canvas.requestRenderAll();
+    if (apply) this.commit();
+    else this.emit();
   }
 
   /** Changes size by setting the scale so the object's own box becomes width x height. */
@@ -621,6 +1077,21 @@ export class Editor {
     this.listeners.clear();
     return this.canvas.dispose();
   }
+}
+
+function readShadow(o: FabricObject | undefined): ShadowStyle | null {
+  const s = o?.shadow;
+  return s ? { color: typeof s.color === 'string' ? s.color : DEFAULT_SHADOW.color, blur: s.blur, offsetX: s.offsetX, offsetY: s.offsetY } : null;
+}
+
+/** The end point moved to the nearest 45° direction from `from`, keeping the length. */
+export function snapAngle(from: { x: number; y: number }, to: { x: number; y: number }): Point {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const step = Math.PI / 4;
+  const angle = Math.round(Math.atan2(dy, dx) / step) * step;
+  const length = Math.hypot(dx, dy);
+  return new Point(from.x + Math.round(length * Math.cos(angle) * 1000) / 1000, from.y + Math.round(length * Math.sin(angle) * 1000) / 1000);
 }
 
 /** Union of the objects' axis-aligned boxes, in canvas units. */

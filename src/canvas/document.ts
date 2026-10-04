@@ -10,16 +10,26 @@ declare module 'fabric' {
     name?: string;
     /** Canonical image source ("asset:<sha256>", "repositorios/…" or data:) behind a blob:/http URL. */
     assetSrc?: string;
+    /** A connector joins the objects with these ids (see links.ts). */
+    connectFrom?: string;
+    connectTo?: string;
+    connectArrow?: boolean;
+    /** A text written inside the shape with this id (see links.ts). */
+    attachedTo?: string;
   }
   interface SerializedObjectProps {
     id?: string;
     name?: string;
     assetSrc?: string;
+    connectFrom?: string;
+    connectTo?: string;
+    connectArrow?: boolean;
+    attachedTo?: string;
   }
 }
 
 // Serialized with every object (Fabric's documented custom-property hook).
-FabricObject.customProperties = ['id', 'name', 'assetSrc'];
+FabricObject.customProperties = ['id', 'name', 'assetSrc', 'connectFrom', 'connectTo', 'connectArrow', 'attachedTo'];
 // Fabric 7 default, stated explicitly: every position in Tonga is the object's centre.
 FabricObject.ownDefaults.originX = 'center';
 FabricObject.ownDefaults.originY = 'center';
@@ -88,8 +98,9 @@ async function resolveSources(o: Record<string, unknown>, resolve: SourceResolve
 export function readProject(canvas: StaticCanvas, size: { width: number; height: number }, background: Background, title = ''): Project {
   const project = newProject(size.width, size.height, background);
   project.title = title;
+  // Helpers on the canvas (the crop frame) are not part of the document; toObject() skips them too.
   const serialized = (canvas.toObject() as { objects: Record<string, unknown>[] }).objects;
-  project.layers = canvas.getObjects().map((o, i) => toLayer(o, serialized[i]));
+  project.layers = canvas.getObjects().filter((o) => !o.excludeFromExport).map((o, i) => toLayer(o, serialized[i]));
   return project;
 }
 

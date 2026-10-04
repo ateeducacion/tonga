@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { FabricImage, StaticCanvas } from 'fabric';
-import { applyAdjustments, applyCrop, buildFilters, clearBackground, NO_ADJUSTMENTS, readAdjustments, readCrop } from '../src/canvas/image';
+import { FabricImage, Point, StaticCanvas, type Rect } from 'fabric';
+import { applyAdjustments, applyCrop, buildFilters, clearBackground, cropFromFrame, NO_ADJUSTMENTS, NO_CROP, readAdjustments, readCrop } from '../src/canvas/image';
 import { readProject, writeProject } from '../src/canvas/document';
-import { Editor } from '../src/canvas/editor';
+import { Editor, readGradient } from '../src/canvas/editor';
+import { exportProject } from '../src/export/export';
 import { newProject } from '../src/project/schema';
 
 function photo(width = 200, height = 100): FabricImage {
@@ -19,10 +20,12 @@ describe('image adjustments', () => {
 
   it('round-trips every adjustment through the filters', () => {
     const img = photo();
-    const a = { grayscale: true, sepia: true, invert: true, brightness: 25, contrast: -40, saturation: 60, blur: 30 };
+    const a = { grayscale: true, sepia: true, invert: true, brightness: 25, contrast: -40, saturation: 60, blur: 30, vintage: true, pixelate: 1, noise: 45 };
     applyAdjustments(img, a);
-    expect(img.filters.map((f) => f.type)).toEqual(['Grayscale', 'Sepia', 'Invert', 'Brightness', 'Contrast', 'Saturation', 'Blur']);
+    expect(img.filters.map((f) => f.type)).toEqual(['Grayscale', 'Sepia', 'Invert', 'Brightness', 'Contrast', 'Saturation', 'Blur', 'Vintage', 'Pixelate', 'Noise']);
     expect(readAdjustments(img)).toEqual(a);
+    applyAdjustments(img, { ...NO_ADJUSTMENTS, pixelate: 100 });
+    expect(img.filters[0]).toMatchObject({ blocksize: 41 });
   });
 
   it('clamps out-of-range values', () => {
@@ -57,6 +60,19 @@ describe('image crop', () => {
     expect(img).toMatchObject({ cropX: 50, cropY: 10, width: 100, height: 80 });
     expect(img.getPointByOrigin('left', 'top').x).toBeCloseTo(leftEdgeOfContent, 6);
     expect(readCrop(img)).toEqual({ left: 25, top: 10, right: 25, bottom: 10 });
+  });
+
+  it('turns a frame drawn over the image into the crop, through rotation and an earlier crop', () => {
+    const img = photo(200, 100); // centred at (300, 200), 200×100 on canvas
+    const corners = (l: number, t: number, r: number, b: number) => [new Point(l, t), new Point(r, t), new Point(r, b), new Point(l, b)];
+    expect(cropFromFrame(img, corners(250, 160, 350, 250))).toEqual({ left: 25, top: 10, right: 25, bottom: 0 });
+    expect(cropFromFrame(img, corners(0, 0, 1000, 1000))).toEqual(NO_CROP); // outside the image: ignored
+    applyCrop(img, { left: 50, top: 0, right: 0, bottom: 0 }); // the right half, still at its place
+    img.rotate(90);
+    const c = img.getCenterPoint();
+    // A frame over the upper half of the rotated image keeps the left half of what is shown.
+    const kept = cropFromFrame(img, corners(c.x - 50, c.y - 50, c.x + 50, c.y));
+    expect(kept).toEqual({ left: 50, top: 0, right: 25, bottom: 0 });
   });
 
   it('never crops the whole image away', () => {
@@ -98,6 +114,83 @@ describe('clearBackground', () => {
   it('has nothing to clear when the border is already transparent', () => {
     const { data, width, height } = pixels(['...', '.R.', '...']);
     expect(clearBackground(data, width, height)).toBe(0);
+  });
+});
+
+describe('Editor visual crop', () => {
+  async function withImage(): Promise<Editor> {
+    document.body.innerHTML = '<canvas id="c"></canvas>';
+    const ed = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
+    await ed.open(newProject(800, 600));
+    const el = document.createElement('canvas');
+    el.width = 200;
+    el.height = 100;
+    await ed.addImage(el.toDataURL(), 'Foto');
+    return ed;
+  }
+
+  it('crops to the frame the user resized, as one undo step; the frame is never in the document', async () => {
+    const ed = await withImage();
+    expect(ed.startCrop()).toBe(true);
+    expect(ed.startCrop()).toBe(false); // already cropping
+    expect(ed.isCropping).toBe(true);
+    expect(ed.layers().map((l) => l.name)).toEqual(['Foto']);
+    expect(ed.toProject().layers).toHaveLength(1);
+    const frame = ed.canvas.getActiveObject() as Rect;
+    frame.set({ scaleX: 0.5 }).setCoords(); // keep the middle half
+    ed.finishCrop(true);
+    expect(ed.isCropping).toBe(false);
+    expect(ed.inspect()?.image?.crop).toEqual({ left: 25, top: 0, right: 25, bottom: 0 });
+    expect(ed.canvas.getObjects()).toHaveLength(1);
+    await ed.undo();
+    expect(ed.inspect()?.image?.crop).toEqual(NO_CROP);
+  });
+
+  it('cancels on «Cancelar», when something else is selected, and on undo', async () => {
+    const ed = await withImage();
+    ed.startCrop();
+    ed.finishCrop(false);
+    expect(ed.inspect()?.image?.crop).toEqual(NO_CROP);
+    ed.finishCrop(true); // not cropping: nothing to do
+    ed.startCrop();
+    ed.canvas.discardActiveObject();
+    ed.canvas.fire('selection:cleared', {} as never);
+    expect(ed.isCropping).toBe(false);
+    expect(ed.canvas.getObjects()).toHaveLength(1);
+    ed.selectAll();
+    ed.startCrop();
+    await ed.undo();
+    expect(ed.isCropping).toBe(false);
+    ed.addShape('rect');
+    expect(ed.startCrop()).toBe(false); // not an image
+  });
+});
+
+describe('Editor gradients', () => {
+  it('fills a shape with a two-colour gradient, changes it, keeps it in SVG and turns it back to a colour', async () => {
+    document.body.innerHTML = '<canvas id="c"></canvas>';
+    const ed = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
+    await ed.open(newProject(800, 600));
+    ed.addShape('rect');
+    ed.setGradient({ from: '#2563eb', to: '#ffffff', direction: 'vertical' });
+    expect(ed.inspect()).toMatchObject({ fill: '#2563eb', gradient: { from: '#2563eb', to: '#ffffff', direction: 'vertical' } });
+    for (const direction of ['horizontal', 'diagonal'] as const) {
+      ed.setGradient({ from: '#2563eb', to: '#16a34a', direction });
+      expect(ed.inspect()?.gradient?.direction).toBe(direction);
+    }
+    await ed.open(ed.toProject());
+    ed.selectAll();
+    expect(ed.inspect()?.gradient).toEqual({ from: '#2563eb', to: '#16a34a', direction: 'diagonal' });
+    const svg = await (await exportProject(ed.toProject(), { format: 'svg', scale: 1, quality: 1, transparent: true }, (s) => s, (s) => s)).text();
+    expect(svg).toContain('<linearGradient');
+
+    ed.addShape('star'); // remembered, as its own gradient
+    expect(ed.inspect()?.gradient?.to).toBe('#16a34a');
+    ed.setGradient(null);
+    expect(ed.inspect()).toMatchObject({ fill: '#2563eb', gradient: null });
+    ed.setGradient(null); // already a plain colour
+    expect(ed.inspect()?.fill).toBe('#2563eb');
+    expect(readGradient('#fff')).toBeNull();
   });
 });
 

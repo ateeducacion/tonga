@@ -1,0 +1,26 @@
+school.svg|Colegio
+book.svg|Libro
+book-open.svg|Libro abierto
+notebook-pen.svg|Cuaderno
+pencil.svg|Lápiz
+pen-tool.svg|Pluma
+ruler.svg|Regla
+calculator.svg|Calculadora
+backpack.svg|Mochila
+graduation-cap.svg|Birrete
+library.svg|Biblioteca
+presentation.svg|Pizarra
+clipboard-list.svg|Lista de tareas
+calendar.svg|Calendario
+clock.svg|Reloj
+alarm-clock.svg|Despertador
+lightbulb.svg|Idea
+puzzle.svg|Puzle
+palette.svg|Paleta
+brush.svg|Pincel
+scissors.svg|Tijeras
+paperclip.svg|Clip
+globe.svg|Globo terráqueo
+map.svg|Mapa
+map-pin.svg|Ubicación
+compass.svg|Brújula

@@ -4,6 +4,30 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Añadido
+
+- **Lápiz** con color, grosor y modo «Recta» (Mayús fija ángulos de 45°), en el panel mientras está activo. Tonga 1 lo tenía y se había perdido. Se mantienen para los siguientes trazos.
+- **Recordar el último estilo**: una forma, línea o texto nuevo empieza con los colores, el grosor, el estilo de línea, la sombra y el degradado elegidos la última vez para ese tipo de objeto.
+- **Subrayado** junto a negrita y cursiva.
+- **Sombra** en cualquier objeto: color, difuminado y desplazamiento.
+- **Estilo de línea**: continua, guiones o puntos, en proporción al grosor.
+- **Líneas con flecha** (una o dos puntas) y un grupo **Diagramas** en Formas: inicio o fin, documento, base de datos, llave y corchete.
+- **Distribuir** en horizontal o en vertical tres o más objetos con el mismo hueco.
+- **Ajustar a otros objetos**: al arrastrar, un borde se alinea con otro borde y el centro con otro centro (de otro objeto o del lienzo), con una guía corta entre los dos. Funciona como un imán: a menos de 8 px salta a la línea y, una vez alineado, hay que tirar más de 20 px para despegarlo, así que no tiembla con el pulso. Alt mueve libremente. Se activa en los ajustes del lienzo (viene desactivado).
+- **Ajustar a la rejilla** (cada 40 px), en los ajustes del lienzo: atrae como un imán (el mismo que con los objetos) cuando la esquina pasa cerca de una línea, sin ir a saltos, y la rejilla se ve solo mientras se arrastra.
+- **Pegar** (Ctrl+V) una imagen o un texto copiados en otra aplicación.
+- **Conectores**: «Conectar con flecha/línea» une dos objetos seleccionados y la unión los sigue al moverlos.
+- **Escribir dentro de una forma** con doble clic (o «Escribir dentro»): el texto queda centrado, sigue a la forma y encoge la letra si no cabe.
+- **Recortar con el ratón**: un marco con tiradores sobre la imagen, además de los campos por lado.
+- **Degradado** de dos colores en el relleno de las formas (horizontal, vertical o diagonal).
+- Filtros de imagen **Vintage**, **Pixelado** y **Ruido**.
+- **Plantillas** en «Nuevo dibujo»: mapa conceptual, diagrama de Venn, línea temporal, cómic, storyboard, ejes cartesianos, ciclo y organigrama, editables pieza a pieza.
+- Biblioteca **Iconos y símbolos**: 143 iconos SVG de Lucide (licencia ISC) en cinco colecciones. Cada colección de otro autor declara su licencia en un `rights.json` y la biblioteca la muestra.
+
+### Eliminado
+
+- «Mostrar rejilla» en los ajustes del lienzo: una rejilla siempre visible que no se usaba. Con «Ajustar a la rejilla», se ve mientras se arrastra.
+
 ## [2.3.2] - 2026-10-04
 
 ### Añadido
