@@ -6,8 +6,9 @@ import { resolveSource, resolveToDataUrl } from '../assets/sources';
 import { APP_BUILD, APP_VERSION } from '../config';
 import { UserError } from '../errors';
 import { defaultFileName, exportFileName, exportProject, type ExportFormat } from '../export/export';
+import { slideToProject } from '../import/exe';
 import { importFile } from '../import/load';
-import { clearAutosave, getPref, loadAutosave, saveAutosave, setPref } from '../persistence/store';
+import { clearAutosave, getPref, loadAutosave, putAsset, saveAutosave, setPref } from '../persistence/store';
 import { importEmbeddedAssets, toTongaFile } from '../project/file';
 import { newProject, parseProject, type Background } from '../project/schema';
 import { announce, byId, confirmDialog, download, hydrateIcons, openDialog, toast } from '../ui/dom';
@@ -16,6 +17,7 @@ import { renderLayers } from '../ui/layers';
 import { ContextMenu, type MenuEntry } from '../ui/context-menu';
 import { Library } from '../ui/library';
 import { setupShapesMenu } from '../ui/shapes-menu';
+import { chooseSlide } from '../ui/slides-dialog';
 import { setupTabs } from '../ui/tabs';
 import { commandFor, isTyping, type Command } from '../ui/shortcuts';
 
@@ -212,6 +214,13 @@ export class App {
       if (result.kind === 'project') {
         if (!(await this.confirmDiscard())) return;
         await this.openProject(await importEmbeddedAssets(result.project), `Proyecto «${file.name}» abierto.`);
+      } else if (result.kind === 'slides') {
+        // One Slide iDevice opens directly; several ask which one.
+        const slide = result.slides.length === 1 ? result.slides[0] : await chooseSlide(result.slides);
+        if (!slide || !(await this.confirmDiscard())) return;
+        const { project, missing } = await slideToProject(slide, result.files, putAsset);
+        const lost = missing ? ` Faltaban ${missing === 1 ? 'una imagen' : `${missing} imágenes`} en el fichero.` : '';
+        await this.openProject(project, `Diapositiva «${slide.title}» abierta.${lost}`);
       } else if (result.kind === 'legacy-svg') {
         this.title = result.name;
         this.zoomFit();

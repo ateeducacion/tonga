@@ -38,7 +38,7 @@ FabricObject.ownDefaults.originY = 'center';
 export type SourceResolver = (canonical: string) => string | Promise<string>;
 
 const TYPE_MAP: Record<string, LayerType> = {
-  image: 'image', textbox: 'text', 'i-text': 'text', text: 'text', rect: 'rect', ellipse: 'ellipse', circle: 'ellipse',
+  image: 'image', textbox: 'text', 'i-text': 'text', itext: 'text', text: 'text', rect: 'rect', ellipse: 'ellipse', circle: 'ellipse',
   triangle: 'triangle', line: 'line', path: 'path', group: 'group',
 };
 

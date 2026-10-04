@@ -20,7 +20,7 @@ Cubren la lógica sin DOM o con un DOM mínimo:
 - **imagen**: ida y vuelta de cada ajuste (también vintage, pixelado y ruido), recorte con el marco (giro y recorte previo incluidos), límites, recorte que no desplaza el contenido visible, persistencia en el `.tonga` y deshacer en un solo paso al arrastrar un deslizador; «Quitar fondo» que borra el marco liso, conserva el mismo color encerrado y no toca una imagen sin fondo uniforme;
 - **exportación**: nombres de fichero, fondo blanco en JPEG/PDF, SVG vectorial a tamaño de documento y con el texto escapado;
 - **escritor de PDF**: tabla `xref` válida, página A4 con la orientación del dibujo;
-- **importación**: tipo por bytes, límites, saneado de SVG (scripts, handlers, URL externas, entidades) y SVG de Tonga 1;
+- **importación**: tipo por bytes, límites, saneado de SVG (scripts, handlers, URL externas, entidades) y SVG de Tonga 1; ZIP (deflate real de eXeLearning, rutas peligrosas, dañado, cifrado), diapositivas de eXeLearning (varias por página, iDevices rotos, imágenes que faltan) y la ida y vuelta Tonga → `.elpx` → Tonga;
 - **catálogo**: el catálogo real se construye sin errores, los iconos llevan la licencia de su `rights.json` y uno roto hace fallar el build, búsqueda sin acentos;
 - **atajos**: combinaciones, y que no actúen mientras se escribe.
 

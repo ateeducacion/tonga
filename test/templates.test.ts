@@ -26,6 +26,18 @@ describe('templates', () => {
     }
   });
 
+  it('a resource cover has editable placeholder texts, a logo and a library image', () => {
+    for (const kind of ['cover-panel', 'cover-band'] as const) {
+      const project = buildTemplate(kind, 1280, 720, { kind: 'transparent' });
+      const byName = (n: string) => project.layers.find((l) => l.name === n);
+      expect(byName('Título')).toMatchObject({ type: 'text', object: { text: 'Título del recurso', fontWeight: 'bold' } });
+      expect(byName('Subtítulo')?.object).toMatchObject({ fontStyle: 'italic' });
+      expect(byName('Imagen')).toMatchObject({ type: 'image', object: { src: 'repositorios/iconosescuela/book-open.svg' } });
+      expect(byName('Logo')?.type).toBe('path');
+      expect(project.layers[0]).toMatchObject({ name: 'Fondo', locked: true }); // covers the canvas, so it starts locked
+    }
+  });
+
   it('opens in the editor with its ties working, as a fresh document', async () => {
     document.body.innerHTML = '<canvas id="c"></canvas>';
     const editor = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
