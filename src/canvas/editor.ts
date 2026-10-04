@@ -10,7 +10,7 @@ import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
-import { snapToGrid, snapToObjects, type Guide, type SnapResult } from './snap';
+import { snapToGrid, snapToObjects, type Guide, type SnapResult, type Stuck } from './snap';
 import { followText, isConnector, makeConnector, refreshLinks } from './links';
 import { applyAdjustments, applyCrop, cropFromFrame, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
 
@@ -53,8 +53,10 @@ export const DEFAULT_FILL = '#f28c28';
 export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
 
-/** How close (screen pixels) an edge must come to another to snap to it. */
-const SNAP_DISTANCE = 5;
+// The snapping magnet, in screen pixels: an edge or centre jumps to a line closer than SNAP_PULL,
+// and stays on it until pulled more than SNAP_RELEASE away.
+const SNAP_PULL = 8;
+const SNAP_RELEASE = 20;
 /** Grid spacing for «Ajustar a la rejilla», in canvas pixels. */
 export const GRID_SIZE = 40;
 
@@ -164,6 +166,7 @@ export class Editor {
   private styles: Record<StyleKind, Record<string, unknown>> = { shape: {}, line: {}, text: {} };
   private snap: Snapping = { grid: false, objects: true };
   private dragging = false;
+  private gridStuck: Stuck = {};
   private crop: { image: FabricImage; frame: Rect } | null = null;
   private guides: Guide[] = [];
 
@@ -235,22 +238,32 @@ export class Editor {
    */
   private snapMoving(target: FabricObject, free = false): void {
     this.dragging = true;
-    // What it was snapped to on the previous move keeps it a little longer (see snap.ts).
+    // What it was snapped to on the previous move holds it until a clear pull (see snap.ts).
     const stuck = { x: this.guides.find((g) => g.axis === 'x')?.at, y: this.guides.find((g) => g.axis === 'y')?.at };
+    const gridStuck = this.gridStuck;
     this.guides = [];
+    this.gridStuck = {};
     if (free || (!this.snap.grid && !this.snap.objects)) return;
     const box = target.getBoundingRect();
+    const [pull, release] = [SNAP_PULL / this.zoom, SNAP_RELEASE / this.zoom];
     let result: SnapResult = { dx: 0, dy: 0, guides: [] };
     if (this.snap.objects) {
       const moving = target instanceof ActiveSelection ? target.getObjects() : [target];
       const others = this.canvas.getObjects().filter((o) => !moving.includes(o) && o.visible !== false && !o.excludeFromExport).map((o) => o.getBoundingRect());
       others.push({ left: 0, top: 0, width: this.width, height: this.height });
-      result = snapToObjects(box, others, SNAP_DISTANCE / this.zoom, stuck);
+      result = snapToObjects(box, others, pull, stuck, release);
     }
     if (this.snap.grid) {
-      const grid = snapToGrid(box, GRID_SIZE, SNAP_DISTANCE / this.zoom);
-      if (!result.guides.some((g) => g.axis === 'x')) result.dx = grid.dx;
-      if (!result.guides.some((g) => g.axis === 'y')) result.dy = grid.dy;
+      // An object line wins on its axis; otherwise the grid.
+      const grid = snapToGrid(box, GRID_SIZE, pull, gridStuck, release);
+      if (!result.guides.some((g) => g.axis === 'x')) {
+        result.dx = grid.dx;
+        this.gridStuck.x = grid.x;
+      }
+      if (!result.guides.some((g) => g.axis === 'y')) {
+        result.dy = grid.dy;
+        this.gridStuck.y = grid.y;
+      }
     }
     target.set({ left: target.left + result.dx, top: target.top + result.dy }).setCoords();
     this.guides = result.guides;
@@ -260,6 +273,7 @@ export class Editor {
     if (!this.dragging) return;
     this.dragging = false;
     this.guides = [];
+    this.gridStuck = {};
     this.canvas.requestRenderAll();
   }
 

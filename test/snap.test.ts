@@ -24,8 +24,14 @@ describe('snap geometry', () => {
   });
 
   it('pulls the top-left corner onto a grid line only when it is close (a magnet, not steps)', () => {
-    expect(snapToGrid(box, 20, 5)).toEqual({ dx: -3, dy: 0 }); // 103 → 100; 47 is 7 px from 40 or 60: free
-    expect(snapToGrid({ ...box, top: 58 }, 20, 5)).toEqual({ dx: -3, dy: 2 });
+    expect(snapToGrid(box, 20, 5)).toMatchObject({ dx: -3, dy: 0, x: 100, y: undefined }); // 47 is 7 px from 40 or 60: free
+    expect(snapToGrid({ ...box, top: 58 }, 20, 5)).toMatchObject({ dx: -3, dy: 2, x: 100, y: 60 });
+  });
+
+  it('keeps the corner on its grid line until it is pulled past the release distance', () => {
+    expect(snapToGrid({ ...box, left: 108 }, 20, 5, { x: 100 }, 12)).toMatchObject({ dx: -8, x: 100 }); // held at 8 px
+    expect(snapToGrid({ ...box, left: 113 }, 20, 5, { x: 100 }, 12)).toMatchObject({ dx: 0, x: undefined }); // 13 px: free
+    expect(snapToObjects({ ...box, left: 115 }, [{ left: 0, top: 300, width: 100, height: 50 }], 6, { x: 100 }, 20).dx).toBe(-15); // a custom release
   });
 
   it('stays on the line it snapped to until the box moves twice the threshold away', () => {
@@ -78,8 +84,13 @@ describe('Editor snapping while dragging', () => {
     const r = moving.getBoundingRect();
     expect([r.left % 40, r.top % 40].map((v) => Math.round(Math.min(v, 40 - v) * 1000) / 1000)).toEqual([0, 0]);
     ed.canvas.renderAll(); // draws the grid
-    drag(ed, moving, 803, 407); // corner 7 and 11 px from the lines: moves freely
-    expect(moving.left).toBe(803);
+    drag(ed, moving, 813, 417); // corner 17 px off the line it is on: still held (magnet)
+    expect(moving.getBoundingRect().left).toBeCloseTo(720, 5);
+    drag(ed, moving, 820, 424); // 24 px: comes off
+    expect(moving.left).toBe(820);
+    ed.canvas.fire('mouse:up', {} as never);
+    drag(ed, moving, 813, 417); // a new drag starts free: 17 px is too far to catch
+    expect(moving.left).toBe(813);
     ed.canvas.fire('mouse:up', {} as never);
     ed.setSnapping({ grid: false });
     drag(ed, moving, 793, 397); // corner (717, 321) near the grid crossing (720, 320)

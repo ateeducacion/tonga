@@ -80,12 +80,13 @@ function guide(axis: Axis, at: number, moved: Box, other: Box): Guide {
 }
 
 /**
- * Lines up the box's edges or centre with those of the other boxes (canvas included). `stuck`
- * holds what it was snapped to on the previous move: that line keeps it up to twice the threshold.
+ * Lines up the box's edges or centre with those of the other boxes (canvas included) when one
+ * comes within `threshold`. `stuck` holds what it was snapped to on the previous move: that line
+ * keeps it until it is more than `release` away, so it takes a clear pull to come off.
  */
-export function snapToObjects(box: Box, others: Box[], threshold: number, stuck: Stuck = {}): SnapResult {
-  const x = keep(box, others, 'x', stuck.x, threshold * 2) ?? nearest(box, others, 'x', threshold);
-  const y = keep(box, others, 'y', stuck.y, threshold * 2) ?? nearest(box, others, 'y', threshold);
+export function snapToObjects(box: Box, others: Box[], threshold: number, stuck: Stuck = {}, release = threshold * 2): SnapResult {
+  const x = keep(box, others, 'x', stuck.x, release) ?? nearest(box, others, 'x', threshold);
+  const y = keep(box, others, 'y', stuck.y, release) ?? nearest(box, others, 'y', threshold);
   const dx = x?.shift ?? 0;
   const dy = y?.shift ?? 0;
   const moved = { ...box, left: box.left + dx, top: box.top + dy };
@@ -95,11 +96,18 @@ export function snapToObjects(box: Box, others: Box[], threshold: number, stuck:
   return { dx, dy, guides };
 }
 
-/** Pulls the box's top-left corner onto a grid line when it is within `threshold` of one. */
-export function snapToGrid(box: Box, size: number, threshold: number): { dx: number; dy: number } {
-  const to = (v: number) => {
-    const shift = Math.round(v / size) * size - v;
-    return Math.abs(shift) <= threshold ? shift : 0;
+/**
+ * Pulls the box's top-left corner onto a grid line when it comes within `threshold` of one, and
+ * keeps it on the line it is `stuck` to until it is more than `release` away. Returns the shift
+ * and the lines it is on now (to pass back as `stuck` on the next move).
+ */
+export function snapToGrid(box: Box, size: number, threshold: number, stuck: Stuck = {}, release = threshold * 2): SnapResult & Stuck {
+  const to = (v: number, held: number | undefined): [number, number | undefined] => {
+    if (held !== undefined && Math.abs(held - v) <= release) return [held - v, held];
+    const line = Math.round(v / size) * size;
+    return Math.abs(line - v) <= threshold ? [line - v, line] : [0, undefined];
   };
-  return { dx: to(box.left), dy: to(box.top) };
+  const [dx, x] = to(box.left, stuck.x);
+  const [dy, y] = to(box.top, stuck.y);
+  return { dx, dy, guides: [], x, y };
 }
