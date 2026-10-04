@@ -44,6 +44,17 @@ Un fichero `.tonga` es JSON en UTF-8. Guarda el dibujo para continuarlo otro dí
 | `layers[].object` | objeto | Datos de Fabric de **ese** objeto (`toObject()`); posiciones con origen `center`. |
 | `assets` | mapa | Solo en ficheros descargados: los bytes de cada imagen local, como `data:`. |
 
+### Vínculos entre capas (2.3.3)
+
+Dentro de `layers[].object`, dos propiedades propias de Tonga atan una capa a otras por su `id`. Son opcionales y aditivas: no cambian `version`, y una versión anterior de Tonga las ignora (los objetos quedan donde estaban).
+
+| Propiedad | En | Significado |
+|---|---|---|
+| `connectFrom`, `connectTo`, `connectArrow` | un trazado (`path`) | Conector entre las capas `connectFrom` y `connectTo`, con punta de flecha si `connectArrow` es `true`. Tonga lo vuelve a dibujar cuando se mueven y lo borra si falta una de las dos. |
+| `attachedTo` | un texto (`text`) | Texto escrito dentro de la forma `attachedTo`: va en su centro y desaparece con ella. |
+
+Sombra (`shadow`), discontinuo (`strokeDashArray`), degradado (`fill` con un `Gradient` lineal) y subrayado (`underline`) son propiedades normales de Fabric.
+
 ## Imágenes
 
 Una imagen se referencia con `src`:

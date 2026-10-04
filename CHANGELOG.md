@@ -4,6 +4,26 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Añadido
+
+- **Lápiz** con color, grosor y modo «Recta» (Mayús fija ángulos de 45°), en el panel mientras está activo. Tonga 1 lo tenía y se había perdido. Se mantienen para los siguientes trazos.
+- **Borrador** (tecla X): borra los trazos, líneas y flechas por los que pasa; cada pasada se deshace de una vez.
+- **Recordar el último estilo**: una forma, línea o texto nuevo empieza con los colores, el grosor, el estilo de línea, la sombra y el degradado elegidos la última vez para ese tipo de objeto.
+- **Subrayado** junto a negrita y cursiva.
+- **Sombra** en cualquier objeto: color, difuminado y desplazamiento.
+- **Estilo de línea**: continua, guiones o puntos, en proporción al grosor.
+- **Líneas con flecha** (una o dos puntas) y un grupo **Diagramas** en Formas: inicio o fin, documento, base de datos, llave y corchete.
+- **Distribuir** en horizontal o en vertical tres o más objetos con el mismo hueco.
+- **Ajustar a otros objetos** (bordes y centros, con guías al arrastrar) y **ajustar a la rejilla**, en los ajustes del lienzo. La rejilla visible mide ahora píxeles del dibujo, como el ajuste.
+- **Pegar** (Ctrl+V) una imagen o un texto copiados en otra aplicación.
+- **Conectores**: «Conectar con flecha/línea» une dos objetos seleccionados y la unión los sigue al moverlos.
+- **Escribir dentro de una forma** con doble clic (o «Escribir dentro»): el texto queda centrado, sigue a la forma y encoge la letra si no cabe.
+- **Recortar con el ratón**: un marco con tiradores sobre la imagen, además de los campos por lado.
+- **Degradado** de dos colores en el relleno de las formas (horizontal, vertical o diagonal).
+- Filtros de imagen **Vintage**, **Pixelado** y **Ruido**.
+- **Plantillas** en «Nuevo dibujo»: mapa conceptual, diagrama de Venn, línea temporal, cómic, storyboard, ejes cartesianos, ciclo y organigrama, editables pieza a pieza.
+- Biblioteca **Iconos y símbolos**: 143 iconos SVG de Lucide (licencia ISC) en cinco colecciones. Cada colección de otro autor declara su licencia en un `rights.json` y la biblioteca la muestra.
+
 ## [2.3.2] - 2026-10-04
 
 ### Añadido
