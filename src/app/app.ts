@@ -1,5 +1,6 @@
 // Wires the UI to the editor: tools, dialogs, shortcuts, zoom, import/export, autosave.
 import { Editor, GRID_SIZE, type ShapeKind } from '../canvas/editor';
+import { buildTemplate, TEMPLATES } from '../canvas/templates';
 import type { CatalogAsset } from '../assets/catalog';
 import { resolveSource, resolveToDataUrl } from '../assets/sources';
 import { APP_BUILD, APP_VERSION } from '../config';
@@ -182,8 +183,12 @@ export class App {
     w = Math.min(8192, Math.max(16, Math.round(w || 1123)));
     h = Math.min(8192, Math.max(16, Math.round(h || 794)));
     const bg: Background = data.get('bg') === 'color' ? { kind: 'color', color: String(data.get('bgcolor')) } : { kind: 'transparent' };
+    const template = TEMPLATES.find((t) => t.kind === data.get('template'));
     await clearAutosave().catch(() => undefined);
-    await this.openProject(newProject(w, h, bg), `Nuevo dibujo de ${w} × ${h} px.`);
+    await this.openProject(
+      template ? buildTemplate(template.kind, w, h, bg) : newProject(w, h, bg),
+      template ? `Nuevo dibujo de ${w} × ${h} px con la plantilla «${template.label}».` : `Nuevo dibujo de ${w} × ${h} px.`,
+    );
   }
 
   private async confirmDiscard(): Promise<boolean> {
@@ -391,6 +396,12 @@ export class App {
     newForm.addEventListener('submit', (e) => {
       if (e.submitter instanceof HTMLButtonElement && e.submitter.value === 'create') void this.serial(() => this.newDrawing(newForm));
     });
+    newDlg.querySelector('select[name="template"]')?.append(...TEMPLATES.map((t) => {
+      const option = document.createElement('option');
+      option.value = t.kind;
+      option.textContent = t.label;
+      return option;
+    }));
     newDlg.querySelector('input[name="bgcolor"]')?.addEventListener('input', () => {
       (newDlg.querySelector('input[name="bg"][value="color"]') as HTMLInputElement).checked = true;
     });
