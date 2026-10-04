@@ -4,6 +4,10 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Cambiado
+
+- Exportar con «Fondo transparente», como en Canva: en PNG y SVG quita el fondo del lienzo aunque sea un color o una imagen. La casilla aparece marcada solo si el lienzo ya es transparente.
+
 ## [2.3.1] - 2026-10-03
 
 ### Cambiado
