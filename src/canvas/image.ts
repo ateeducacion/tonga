@@ -117,24 +117,25 @@ export function clearBackground(data: Uint8ClampedArray, width: number, height: 
   for (let x = 0; x < width; x++) border.push(x, (height - 1) * width + x);
   for (let y = 1; y < height - 1; y++) border.push(y * width, y * width + width - 1);
   // The most frequent border colour (4 bits per channel) is the background, if it dominates.
+  const at = (i: number) => Number(data[i]); // indices stay in range, never undefined
   const buckets = new Map<number, { count: number; at: number }>();
   let transparent = 0;
   for (const p of border) {
     const i = p * 4;
-    if ((data[i + 3] ?? 0) < 16) {
+    if (at(i + 3) < 16) {
       transparent++;
       continue;
     }
-    const key = (((data[i] ?? 0) >> 4) << 8) | (((data[i + 1] ?? 0) >> 4) << 4) | ((data[i + 2] ?? 0) >> 4);
+    const key = ((at(i) >> 4) << 8) | ((at(i + 1) >> 4) << 4) | (at(i + 2) >> 4);
     const b = buckets.get(key) ?? { count: 0, at: i };
     b.count++;
     buckets.set(key, b);
   }
   const top = [...buckets.values()].sort((a, b) => b.count - a.count)[0];
   if (!top || top.count + transparent < border.length * 0.6) return 0;
-  const [r, g, b] = [data[top.at] ?? 0, data[top.at + 1] ?? 0, data[top.at + 2] ?? 0];
+  const [r, g, b] = [at(top.at), at(top.at + 1), at(top.at + 2)];
   const isBackground = (i: number) =>
-    (data[i + 3] ?? 0) < 16 || (Math.abs((data[i] ?? 0) - r) <= tolerance && Math.abs((data[i + 1] ?? 0) - g) <= tolerance && Math.abs((data[i + 2] ?? 0) - b) <= tolerance);
+    at(i + 3) < 16 || (Math.abs(at(i) - r) <= tolerance && Math.abs(at(i + 1) - g) <= tolerance && Math.abs(at(i + 2) - b) <= tolerance);
 
   const seen = new Uint8Array(width * height);
   const stack = border.filter((p) => isBackground(p * 4));

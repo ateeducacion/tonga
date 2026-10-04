@@ -94,6 +94,11 @@ describe('clearBackground', () => {
     expect(clearBackground(data, width, height)).toBe(0);
     expect(data).toEqual(before);
   });
+
+  it('has nothing to clear when the border is already transparent', () => {
+    const { data, width, height } = pixels(['...', '.R.', '...']);
+    expect(clearBackground(data, width, height)).toBe(0);
+  });
 });
 
 describe('Editor image tools', () => {
@@ -138,7 +143,12 @@ describe('Editor image tools', () => {
     expect(ed.inspect()?.image?.crop.right).toBe(50);
     const src = ed.toProject().layers[0]?.object.src as string;
     expect(src).toMatch(/^data:image\/png/);
+    // A second pass starts from the stored asset, which has no background left.
+    expect(await ed.removeImageBackground(save)).toBe(false);
+    expect(saved).toHaveLength(1);
     await ed.undo();
     expect(ed.toProject().layers[0]?.object.src).toBe(el.toDataURL());
+    ed.select([]);
+    expect(await ed.removeImageBackground(save)).toBe(false);
   });
 });

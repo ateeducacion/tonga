@@ -511,7 +511,7 @@ export class Editor {
   async removeImageBackground(save: (png: Blob) => Promise<string>): Promise<boolean> {
     const o = this.canvas.getActiveObject();
     if (!isImage(o)) return false;
-    const png = await removeBackground(await this.resolve(o.assetSrc ?? o.getSrc()));
+    const png = await removeBackground(await this.resolve(o.assetSrc as string)); // every image gets one when added or read
     if (!png) return false;
     const canonical = await save(png);
     // setSrc resets the size to the whole image; the pixels are the same size, so keep the crop.
