@@ -1,5 +1,5 @@
-// Snapping while dragging: to the grid and to the edges and centres of other objects and of the
-// canvas. Plain geometry (no Fabric), so it can be tested on its own.
+// Snapping while dragging: to the edges and centres of other objects and of the canvas.
+// Plain geometry (no Fabric), so it can be tested on its own.
 
 export interface Box {
   left: number;
@@ -42,10 +42,4 @@ export function snapToObjects(box: Box, others: Box[], threshold: number): SnapR
   if (x) guides.push({ axis: 'x', at: x.at });
   if (y) guides.push({ axis: 'y', at: y.at });
   return { dx: x?.shift ?? 0, dy: y?.shift ?? 0, guides };
-}
-
-/** Moves the box's top-left corner onto the nearest grid crossing. */
-export function snapToGrid(box: Box, size: number): { dx: number; dy: number } {
-  const to = (v: number) => Math.round(v / size) * size - v;
-  return { dx: to(box.left), dy: to(box.top) };
 }

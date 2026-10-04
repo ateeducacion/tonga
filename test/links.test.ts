@@ -173,30 +173,3 @@ describe('Text inside shapes', () => {
     expect(names()).toEqual([]);
   });
 });
-
-describe('Eraser', () => {
-  const pointer = (type: 'mouse:down' | 'mouse:move' | 'mouse:up', x: number, y: number) =>
-    editor.canvas.fire(type, { e: new MouseEvent('mousemove'), scenePoint: new Point(x, y), viewportPoint: new Point(x, y) } as never);
-
-  it('removes the strokes it passes over, in one undo step, and leaves shapes alone', async () => {
-    editor.addShape('rect');
-    editor.addShape('line'); // horizontal, through the centre (400, 300)
-    editor.addShape('arrowLine');
-    editor.setProps({ top: 500 });
-    editor.setErasing(true);
-    expect(editor.isErasing).toBe(true);
-    expect(editor.canvas.skipTargetFind).toBe(true);
-    pointer('mouse:down', 10, 10); // nothing there
-    pointer('mouse:move', 400, 300);
-    pointer('mouse:move', 400, 500);
-    pointer('mouse:up', 400, 500);
-    expect(names()).toEqual(['Rectángulo 1']);
-    await editor.undo();
-    expect(names()).toEqual(['Línea con flecha 1', 'Línea 1', 'Rectángulo 1']);
-    pointer('mouse:move', 400, 300); // not pressed: nothing
-    pointer('mouse:up', 400, 300);
-    expect(names()).toHaveLength(3);
-    editor.setErasing(false);
-    expect(editor.canvas.defaultCursor).toBe('default');
-  });
-});

@@ -24,7 +24,6 @@ describe('keyboard shortcuts (RULE-100)', () => {
     [key('1'), 'zoom-100'],
     [key('t'), 'add-text'],
     [key('k'), 'library'],
-    [key('x'), 'tool-erase'],
   ])('%o -> %s', (e, cmd) => expect(commandFor(e)).toBe(cmd));
 
   it('moves 1 px, or 10 px with Shift', () => {

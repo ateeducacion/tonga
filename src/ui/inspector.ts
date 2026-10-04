@@ -24,8 +24,6 @@ let shadowOpen = false;
 export interface InspectorActions {
   resizeCanvas(width: number, height: number): void;
   setBackground(color: string | null): void;
-  toggleGrid(on: boolean): void;
-  gridOn(): boolean;
 }
 
 let signature = '';
@@ -39,14 +37,13 @@ export function renderInspector(editor: Editor, actions: InspectorActions, force
     return;
   }
   const pencil = !info && editor.isDrawing;
-  const eraser = !info && editor.isErasing;
-  const sig = info ? `${info.type}:${info.ids.join(',')}` : pencil ? 'pencil' : eraser ? 'eraser' : `canvas:${editor.size.width}x${editor.size.height}:${JSON.stringify(editor.currentBackground)}`;
+  const sig = info ? `${info.type}:${info.ids.join(',')}` : pencil ? 'pencil' : `canvas:${editor.size.width}x${editor.size.height}:${JSON.stringify(editor.currentBackground)}`;
   if (sig === signature && !force) {
     syncValues(form, info, editor);
     return;
   }
   signature = sig;
-  form.replaceChildren(...(info ? selectionFields(editor, info) : pencil ? pencilFields(editor) : eraser ? eraserFields() : canvasFields(editor, actions)));
+  form.replaceChildren(...(info ? selectionFields(editor, info) : pencil ? pencilFields(editor) : canvasFields(editor, actions)));
   syncValues(form, info, editor);
 }
 
@@ -59,10 +56,6 @@ function cropFields(editor: Editor): HTMLElement[] {
     h('p', { class: 'muted' }, 'Recortar: ajusta el marco azul con sus tiradores y pulsa «Aplicar el recorte». Escape o «Cancelar» dejan la imagen como estaba.'),
     h('div', { class: 'dialog-actions' }, apply, cancel),
   ];
-}
-
-function eraserFields(): HTMLElement[] {
-  return [h('p', { class: 'muted' }, 'Borrador: pasa por encima de los trazos, líneas y flechas para borrarlos. Cada pasada se deshace de una vez.')];
 }
 
 /** While the pencil is on, the inspector holds its colour, width and mode for the next strokes. */
@@ -539,21 +532,14 @@ function canvasFields(editor: Editor, actions: InspectorActions): HTMLElement[] 
   // «Transparente» is a swatch like the colours: no separate checkbox.
   const color = colour('Color de fondo', 'bg', (c) => actions.setBackground(c === TRANSPARENT ? null : c), { transparent: true });
   syncColour(color, bg.kind === 'color' ? bg.color : bg.kind === 'transparent' ? TRANSPARENT : 'image'); // an image: no swatch marked
-  const grid = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'grid', checked: actions.gridOn() }), 'Mostrar rejilla');
-  grid.querySelector('input')?.addEventListener('change', (e) => actions.toggleGrid((e.target as HTMLInputElement).checked));
-  const snap = (label: string, key: 'grid' | 'objects') => {
-    const box = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: `snap-${key}`, checked: editor.snapping[key] }), label);
-    box.querySelector('input')?.addEventListener('change', (e) => editor.setSnapping({ [key]: (e.target as HTMLInputElement).checked }));
-    return box;
-  };
+  const snap = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'snap-objects', checked: editor.snapping.objects }), 'Ajustar a otros objetos');
+  snap.querySelector('input')?.addEventListener('change', (e) => editor.setSnapping({ objects: (e.target as HTMLInputElement).checked }));
   return [
     h('p', { class: 'muted' }, 'Nada seleccionado. Ajustes del lienzo:'),
     size,
     apply,
     color,
-    grid,
-    snap('Ajustar a la rejilla', 'grid'),
-    snap('Ajustar a otros objetos', 'objects'),
+    snap,
     h('p', { class: 'muted' }, bg.kind === 'image' ? 'El fondo es una imagen de la biblioteca.' : ''),
   ];
 }

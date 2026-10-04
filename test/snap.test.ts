@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { FabricObject } from 'fabric';
 import { Editor } from '../src/canvas/editor';
-import { snapToGrid, snapToObjects } from '../src/canvas/snap';
+import { snapToObjects } from '../src/canvas/snap';
 import { newProject } from '../src/project/schema';
 
 describe('snap geometry', () => {
@@ -15,10 +15,6 @@ describe('snap geometry', () => {
 
   it('does nothing when everything is too far', () => {
     expect(snapToObjects(box, [{ left: 500, top: 500, width: 10, height: 10 }], 6)).toEqual({ dx: 0, dy: 0, guides: [] });
-  });
-
-  it('moves the top-left corner onto the grid', () => {
-    expect(snapToGrid(box, 20)).toEqual({ dx: -3, dy: -7 });
   });
 });
 
@@ -48,21 +44,16 @@ describe('Editor snapping while dragging', () => {
     ed.canvas.fire('mouse:up', {} as never); // nothing left to clear
   });
 
-  it('snaps to the grid when asked, and not at all when both are off', async () => {
+  it('does not snap when switched off', async () => {
     const { ed, moving } = await setup();
-    ed.setSnapping({ grid: true, objects: false });
-    expect(ed.snapping).toEqual({ grid: true, objects: false });
-    drag(ed, moving, 733, 377);
-    const r = moving.getBoundingRect();
-    expect([r.left % 20, r.top % 20].map((v) => Math.round(Math.min(v, 20 - v) * 1000) / 1000)).toEqual([0, 0]);
-    ed.setSnapping({ grid: false });
-    drag(ed, moving, 733, 377);
-    expect(moving.left).toBe(733);
+    ed.setSnapping({ objects: false });
+    expect(ed.snapping).toEqual({ objects: false });
+    drag(ed, moving, 555, 417);
+    expect(moving.left).toBe(555);
   });
 
   it('a multiple selection snaps as one box, against the canvas edges', async () => {
     const { ed } = await setup();
-    ed.setSnapping({ grid: true });
     ed.selectAll();
     const selection = ed.canvas.getActiveObject() as FabricObject;
     drag(ed, selection, 79, 300); // its left edge (3) comes close to the canvas edge (0)

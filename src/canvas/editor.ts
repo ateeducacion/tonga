@@ -10,7 +10,7 @@ import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
-import { snapToGrid, snapToObjects, type Guide, type SnapResult } from './snap';
+import { snapToObjects, type Guide } from './snap';
 import { followText, isConnector, makeConnector, refreshLinks } from './links';
 import { applyAdjustments, applyCrop, cropFromFrame, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
 
@@ -53,13 +53,10 @@ export const DEFAULT_FILL = '#f28c28';
 export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
 
-/** Grid spacing in canvas pixels; the visible grid uses the same size at every zoom. */
-export const GRID_SIZE = 20;
 /** How close (screen pixels) an edge must come to another to snap to it. */
 const SNAP_DISTANCE = 6;
 
 export interface Snapping {
-  grid: boolean;
   objects: boolean;
 }
 
@@ -162,10 +159,7 @@ export class Editor {
   private lineStart: Point | null = null;
   private lineDraft: Line | null = null;
   private styles: Record<StyleKind, Record<string, unknown>> = { shape: {}, line: {}, text: {} };
-  private snap: Snapping = { grid: false, objects: true };
-  private erasing = false;
-  private erasePressed = false;
-  private erasedSome = false;
+  private snap: Snapping = { objects: true };
   private crop: { image: FabricImage; frame: Rect } | null = null;
   private guides: Guide[] = [];
 
@@ -217,23 +211,7 @@ export class Editor {
     this.canvas.on('object:scaling', () => refreshLinks(this.canvas));
     this.canvas.on('object:rotating', () => refreshLinks(this.canvas));
     this.canvas.on('mouse:dblclick', ({ target }) => {
-      if (target && !this.drawing && !this.erasing && styleKind(target) === 'shape' && !(target instanceof Textbox)) this.writeInside(target);
-    });
-    // Eraser: everything drawn with a stroke (pencil strokes, lines, arrows) under the pointer
-    // goes; one press-drag-release is one undo step.
-    this.canvas.on('mouse:down', ({ scenePoint, viewportPoint }) => {
-      if (!this.erasing) return;
-      this.erasePressed = true;
-      this.eraseAt(scenePoint, viewportPoint);
-    });
-    this.canvas.on('mouse:move', ({ scenePoint, viewportPoint }) => {
-      if (this.erasePressed) this.eraseAt(scenePoint, viewportPoint);
-    });
-    this.canvas.on('mouse:up', () => {
-      const erased = this.erasePressed && this.erasedSome;
-      this.erasePressed = false;
-      this.erasedSome = false;
-      if (erased) this.commit();
+      if (target && !this.drawing && styleKind(target) === 'shape' && !(target instanceof Textbox)) this.writeInside(target);
     });
     this.canvas.on('mouse:up', () => this.clearGuides());
     this.canvas.on('after:render', ({ ctx }) => this.drawGuides(ctx));
@@ -247,22 +225,13 @@ export class Editor {
     this.snap = { ...this.snap, ...snap };
   }
 
-  /** While dragging, pulls the object onto other objects' edges and centres, or onto the grid. */
+  /** While dragging, pulls the object onto other objects' (and the canvas') edges and centres. */
   private snapMoving(target: FabricObject): void {
-    if (!this.snap.grid && !this.snap.objects) return;
+    if (!this.snap.objects) return;
     const moving = target instanceof ActiveSelection ? target.getObjects() : [target];
-    const box = target.getBoundingRect();
-    let result: SnapResult = { dx: 0, dy: 0, guides: [] };
-    if (this.snap.objects) {
-      const others = this.canvas.getObjects().filter((o) => !moving.includes(o) && o.visible !== false).map((o) => o.getBoundingRect());
-      others.push({ left: 0, top: 0, width: this.width, height: this.height });
-      result = snapToObjects(box, others, SNAP_DISTANCE / this.zoom);
-    }
-    if (this.snap.grid) {
-      const grid = snapToGrid(box, GRID_SIZE);
-      if (!result.guides.some((g) => g.axis === 'x')) result.dx = grid.dx;
-      if (!result.guides.some((g) => g.axis === 'y')) result.dy = grid.dy;
-    }
+    const others = this.canvas.getObjects().filter((o) => !moving.includes(o) && o.visible !== false).map((o) => o.getBoundingRect());
+    others.push({ left: 0, top: 0, width: this.width, height: this.height });
+    const result = snapToObjects(target.getBoundingRect(), others, SNAP_DISTANCE / this.zoom);
     target.set({ left: target.left + result.dx, top: target.top + result.dy }).setCoords();
     this.guides = result.guides;
   }
@@ -656,7 +625,7 @@ export class Editor {
     this.place(img, 'image', name);
   }
 
-  // ---- Connectors, text inside shapes, eraser -------------------------------------------------
+  // ---- Connectors and text inside shapes ------------------------------------------------------
 
   /**
    * Joins the two selected objects with a connector (an arrow, or a plain line) that follows
@@ -706,33 +675,6 @@ export class Editor {
     text.selectAll();
     this.canvas.requestRenderAll();
     this.emit();
-  }
-
-  /** The eraser tool removes strokes and lines it passes over. */
-  setErasing(on: boolean): void {
-    this.erasing = on;
-    this.canvas.defaultCursor = on ? 'crosshair' : 'default';
-    if (on) {
-      this.canvas.skipTargetFind = true;
-      this.canvas.discardActiveObject();
-    }
-    this.emit();
-  }
-
-  get isErasing(): boolean {
-    return this.erasing;
-  }
-
-  private eraseAt(scene: Point, viewport: Point): void {
-    // The point and four around it, so a thin stroke is still easy to hit.
-    const around = [[0, 0], [4, 0], [-4, 0], [0, 4], [0, -4]];
-    for (const o of [...this.canvas.getObjects()].reverse()) {
-      if (styleKind(o) !== 'line' || o.selectable === false || o.visible === false || !o.containsPoint(scene)) continue;
-      if (around.every(([dx = 0, dy = 0]) => this.canvas.isTargetTransparent(o, viewport.x + dx, viewport.y + dy))) continue;
-      this.canvas.remove(o);
-      this.erasedSome = true;
-    }
-    this.canvas.requestRenderAll();
   }
 
   /** Turns the pencil on or off; it keeps its colour, width and mode between uses. */

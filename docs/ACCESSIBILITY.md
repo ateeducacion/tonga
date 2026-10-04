@@ -7,7 +7,7 @@ Referencia técnica: **WCAG 2.2 AA**. Un resultado limpio de axe **no** demuestr
 El lienzo es una imagen (`<canvas role="img">`) que un lector de pantalla no puede recorrer. Por eso el dibujo tiene una **representación en el DOM**:
 
 - El panel **Capas** es una lista de botones nativos. Para cada objeto hay botones con nombre accesible para seleccionar («Texto 1 (Texto)», «… oculta, bloqueada»), subir, bajar, ocultar o mostrar, y bloquear o desbloquear.
-- El panel **Propiedades** permite editar el objeto seleccionado sin ratón: nombre, posición, tamaño (con «Mantener proporción»), giro, opacidad, colores (selector y campo hexadecimal), texto, tipografía, alineación, orden, volteo, duplicar y borrar. En las imágenes también se puede recortar (campos por lado) y ajustar: cada deslizador tiene al lado un campo numérico. Sombra, estilo de línea, degradado, distribuir, conectar dos objetos («Conectar con flecha/línea») y escribir dentro de una forma («Escribir dentro») tienen también su botón: no dependen del ratón. El lápiz, el borrador y el recorte con el ratón son ayudas visuales con alternativa por teclado (formas, campos de recorte).
+- El panel **Propiedades** permite editar el objeto seleccionado sin ratón: nombre, posición, tamaño (con «Mantener proporción»), giro, opacidad, colores (selector y campo hexadecimal), texto, tipografía, alineación, orden, volteo, duplicar y borrar. En las imágenes también se puede recortar (campos por lado) y ajustar: cada deslizador tiene al lado un campo numérico. Sombra, estilo de línea, degradado, distribuir, conectar dos objetos («Conectar con flecha/línea») y escribir dentro de una forma («Escribir dentro») tienen también su botón: no dependen del ratón. El lápiz y el recorte con el ratón son ayudas visuales con alternativa por teclado (formas, campos de recorte).
 - Una región `role="status"` anuncia selecciones, inserciones, borrados, deshacer y rehacer, y la herramienta activa.
 
 ## Teclado
@@ -15,7 +15,7 @@ El lienzo es una imagen (`<canvas role="img">`) que un lector de pantalla no pue
 - Todo es alcanzable con Tab. El primer elemento es «Saltar al lienzo».
 - Las formas y el texto se insertan **centrados con un botón**: no hace falta arrastrar (criterio 2.5.7).
 - El menú contextual se abre también con la tecla Menú o Mayús+F10, sobre el objeto seleccionado. Es un menú WAI-ARIA (flechas, Inicio/Fin, Intro, Esc), y todo lo que contiene está también en el inspector y en los atajos.
-- Flechas para mover 1 px y Shift+flechas para 10 px; Supr para borrar; Ctrl/⌘+Z/Y/C/V/D/A; +, −, 0 y 1 para el zoom; V, H, B, X, T, R, E, L, I y K para herramientas y acciones. Los atajos **no actúan** mientras se escribe en un campo ni al editar texto del lienzo, y están documentados en *Ayuda*.
+- Flechas para mover 1 px y Shift+flechas para 10 px; Supr para borrar; Ctrl/⌘+Z/Y/C/V/D/A; +, −, 0 y 1 para el zoom; V, H, B, T, R, E, L, I y K para herramientas y acciones. Los atajos **no actúan** mientras se escribe en un campo ni al editar texto del lienzo, y están documentados en *Ayuda*.
 - Biblioteca: el buscador recibe el foco; en la cuadrícula, las flechas, Inicio y Fin mueven la selección (`aria-activedescendant`) y Enter añade la imagen.
 - Los diálogos son `<dialog>` modales nativos: atrapan el foco, se cierran con Esc y devuelven el foco al cerrar.
 - **Excepción documentada**: el dibujo libre necesita un dispositivo apuntador (ratón, lápiz o dedo). Las formas y el texto tienen alternativa con teclado.

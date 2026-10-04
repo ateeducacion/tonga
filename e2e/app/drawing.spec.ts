@@ -89,16 +89,15 @@ test('an image or text copied in another app is pasted onto the canvas', async (
   await expect(layers(page)).toHaveText(['Texto 2', 'Texto 1', 'captura']);
 });
 
-test('snapping to the grid and to objects can be switched on and off', async ({ page }) => {
+test('snapping to other objects can be switched off, and stays so', async ({ page }) => {
   await newDrawing(page);
-  const grid = inspector(page).getByLabel('Ajustar a la rejilla');
   const objects = inspector(page).getByLabel('Ajustar a otros objetos');
-  await expect(grid).not.toBeChecked();
   await expect(objects).toBeChecked();
-  await grid.check();
+  await expect(inspector(page).getByText(/rejilla/i)).toHaveCount(0);
+  await objects.uncheck();
   await addShape(page, 'rectángulo');
   await page.keyboard.press('Escape');
-  await expect(inspector(page).getByLabel('Ajustar a la rejilla')).toBeChecked();
+  await expect(inspector(page).getByLabel('Ajustar a otros objetos')).not.toBeChecked();
 });
 
 test('two objects are joined by a connector; a double click writes inside a shape', async ({ page }) => {
@@ -123,20 +122,6 @@ test('two objects are joined by a connector; a double click writes inside a shap
   await page.keyboard.type('Oxígeno');
   await expect(layers(page)).toHaveText(['Texto 1', 'Elipse 1', 'Rectángulo 1', 'Conector 1']); // just above its shape
   await expect(inspector(page).getByLabel('Texto', { exact: true })).toHaveValue('Oxígeno');
-});
-
-test('the eraser removes the strokes it passes over, in one undo step', async ({ page }) => {
-  await newDrawing(page);
-  await page.getByRole('radio', { name: 'Dibujo libre' }).click();
-  await drag(page, [0.3, 0.3], [0.7, 0.3]);
-  await drag(page, [0.3, 0.6], [0.7, 0.6]);
-  await expect(layers(page)).toHaveText(['Trazo 2', 'Trazo 1']);
-  await page.getByRole('radio', { name: 'Borrador' }).click();
-  await expect(inspector(page)).toContainText('Borrador');
-  await drag(page, [0.5, 0.2], [0.5, 0.7], 30);
-  await expect(layers(page)).toHaveCount(0);
-  await page.getByRole('button', { name: 'Deshacer' }).click();
-  await expect(layers(page)).toHaveText(['Trazo 2', 'Trazo 1']);
 });
 
 test('an image is cropped with the mouse, and takes the new filters', async ({ page }) => {

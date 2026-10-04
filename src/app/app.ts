@@ -1,5 +1,5 @@
 // Wires the UI to the editor: tools, dialogs, shortcuts, zoom, import/export, autosave.
-import { Editor, GRID_SIZE, type ShapeKind } from '../canvas/editor';
+import { Editor, type ShapeKind } from '../canvas/editor';
 import { buildTemplate, TEMPLATES } from '../canvas/templates';
 import type { CatalogAsset } from '../assets/catalog';
 import { resolveSource, resolveToDataUrl } from '../assets/sources';
@@ -19,7 +19,7 @@ import { setupShapesMenu } from '../ui/shapes-menu';
 import { setupTabs } from '../ui/tabs';
 import { commandFor, isTyping, type Command } from '../ui/shortcuts';
 
-type Tool = 'select' | 'hand' | 'draw' | 'erase';
+type Tool = 'select' | 'hand' | 'draw';
 const ZOOM_STEPS = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4];
 const AUTOSAVE_DELAY = 1500;
 
@@ -32,7 +32,6 @@ export class App {
   private savedRevision = 0;
   private autosavedRevision = 0;
   private autosaveTimer = 0;
-  private grid = false;
   private title = '';
   private queue: Promise<unknown> = Promise.resolve();
   private copiedHere = false;
@@ -116,11 +115,6 @@ export class App {
     renderInspector(this.editor, {
       resizeCanvas: (w, h) => void this.editor.resizeCanvas(w, h).then(() => this.fitIfNeeded()),
       setBackground: (c) => void this.setBackground(c ? { kind: 'color', color: c } : { kind: 'transparent' }),
-      toggleGrid: (on) => {
-        this.grid = on;
-        byId('canvas-frame').classList.toggle('grid', on);
-      },
-      gridOn: () => this.grid,
     });
     byId<HTMLButtonElement>('workspace').classList.toggle('hand', this.tool === 'hand');
     (document.querySelector('[data-action="undo"]') as HTMLButtonElement).disabled = !this.editor.canUndo;
@@ -129,7 +123,6 @@ export class App {
     const frame = byId('canvas-frame');
     frame.style.width = `${this.editor.canvas.width}px`;
     frame.style.height = `${this.editor.canvas.height}px`;
-    frame.style.setProperty('--grid-size', `${GRID_SIZE * this.editor.zoomLevel}px`); // canvas pixels, like snapping
     frame.classList.toggle('opaque', this.editor.currentBackground.kind !== 'transparent');
     document.title = `${this.dirty ? '• ' : ''}${this.title || 'Sin título'} · Tonga`;
     this.touch();
@@ -280,10 +273,9 @@ export class App {
     this.tool = tool;
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-tool]')) b.setAttribute('aria-checked', String(b.dataset.tool === tool));
     this.editor.setDrawing(tool === 'draw');
-    this.editor.setErasing(tool === 'erase');
     this.editor.canvas.selection = tool === 'select';
     this.editor.canvas.skipTargetFind = tool !== 'select';
-    const names: Record<Tool, string> = { select: 'Seleccionar', hand: 'Mover la vista', draw: 'Dibujo libre', erase: 'Borrador' };
+    const names: Record<Tool, string> = { select: 'Seleccionar', hand: 'Mover la vista', draw: 'Dibujo libre' };
     announce(`Herramienta: ${names[tool]}`);
     this.render();
   }
@@ -565,7 +557,6 @@ export class App {
       'tool-select': () => this.setTool('select'),
       'tool-hand': () => this.setTool('hand'),
       'tool-draw': () => this.setTool('draw'),
-      'tool-erase': () => this.setTool('erase'),
       'add-text': () => e.addText(),
       'add-rect': () => e.addShape('rect'),
       'add-ellipse': () => e.addShape('ellipse'),
