@@ -33,6 +33,13 @@ describe('connector geometry', () => {
     expect(exitPoint(box, { x: 60, y: 30 })).toEqual({ x: 60, y: 30 }); // target inside: stops there
   });
 
+  it('ends on the ellipse itself when the object is round', () => {
+    const p = exitPoint({ ...box, round: true }, { x: 150, y: 75 }); // diagonal from the centre (50, 25)
+    expect(((p.x - 50) / 50) ** 2 + ((p.y - 25) / 25) ** 2).toBeCloseTo(1, 6);
+    expect(exitPoint({ ...box, round: true }, { x: 500, y: 25 })).toEqual({ x: 100, y: 25 });
+    expect(exitPoint({ ...box, round: true }, { x: 60, y: 27 })).toEqual({ x: 60, y: 27 });
+  });
+
   it('draws a straight segment, with an arrow head at the end when asked', () => {
     const to = { left: 300, top: 0, width: 100, height: 50 };
     expect(connectorPath(box, to, false, 2)).toBe('M 100 25 L 300 25');
@@ -116,6 +123,20 @@ describe('Text inside shapes', () => {
     editor.select([shape.id ?? '']);
     editor.removeSelected();
     expect(names()).toEqual([]);
+  });
+
+  it('makes the letters smaller until a long word fits inside the shape', () => {
+    editor.addShape('rect');
+    const shape = editor.canvas.getActiveObject() as FabricObject;
+    editor.writeInside();
+    const text = editor.canvas.getActiveObject() as Textbox;
+    const before = text.fontSize;
+    text.exitEditing();
+    editor.select([text.id ?? '']);
+    editor.setProps({ text: 'Fotosíntesis Fotosíntesis Fotosíntesis Fotosíntesis' });
+    expect(text.fontSize).toBeLessThan(before);
+    expect(text.dynamicMinWidth).toBeLessThanOrEqual(shape.getScaledWidth() * 0.8 + 0.5);
+    expect(text.height).toBeLessThanOrEqual(shape.getScaledHeight() * 0.9);
   });
 
   it('a double click on a shape writes inside; not on lines, texts or while drawing', () => {

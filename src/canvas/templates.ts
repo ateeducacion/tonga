@@ -61,6 +61,13 @@ class Builder {
   }
 }
 
+/** An arrow from (x0, y0) to (x1, y1) in canvas coordinates, its head `head` px long. */
+function arrow(x0: number, y0: number, x1: number, y1: number, head: number): Path {
+  const a = Math.atan2(y1 - y0, x1 - x0);
+  const wing = (side: number) => `${x1 - head * Math.cos(a + (side * Math.PI) / 6)} ${y1 - head * Math.sin(a + (side * Math.PI) / 6)}`;
+  return new Path(`M ${x0} ${y0} L ${x1} ${y1} M ${wing(1)} L ${x1} ${y1} L ${wing(-1)}`, { ...LINE, fill: null });
+}
+
 const rect = (x: number, y: number, w: number, h: number, fill: string, rounded = false) =>
   new Rect({ left: x, top: y, width: w, height: h, rx: rounded ? h / 5 : 0, ry: rounded ? h / 5 : 0, fill, stroke: INK, strokeWidth: 2, strokeUniform: true });
 const ellipse = (x: number, y: number, rx: number, ry: number, fill: string) =>
@@ -88,8 +95,7 @@ const BUILD: Record<TemplateKind, (b: Builder) => void> = {
   },
   timeline: (b) => {
     const { w, h, u } = b;
-    const arrow = SHAPES.find((s) => s.kind === 'arrowLine')?.d ?? '';
-    b.add(new Path(arrow, { ...LINE, fill: null, left: w / 2, top: h / 2, scaleX: (w * 0.9) / 100, scaleY: u / 600 }), 'Eje del tiempo');
+    b.add(arrow(w * 0.05, h / 2, w * 0.95, h / 2, u * 0.03), 'Eje del tiempo');
     for (let i = 0; i < 5; i++) {
       const x = w * (0.15 + i * 0.16);
       b.add(ellipse(x, h / 2, u * 0.02, u * 0.02, '#f28c28'), `Hito ${i + 1}`);
@@ -127,9 +133,8 @@ const BUILD: Record<TemplateKind, (b: Builder) => void> = {
   },
   axes: (b) => {
     const { w, h, u } = b;
-    const arrow = SHAPES.find((s) => s.kind === 'arrowLine')?.d ?? '';
-    b.add(new Path(arrow, { ...LINE, fill: null, left: w / 2, top: h / 2, scaleX: (w * 0.9) / 100, scaleY: u / 500 }), 'Eje X');
-    b.add(new Path(arrow, { ...LINE, fill: null, left: w / 2, top: h / 2, scaleX: (h * 0.9) / 100, scaleY: u / 500, angle: -90 }), 'Eje Y');
+    b.add(arrow(w * 0.05, h / 2, w * 0.95, h / 2, u * 0.03), 'Eje X');
+    b.add(arrow(w / 2, h * 0.95, w / 2, h * 0.05, u * 0.03), 'Eje Y');
     const step = u / 10;
     for (let k = -4; k <= 4; k++) {
       if (!k) continue;

@@ -691,7 +691,7 @@ export class Editor {
     if (!shape || styleKind(shape) !== 'shape') return;
     const existing = this.canvas.getObjects().find((o) => o.attachedTo === shape.id);
     const text = (existing as Textbox | undefined) ?? new Textbox('Texto', {
-      fontSize: Math.max(14, Math.round(Math.min(shape.getScaledHeight() / 4, this.unit() / 4))), fontFamily: 'Arial',
+      fontSize: Math.max(14, Math.round(Math.min(shape.getScaledHeight() / 5, this.unit() / 6))), fontFamily: 'Arial',
       fill: DEFAULT_STROKE, textAlign: 'center', ...this.styleFor('text'),
     });
     if (!existing) {

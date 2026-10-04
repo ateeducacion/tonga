@@ -276,10 +276,10 @@ function fillFields(editor: Editor, key: (p: string) => string): HTMLElement[] {
 
 /** Solid, dashed or dotted, each button drawing its own line. */
 function lineStyles(editor: Editor): HTMLDivElement {
-  const styles: [LineStyle, string][] = [['solid', 'Continua'], ['dashed', 'Discontinua'], ['dotted', 'Puntos']];
-  const buttons = styles.map(([style, text]) => {
+  const styles: [LineStyle, string, string][] = [['solid', 'Continua', 'Línea continua'], ['dashed', 'Guiones', 'Línea discontinua'], ['dotted', 'Puntos', 'Línea de puntos']];
+  const buttons = styles.map(([style, text, label]) => {
     const line = h('span', { class: `line-sample ${style}`, 'aria-hidden': 'true' });
-    const b = h('button', { type: 'button', class: 'width', 'data-line': style, 'aria-pressed': 'false', 'aria-label': `Línea ${text.toLowerCase()}`, title: text }, line, h('span', { 'aria-hidden': 'true' }, text));
+    const b = h('button', { type: 'button', class: 'width', 'data-line': style, 'aria-pressed': 'false', 'aria-label': label, title: label }, line, h('span', { 'aria-hidden': 'true' }, text));
     b.addEventListener('click', () => editor.setLineStyle(style));
     return b;
   });
