@@ -1,6 +1,6 @@
 {
   "name": "tonga",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Aplicación web estática de dibujo para el aula (Tonga)",
   "private": true,
   "type": "module",
