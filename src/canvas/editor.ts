@@ -10,7 +10,7 @@ import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
-import { snapToObjects, type Guide } from './snap';
+import { snapToGrid, snapToObjects, type Guide, type SnapResult } from './snap';
 import { followText, isConnector, makeConnector, refreshLinks } from './links';
 import { applyAdjustments, applyCrop, cropFromFrame, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
 
@@ -54,9 +54,12 @@ export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
 
 /** How close (screen pixels) an edge must come to another to snap to it. */
-const SNAP_DISTANCE = 6;
+const SNAP_DISTANCE = 5;
+/** Grid spacing for «Ajustar a la rejilla», in canvas pixels. */
+export const GRID_SIZE = 20;
 
 export interface Snapping {
+  grid: boolean;
   objects: boolean;
 }
 
@@ -159,7 +162,8 @@ export class Editor {
   private lineStart: Point | null = null;
   private lineDraft: Line | null = null;
   private styles: Record<StyleKind, Record<string, unknown>> = { shape: {}, line: {}, text: {} };
-  private snap: Snapping = { objects: true };
+  private snap: Snapping = { grid: false, objects: true };
+  private dragging = false;
   private crop: { image: FabricImage; frame: Rect } | null = null;
   private guides: Guide[] = [];
 
@@ -203,8 +207,8 @@ export class Editor {
       if (this.lineStart) this.draftLine(this.lineStart, scenePoint, e.shiftKey);
     });
     this.canvas.on('mouse:up', () => this.finishLine());
-    this.canvas.on('object:moving', ({ target }) => {
-      this.snapMoving(target);
+    this.canvas.on('object:moving', ({ target, e }) => {
+      this.snapMoving(target, !!e && 'altKey' in e && e.altKey); // Alt: move freely
       if (typeof target.attachedTo === 'string') followText(this.canvas, target); // dragging the text moves its shape
       refreshLinks(this.canvas);
     });
@@ -225,38 +229,67 @@ export class Editor {
     this.snap = { ...this.snap, ...snap };
   }
 
-  /** While dragging, pulls the object onto other objects' (and the canvas') edges and centres. */
-  private snapMoving(target: FabricObject): void {
-    if (!this.snap.objects) return;
-    const moving = target instanceof ActiveSelection ? target.getObjects() : [target];
-    const others = this.canvas.getObjects().filter((o) => !moving.includes(o) && o.visible !== false).map((o) => o.getBoundingRect());
-    others.push({ left: 0, top: 0, width: this.width, height: this.height });
-    const result = snapToObjects(target.getBoundingRect(), others, SNAP_DISTANCE / this.zoom);
+  /**
+   * While dragging, pulls the object onto other objects' (and the canvas') edges and centres,
+   * else onto the grid. `free` (Alt held) moves it without snapping.
+   */
+  private snapMoving(target: FabricObject, free = false): void {
+    this.dragging = true;
+    this.guides = [];
+    if (free || (!this.snap.grid && !this.snap.objects)) return;
+    const box = target.getBoundingRect();
+    let result: SnapResult = { dx: 0, dy: 0, guides: [] };
+    if (this.snap.objects) {
+      const moving = target instanceof ActiveSelection ? target.getObjects() : [target];
+      const others = this.canvas.getObjects().filter((o) => !moving.includes(o) && o.visible !== false && !o.excludeFromExport).map((o) => o.getBoundingRect());
+      others.push({ left: 0, top: 0, width: this.width, height: this.height });
+      result = snapToObjects(box, others, SNAP_DISTANCE / this.zoom);
+    }
+    if (this.snap.grid) {
+      const grid = snapToGrid(box, GRID_SIZE);
+      if (!result.guides.some((g) => g.axis === 'x')) result.dx = grid.dx;
+      if (!result.guides.some((g) => g.axis === 'y')) result.dy = grid.dy;
+    }
     target.set({ left: target.left + result.dx, top: target.top + result.dy }).setCoords();
     this.guides = result.guides;
   }
 
   private clearGuides(): void {
-    if (!this.guides.length) return;
+    if (!this.dragging) return;
+    this.dragging = false;
     this.guides = [];
     this.canvas.requestRenderAll();
   }
 
+  /** While dragging: the grid (if snapping to it) and short guides between lined-up objects. */
   private drawGuides(ctx: CanvasRenderingContext2D): void {
-    if (!this.guides.length) return;
+    const grid = this.dragging && this.snap.grid;
+    if (!grid && !this.guides.length) return;
     ctx.save();
     ctx.transform(...(this.canvas.viewportTransform as [number, number, number, number, number, number]));
-    ctx.strokeStyle = '#e11d48';
     ctx.lineWidth = 1 / this.zoom;
-    ctx.setLineDash([4 / this.zoom, 3 / this.zoom]);
+    if (grid) {
+      ctx.strokeStyle = 'rgba(37, 99, 235, 0.12)'; // over the objects (Fabric has no public layer below them), so faint
+      ctx.beginPath();
+      for (let x = GRID_SIZE; x < this.width; x += GRID_SIZE) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, this.height);
+      }
+      for (let y = GRID_SIZE; y < this.height; y += GRID_SIZE) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(this.width, y);
+      }
+      ctx.stroke();
+    }
+    ctx.strokeStyle = '#e11d48';
     ctx.beginPath();
     for (const g of this.guides) {
       if (g.axis === 'x') {
-        ctx.moveTo(g.at, 0);
-        ctx.lineTo(g.at, this.height);
+        ctx.moveTo(g.at, g.from);
+        ctx.lineTo(g.at, g.to);
       } else {
-        ctx.moveTo(0, g.at);
-        ctx.lineTo(this.width, g.at);
+        ctx.moveTo(g.from, g.at);
+        ctx.lineTo(g.to, g.at);
       }
     }
     ctx.stroke();

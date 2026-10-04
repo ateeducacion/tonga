@@ -15,7 +15,7 @@ Cubren la lógica sin DOM o con un DOM mínimo:
 - **formato `.tonga`**: ida y vuelta, migraciones, ficheros malformados o con versión desconocida, orígenes de imagen no permitidos;
 - **historial**: deshacer, rehacer, agrupación de pasos, límites por número y por bytes;
 - **editor**: nombres automáticos, colocación, copiar y pegar, agrupar y desagrupar sin mover, alinear un objeto girado, bloqueo y visibilidad, fondo, tamaño exacto con trazo uniforme, revisiones; lápiz (color, grosor, recta con Mayús), estilo recordado por tipo, sombra (también en SVG), discontinuo proporcional al grosor, degradado, distribuir;
-- **ajuste y vínculos**: geometría del ajuste a otros objetos; conectores que siguen a sus objetos, desaparecen con ellos y sobreviven a agrupar; texto dentro de una forma que la sigue, la mueve y encoge la letra hasta caber;
+- **ajuste y vínculos**: geometría del ajuste a otros objetos (sin mezclar bordes con centros, Alt para mover libre) y a la rejilla; conectores que siguen a sus objetos, desaparecen con ellos y sobreviven a agrupar; texto dentro de una forma que la sigue, la mueve y encoge la letra hasta caber;
 - **plantillas**: cada una es un proyecto válido, dentro del lienzo y con sus vínculos completos, en tres tamaños;
 - **imagen**: ida y vuelta de cada ajuste (también vintage, pixelado y ruido), recorte con el marco (giro y recorte previo incluidos), límites, recorte que no desplaza el contenido visible, persistencia en el `.tonga` y deshacer en un solo paso al arrastrar un deslizador; «Quitar fondo» que borra el marco liso, conserva el mismo color encerrado y no toca una imagen sin fondo uniforme;
 - **exportación**: nombres de fichero, fondo blanco en JPEG/PDF, SVG vectorial a tamaño de documento y con el texto escapado;

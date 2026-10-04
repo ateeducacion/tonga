@@ -532,14 +532,18 @@ function canvasFields(editor: Editor, actions: InspectorActions): HTMLElement[] 
   // «Transparente» is a swatch like the colours: no separate checkbox.
   const color = colour('Color de fondo', 'bg', (c) => actions.setBackground(c === TRANSPARENT ? null : c), { transparent: true });
   syncColour(color, bg.kind === 'color' ? bg.color : bg.kind === 'transparent' ? TRANSPARENT : 'image'); // an image: no swatch marked
-  const snap = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'snap-objects', checked: editor.snapping.objects }), 'Ajustar a otros objetos');
-  snap.querySelector('input')?.addEventListener('change', (e) => editor.setSnapping({ objects: (e.target as HTMLInputElement).checked }));
+  const snap = (label: string, key: 'grid' | 'objects', title: string) => {
+    const box = h('label', { class: 'check', title }, h('input', { type: 'checkbox', name: `snap-${key}`, checked: editor.snapping[key] }), label);
+    box.querySelector('input')?.addEventListener('change', (e) => editor.setSnapping({ [key]: (e.target as HTMLInputElement).checked }));
+    return box;
+  };
   return [
     h('p', { class: 'muted' }, 'Nada seleccionado. Ajustes del lienzo:'),
     size,
     apply,
     color,
-    snap,
+    snap('Ajustar a otros objetos', 'objects', 'Bordes y centros se alinean al arrastrar. Mantén Alt para moverlo libremente.'),
+    snap('Ajustar a la rejilla', 'grid', 'Al arrastrar, la esquina va a una rejilla de 20 px, que se ve mientras arrastras.'),
     h('p', { class: 'muted' }, bg.kind === 'image' ? 'El fondo es una imagen de la biblioteca.' : ''),
   ];
 }

@@ -89,15 +89,20 @@ test('an image or text copied in another app is pasted onto the canvas', async (
   await expect(layers(page)).toHaveText(['Texto 2', 'Texto 1', 'captura']);
 });
 
-test('snapping to other objects can be switched off, and stays so', async ({ page }) => {
+test('snapping to other objects and to the grid can be switched on and off, and stays so', async ({ page }) => {
   await newDrawing(page);
   const objects = inspector(page).getByLabel('Ajustar a otros objetos');
+  const grid = inspector(page).getByLabel('Ajustar a la rejilla');
   await expect(objects).toBeChecked();
-  await expect(inspector(page).getByText(/rejilla/i)).toHaveCount(0);
+  await expect(grid).not.toBeChecked();
+  await expect(inspector(page).getByText('Mostrar rejilla')).toHaveCount(0);
   await objects.uncheck();
+  await grid.check();
   await addShape(page, 'rectángulo');
+  await drag(page, [0.5, 0.5], [0.6, 0.6]); // a drag shows the grid and snaps to it
   await page.keyboard.press('Escape');
   await expect(inspector(page).getByLabel('Ajustar a otros objetos')).not.toBeChecked();
+  await expect(inspector(page).getByLabel('Ajustar a la rejilla')).toBeChecked();
 });
 
 test('two objects are joined by a connector; a double click writes inside a shape', async ({ page }) => {
