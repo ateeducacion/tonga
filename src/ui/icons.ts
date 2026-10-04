@@ -48,6 +48,7 @@ export const ICONS = {
   ellipsis: '<circle cx="12" cy="12" r="1"/> <circle cx="19" cy="12" r="1"/> <circle cx="5" cy="12" r="1"/>',
   minus: '<path d="M5 12h14"/>',
   arrowUp: '<path d="m5 12 7-7 7 7"/> <path d="M12 19V5"/>',
+  arrowRight: '<path d="M5 12h14"/> <path d="m12 5 7 7-7 7"/>',
   arrowDown: '<path d="M12 5v14"/> <path d="m19 12-7 7-7-7"/>',
   chevronsUp: '<path d="m17 11-5-5-5 5"/> <path d="m17 18-5-5-5 5"/>',
   chevronsDown: '<path d="m7 6 5 5 5-5"/> <path d="m7 13 5 5 5-5"/>',

@@ -34,14 +34,19 @@ export function renderInspector(editor: Editor, actions: InspectorActions, force
   const form = byId<HTMLFormElement>('inspector');
   const info = editor.inspect();
   const pencil = !info && editor.isDrawing;
-  const sig = info ? `${info.type}:${info.ids.join(',')}` : pencil ? 'pencil' : `canvas:${editor.size.width}x${editor.size.height}:${JSON.stringify(editor.currentBackground)}`;
+  const eraser = !info && editor.isErasing;
+  const sig = info ? `${info.type}:${info.ids.join(',')}` : pencil ? 'pencil' : eraser ? 'eraser' : `canvas:${editor.size.width}x${editor.size.height}:${JSON.stringify(editor.currentBackground)}`;
   if (sig === signature && !force) {
     syncValues(form, info, editor);
     return;
   }
   signature = sig;
-  form.replaceChildren(...(info ? selectionFields(editor, info) : pencil ? pencilFields(editor) : canvasFields(editor, actions)));
+  form.replaceChildren(...(info ? selectionFields(editor, info) : pencil ? pencilFields(editor) : eraser ? eraserFields() : canvasFields(editor, actions)));
   syncValues(form, info, editor);
+}
+
+function eraserFields(): HTMLElement[] {
+  return [h('p', { class: 'muted' }, 'Borrador: pasa por encima de los trazos, líneas y flechas para borrarlos. Cada pasada se deshace de una vez.')];
 }
 
 /** While the pencil is on, the inspector holds its colour, width and mode for the next strokes. */
@@ -269,6 +274,22 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
     parts.push(widths, lineStyles(editor));
   }
   if (info.image) parts.push(imageFields(editor, key));
+  if (info.connector) {
+    const arrow = action('arrowRight', 'Punta de flecha', () => editor.setConnectorArrow(!editor.inspect()?.connector?.arrow));
+    arrow.setAttribute('aria-pressed', String(info.connector.arrow));
+    parts.push(h('div', { class: 'actions', role: 'group', 'aria-label': 'Conector' }, arrow));
+  }
+  if (shape && info.fill && info.type !== 'line') {
+    const inside = h('button', { type: 'button', class: 'btn' }, 'Escribir dentro');
+    inside.title = 'También con doble clic en la forma';
+    inside.addEventListener('click', () => editor.writeInside());
+    parts.push(inside);
+  }
+  if (multi && info.ids.length === 2) {
+    parts.push(h('div', { class: 'actions', role: 'group', 'aria-label': 'Conectar los dos objetos' },
+      action('workflow', 'Conectar con flecha', () => editor.connect(true)),
+      action('minus', 'Conectar con línea', () => editor.connect(false))));
+  }
 
   parts.push(shadowFields(editor, info, key));
 

@@ -3,7 +3,7 @@
 export type Command =
   | 'undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'context-menu' | 'duplicate' | 'delete' | 'deselect' | 'select-all'
   | 'zoom-in' | 'zoom-out' | 'zoom-fit' | 'zoom-100'
-  | 'tool-select' | 'tool-hand' | 'tool-draw'
+  | 'tool-select' | 'tool-hand' | 'tool-draw' | 'tool-erase'
   | 'add-text' | 'add-rect' | 'add-ellipse' | 'add-line' | 'import' | 'library'
   | { nudge: [number, number] };
 
@@ -71,7 +71,7 @@ export function commandFor(e: KeyLike, editingText = false): Command | null {
   }
   if (e.shiftKey) return null;
   const letters: Record<string, Command> = {
-    v: 'tool-select', h: 'tool-hand', b: 'tool-draw', t: 'add-text', r: 'add-rect', e: 'add-ellipse', l: 'add-line', i: 'import', k: 'library',
+    v: 'tool-select', h: 'tool-hand', b: 'tool-draw', x: 'tool-erase', t: 'add-text', r: 'add-rect', e: 'add-ellipse', l: 'add-line', i: 'import', k: 'library',
   };
   return letters[key] ?? null;
 }

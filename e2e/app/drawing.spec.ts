@@ -101,6 +101,44 @@ test('snapping to the grid and to objects can be switched on and off', async ({ 
   await expect(inspector(page).getByLabel('Ajustar a la rejilla')).toBeChecked();
 });
 
+test('two objects are joined by a connector; a double click writes inside a shape', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await page.keyboard.press('Shift+ArrowLeft'); // nudge it away from the second one
+  for (let i = 0; i < 20; i++) await page.keyboard.press('Shift+ArrowLeft');
+  await addShape(page, 'elipse');
+  for (let i = 0; i < 20; i++) await page.keyboard.press('Shift+ArrowRight');
+  await page.keyboard.press('ControlOrMeta+A');
+  await inspector(page).getByRole('button', { name: 'Conectar con flecha' }).click();
+  await expect(layers(page)).toHaveText(['Elipse 1', 'Rectángulo 1', 'Conector 1']);
+  await expect(inspector(page).getByRole('button', { name: 'Punta de flecha' })).toHaveAttribute('aria-pressed', 'true');
+  await inspector(page).getByRole('button', { name: 'Punta de flecha' }).click();
+  await expect(inspector(page).getByRole('button', { name: 'Punta de flecha' })).toHaveAttribute('aria-pressed', 'false');
+
+  // The ellipse sits right of the centre: double-click it and type.
+  const box = await page.locator('canvas.upper-canvas').boundingBox();
+  if (!box) throw new Error('no canvas');
+  await page.keyboard.press('Escape');
+  await page.mouse.dblclick(box.x + box.width / 2 + box.width * 0.18, box.y + box.height / 2);
+  await page.keyboard.type('Oxígeno');
+  await expect(layers(page)).toHaveText(['Texto 1', 'Elipse 1', 'Rectángulo 1', 'Conector 1']); // just above its shape
+  await expect(inspector(page).getByLabel('Texto', { exact: true })).toHaveValue('Oxígeno');
+});
+
+test('the eraser removes the strokes it passes over, in one undo step', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('radio', { name: 'Dibujo libre' }).click();
+  await drag(page, [0.3, 0.3], [0.7, 0.3]);
+  await drag(page, [0.3, 0.6], [0.7, 0.6]);
+  await expect(layers(page)).toHaveText(['Trazo 2', 'Trazo 1']);
+  await page.getByRole('radio', { name: 'Borrador' }).click();
+  await expect(inspector(page)).toContainText('Borrador');
+  await drag(page, [0.5, 0.2], [0.5, 0.7], 30);
+  await expect(layers(page)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Deshacer' }).click();
+  await expect(layers(page)).toHaveText(['Trazo 2', 'Trazo 1']);
+});
+
 test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'línea con flecha');

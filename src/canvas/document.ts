@@ -10,16 +10,26 @@ declare module 'fabric' {
     name?: string;
     /** Canonical image source ("asset:<sha256>", "repositorios/…" or data:) behind a blob:/http URL. */
     assetSrc?: string;
+    /** A connector joins the objects with these ids (see links.ts). */
+    connectFrom?: string;
+    connectTo?: string;
+    connectArrow?: boolean;
+    /** A text written inside the shape with this id (see links.ts). */
+    attachedTo?: string;
   }
   interface SerializedObjectProps {
     id?: string;
     name?: string;
     assetSrc?: string;
+    connectFrom?: string;
+    connectTo?: string;
+    connectArrow?: boolean;
+    attachedTo?: string;
   }
 }
 
 // Serialized with every object (Fabric's documented custom-property hook).
-FabricObject.customProperties = ['id', 'name', 'assetSrc'];
+FabricObject.customProperties = ['id', 'name', 'assetSrc', 'connectFrom', 'connectTo', 'connectArrow', 'attachedTo'];
 // Fabric 7 default, stated explicitly: every position in Tonga is the object's centre.
 FabricObject.ownDefaults.originX = 'center';
 FabricObject.ownDefaults.originY = 'center';

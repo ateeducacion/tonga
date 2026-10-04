@@ -11,6 +11,7 @@ import { applyBackground, layerType, readProject, setLocked, writeProject, type 
 import './controls';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
 import { snapToGrid, snapToObjects, type Guide, type SnapResult } from './snap';
+import { followText, isConnector, makeConnector, refreshLinks } from './links';
 import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
 
 export type { ShapeKind } from './shapes';
@@ -41,6 +42,7 @@ export interface SelectionInfo {
   strokeWidth: number;
   shadow: ShadowStyle | null;
   lineStyle: LineStyle;
+  connector?: { arrow: boolean };
   text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; underline: boolean; textAlign: string };
   image?: { adjustments: ImageAdjustments; crop: ImageCrop };
 }
@@ -129,6 +131,9 @@ export class Editor {
   private lineDraft: Line | null = null;
   private styles: Record<StyleKind, Record<string, unknown>> = { shape: {}, line: {}, text: {} };
   private snap: Snapping = { grid: false, objects: true };
+  private erasing = false;
+  private erasePressed = false;
+  private erasedSome = false;
   private guides: Guide[] = [];
 
   constructor(
@@ -167,7 +172,32 @@ export class Editor {
       if (this.lineStart) this.draftLine(this.lineStart, scenePoint, e.shiftKey);
     });
     this.canvas.on('mouse:up', () => this.finishLine());
-    this.canvas.on('object:moving', ({ target }) => this.snapMoving(target));
+    this.canvas.on('object:moving', ({ target }) => {
+      this.snapMoving(target);
+      if (typeof target.attachedTo === 'string') followText(this.canvas, target); // dragging the text moves its shape
+      refreshLinks(this.canvas);
+    });
+    this.canvas.on('object:scaling', () => refreshLinks(this.canvas));
+    this.canvas.on('object:rotating', () => refreshLinks(this.canvas));
+    this.canvas.on('mouse:dblclick', ({ target }) => {
+      if (target && !this.drawing && !this.erasing && styleKind(target) === 'shape' && !(target instanceof Textbox)) this.writeInside(target);
+    });
+    // Eraser: everything drawn with a stroke (pencil strokes, lines, arrows) under the pointer
+    // goes; one press-drag-release is one undo step.
+    this.canvas.on('mouse:down', ({ scenePoint, viewportPoint }) => {
+      if (!this.erasing) return;
+      this.erasePressed = true;
+      this.eraseAt(scenePoint, viewportPoint);
+    });
+    this.canvas.on('mouse:move', ({ scenePoint, viewportPoint }) => {
+      if (this.erasePressed) this.eraseAt(scenePoint, viewportPoint);
+    });
+    this.canvas.on('mouse:up', () => {
+      const erased = this.erasePressed && this.erasedSome;
+      this.erasePressed = false;
+      this.erasedSome = false;
+      if (erased) this.commit();
+    });
     this.canvas.on('mouse:up', () => this.clearGuides());
     this.canvas.on('after:render', ({ ctx }) => this.drawGuides(ctx));
   }
@@ -324,6 +354,7 @@ export class Editor {
   /** Records the current state as an undo step. Same `key` in a row = one step. */
   commit(key: string | null = null): void {
     if (this.restoring) return;
+    refreshLinks(this.canvas); // connectors and inside texts follow whatever changed
     const before = this.history.current;
     this.history.push(serializeProject(this.toProject()), key);
     if (this.history.current !== before) this.rev++;
@@ -422,6 +453,7 @@ export class Editor {
       lineStyle: lineStyleOf(multi ? (this.selected()[0] as FabricObject) : o),
     };
     if (isImage(o)) info.image = { adjustments: readAdjustments(o), crop: readCrop(o) };
+    if (isConnector(o)) info.connector = { arrow: o.connectArrow === true };
     if (o instanceof Textbox) {
       info.text = {
         text: o.text, fontFamily: o.fontFamily, fontSize: o.fontSize, bold: o.fontWeight === 'bold' || Number(o.fontWeight) >= 600,
@@ -568,6 +600,85 @@ export class Editor {
     const scale = Math.min(1, (this.width * 0.8) / (img.width || 1), (this.height * 0.8) / (img.height || 1));
     img.scale(scale);
     this.place(img, 'image', name);
+  }
+
+  // ---- Connectors, text inside shapes, eraser -------------------------------------------------
+
+  /**
+   * Joins the two selected objects with a connector (an arrow, or a plain line) that follows
+   * them when they move. It goes behind both. False if the selection is not two objects.
+   */
+  connect(arrow: boolean): boolean {
+    const objs = this.selected();
+    if (objs.length !== 2) return false;
+    const [from, to] = objs as [FabricObject, FabricObject];
+    this.canvas.discardActiveObject();
+    const look: Record<string, unknown> = { stroke: DEFAULT_STROKE, strokeWidth: 3, strokeLineCap: 'round', strokeLineJoin: 'round', ...this.styles.line };
+    delete look.shadow; // a connector looks like a line, without the remembered shadow
+    const connector = makeConnector(from, to, arrow, look);
+    this.identify(connector, 'path', undefined, 'Conector');
+    const objects = this.canvas.getObjects();
+    this.canvas.insertAt(Math.min(objects.indexOf(from), objects.indexOf(to)), connector);
+    this.canvas.setActiveObject(connector);
+    this.commit();
+    return true;
+  }
+
+  /** Arrow head on or off for the selected connector. */
+  setConnectorArrow(arrow: boolean): void {
+    const o = this.canvas.getActiveObject();
+    if (!o || !isConnector(o)) return;
+    o.set({ connectArrow: arrow, path: [] }); // forces the re-draw
+    this.commit();
+  }
+
+  /** Text inside the given (or selected) shape: edits the one it has, or writes a new one. */
+  writeInside(shape = this.canvas.getActiveObject()): void {
+    if (!shape || styleKind(shape) !== 'shape') return;
+    const existing = this.canvas.getObjects().find((o) => o.attachedTo === shape.id);
+    const text = (existing as Textbox | undefined) ?? new Textbox('Texto', {
+      fontSize: Math.max(14, Math.round(Math.min(shape.getScaledHeight() / 4, this.unit() / 4))), fontFamily: 'Arial',
+      fill: DEFAULT_STROKE, textAlign: 'center', ...this.styleFor('text'),
+    });
+    if (!existing) {
+      text.set({ attachedTo: shape.id });
+      this.identify(text, 'text');
+      this.canvas.insertAt(this.canvas.getObjects().indexOf(shape) + 1, text);
+      refreshLinks(this.canvas);
+      this.commit();
+    }
+    this.canvas.setActiveObject(text);
+    text.enterEditing();
+    text.selectAll();
+    this.canvas.requestRenderAll();
+    this.emit();
+  }
+
+  /** The eraser tool removes strokes and lines it passes over. */
+  setErasing(on: boolean): void {
+    this.erasing = on;
+    this.canvas.defaultCursor = on ? 'crosshair' : 'default';
+    if (on) {
+      this.canvas.skipTargetFind = true;
+      this.canvas.discardActiveObject();
+    }
+    this.emit();
+  }
+
+  get isErasing(): boolean {
+    return this.erasing;
+  }
+
+  private eraseAt(scene: Point, viewport: Point): void {
+    // The point and four around it, so a thin stroke is still easy to hit.
+    const around = [[0, 0], [4, 0], [-4, 0], [0, 4], [0, -4]];
+    for (const o of [...this.canvas.getObjects()].reverse()) {
+      if (styleKind(o) !== 'line' || o.selectable === false || o.visible === false || !o.containsPoint(scene)) continue;
+      if (around.every(([dx = 0, dy = 0]) => this.canvas.isTargetTransparent(o, viewport.x + dx, viewport.y + dy))) continue;
+      this.canvas.remove(o);
+      this.erasedSome = true;
+    }
+    this.canvas.requestRenderAll();
   }
 
   /** Turns the pencil on or off; it keeps its colour, width and mode between uses. */
