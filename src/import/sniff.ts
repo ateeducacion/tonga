@@ -2,7 +2,7 @@
 import { MAX_IMPORT_BYTES } from '../config';
 import { UserError } from '../errors';
 
-export type ImportKind = 'png' | 'jpeg' | 'webp' | 'svg' | 'tonga';
+export type ImportKind = 'png' | 'jpeg' | 'webp' | 'svg' | 'tonga' | 'exe';
 
 export class ImportError extends UserError {}
 
@@ -13,10 +13,12 @@ export function sniff(bytes: Uint8Array, name: string): ImportKind {
   if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'png';
   if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'jpeg';
   if (ascii(b, 0, 4) === 'RIFF' && ascii(b, 8, 12) === 'WEBP') return 'webp';
+  // A ZIP: eXeLearning's project (.elpx) or an exported iDevice or block.
+  if (b[0] === 0x50 && b[1] === 0x4b && b[2] === 0x03 && b[3] === 0x04 && /\.(elpx|idevice|block)$/i.test(name)) return 'exe';
   const head = new TextDecoder().decode(b.subarray(0, 512)).replace(/^\uFEFF/, '').trimStart();
   if (head.startsWith('{') && /\.tonga$|\.json$/i.test(name)) return 'tonga';
   if (head.startsWith('<') && /<svg[\s>]/i.test(new TextDecoder().decode(b.subarray(0, 4096)))) return 'svg';
-  throw new ImportError('Formato no admitido. Usa PNG, JPEG, WebP, SVG o un proyecto .tonga.');
+  throw new ImportError('Formato no admitido. Usa PNG, JPEG, WebP, SVG, un proyecto .tonga o un fichero de eXeLearning (.elpx, .idevice, .block).');
 }
 
 function ascii(b: Uint8Array, from: number, to: number): string {

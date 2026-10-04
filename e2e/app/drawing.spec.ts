@@ -1,5 +1,7 @@
 // Drawing tools added in 2.3.3: pencil options, styles, snapping, connectors and the rest.
 import type { Page } from '@playwright/test';
+import { Buffer } from 'node:buffer';
+import { zip } from '../../src/export/zip';
 import { addShape, expect, layers, newDrawing, test } from './fixtures';
 
 const inspector = (page: Page) => page.locator('#inspector');
@@ -208,6 +210,79 @@ test('a resource cover template has a title to edit and a library image', async 
   await page.getByRole('tab', { name: 'Propiedades' }).click();
   await inspector(page).getByLabel('Texto', { exact: true }).fill('¿Qué es un volcán?');
   await expect(inspector(page).getByLabel('Texto', { exact: true })).toHaveValue('¿Qué es un volcán?');
+});
+
+test('an eXeLearning block with one slide opens directly as a drawing', async ({ page }) => {
+  await newDrawing(page);
+  await page.locator('#file-project').setInputFiles('test/fixtures/import/portada-volcan.block');
+  await expect(page.getByText('Diapositiva «Diapositiva» abierta.').first()).toBeVisible();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveCount(41);
+  await expect(layers(page).filter({ hasText: /^Texto 1$/ })).toHaveCount(1);
+});
+
+test('an eXeLearning project with several slides asks which one to open', async ({ page }) => {
+  const slide = (text: string, colour: string) => JSON.stringify({
+    engine: 'fabric', width: 800, height: 450, background: colour,
+    fabric: { objects: [{ type: 'Textbox', left: 400, top: 225, width: 300, text, fontSize: 40 }] },
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450"><rect width="800" height="450" fill="${colour}"/></svg>`,
+  });
+  const component = (page: string, json: string) => `<odeComponent><odePageId>${page}</odePageId><odeIdeviceTypeName>slide</odeIdeviceTypeName><jsonProperties><![CDATA[${json}]]></jsonProperties></odeComponent>`;
+  const xml = `<?xml version="1.0"?><ode><odeNavStructures><odeNavStructure><odePageId>p1</odePageId><pageName>Portada</pageName></odeNavStructure><odeNavStructure><odePageId>p2</odePageId><pageName>Actividad</pageName></odeNavStructure></odeNavStructures>${component('p1', slide('Bienvenida', '#fde68a'))}${component('p2', slide('Ejercicio', '#bfdbfe'))}</ode>`;
+  await newDrawing(page);
+  await page.locator('#file-project').setInputFiles({ name: 'curso.elpx', mimeType: 'application/zip', buffer: Buffer.from(zip({ 'content.xml': xml })) });
+  const dialog = page.getByRole('dialog', { name: '¿Qué diapositiva abres?' });
+  await expect(dialog.getByRole('radio')).toHaveCount(2);
+  await expect(dialog.getByRole('radio', { name: /Portada/ })).toBeChecked();
+  await dialog.getByRole('radio', { name: /Actividad/ }).check();
+  await dialog.getByRole('button', { name: 'Abrir' }).click();
+  await expect(page.getByText('Diapositiva «Actividad» abierta.').first()).toBeVisible();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await page.getByRole('button', { name: /^Texto 1/ }).click();
+  await page.getByRole('tab', { name: 'Propiedades' }).click();
+  await expect(inspector(page).getByLabel('Texto', { exact: true })).toHaveValue('Ejercicio');
+
+  // Cancelling keeps the drawing that was open.
+  await page.locator('#file-project').setInputFiles({ name: 'curso.elpx', mimeType: 'application/zip', buffer: Buffer.from(zip({ 'content.xml': xml })) });
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Texto 1']);
+});
+
+test('several layers are chosen with Ctrl or Shift + click and combined into one', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await addShape(page, 'elipse');
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  const bar = page.getByRole('group', { name: 'Capas seleccionadas' });
+  await expect(bar).toBeHidden();
+  await expect(page.getByText('Ctrl o Mayús + clic para elegir varias capas')).toBeVisible();
+
+  await page.getByRole('button', { name: /^Rectángulo 1/ }).click({ modifiers: ['ControlOrMeta'] });
+  await expect(bar).toContainText('2 capas seleccionadas');
+  await page.getByRole('button', { name: /^Elipse 1/ }).focus();
+  await page.keyboard.press('Shift+Enter'); // the keyboard way
+  await expect(bar).toContainText('3 capas seleccionadas');
+  await page.getByRole('button', { name: /^Texto 1/ }).click({ modifiers: ['Shift'] }); // and out again
+  await expect(bar).toContainText('2 capas seleccionadas');
+
+  await bar.getByRole('button', { name: 'Combinar capas' }).click();
+  await expect(layers(page)).toHaveText(['Texto 1', 'Grupo 1']);
+  await expect(bar).toBeHidden();
+  await page.getByRole('button', { name: 'Deshacer' }).click();
+  await expect(layers(page)).toHaveText(['Texto 1', 'Elipse 1', 'Rectángulo 1']);
+});
+
+test('objects selected on the canvas are combined with one visible button', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await addShape(page, 'estrella');
+  await page.keyboard.press('ControlOrMeta+A');
+  await inspector(page).getByRole('button', { name: 'Combinar 2 objetos en una capa' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Grupo 1']);
 });
 
 test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
