@@ -7,6 +7,7 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 ### Añadido
 
 - Plantillas **Portada de recurso** (panel lateral y banda superior), como las portadas de eXeLearning: título, subtítulo, datos del recurso, logo e imagen, todo editable. El fondo empieza bloqueado para que los clics lleguen a lo que hay encima.
+- **Abrir diapositivas de eXeLearning**: «Abrir» acepta `.elpx`, `.idevice` y `.block`. Una diapositiva (iDevice «Slide») se abre como dibujo editable, con sus imágenes; si hay varias, un diálogo con miniaturas pregunta cuál.
 
 ## [2.3.3] - 2026-10-04
 

@@ -116,7 +116,7 @@
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <input type="file" id="file-image" accept="image/png,image/jpeg,image/webp,image/svg+xml,.svg" hidden />
-    <input type="file" id="file-project" accept=".tonga,application/json" hidden />
+    <input type="file" id="file-project" accept=".tonga,application/json,.elpx,.idevice,.block" hidden />
 
     <!-- New drawing -->
     <dialog id="dlg-new" class="dialog" aria-labelledby="dlg-new-title">
@@ -150,6 +150,22 @@
           <span class="spacer"></span>
           <button type="submit" value="cancel" class="btn" formnovalidate>Cancelar</button>
           <button type="submit" value="create" class="btn primary">Crear</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- eXeLearning file with several slides -->
+    <dialog id="dlg-slides" class="dialog" aria-labelledby="dlg-slides-title">
+      <form method="dialog" class="dialog-body">
+        <h2 id="dlg-slides-title">¿Qué diapositiva abres?</h2>
+        <p id="slides-count" class="muted"></p>
+        <fieldset class="slides-list" id="slides-list">
+          <legend class="visually-hidden">Diapositivas</legend>
+        </fieldset>
+        <div class="dialog-actions">
+          <span class="spacer"></span>
+          <button type="submit" value="cancel" class="btn" formnovalidate>Cancelar</button>
+          <button type="submit" value="open" class="btn primary">Abrir</button>
         </div>
       </form>
     </dialog>
@@ -217,7 +233,7 @@
     <dialog id="dlg-help" class="dialog" aria-labelledby="dlg-help-title">
       <div class="dialog-body">
         <h2 id="dlg-help-title">Ayuda</h2>
-        <p>Crea un dibujo, añade textos, formas e imágenes de la biblioteca, y exporta el resultado. Tonga funciona en tu navegador: <strong>nada sale de tu equipo</strong>. Para continuar otro día, usa <em>Guardar</em> (fichero <code>.tonga</code>).</p>
+        <p>Crea un dibujo, añade textos, formas e imágenes de la biblioteca, y exporta el resultado. Tonga funciona en tu navegador: <strong>nada sale de tu equipo</strong>. Para continuar otro día, usa <em>Guardar</em> (fichero <code>.tonga</code>). Con <em>Abrir</em> también puedes abrir una diapositiva de eXeLearning (<code>.elpx</code>, <code>.idevice</code> o <code>.block</code> con un iDevice «Slide»).</p>
         <h3>Atajos de teclado</h3>
         <table class="shortcuts">
           <tbody>

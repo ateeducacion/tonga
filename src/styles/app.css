@@ -914,6 +914,47 @@ h3 {
   color: var(--color-muted);
 }
 
+/* «¿Qué diapositiva abres?»: one card per Slide iDevice, like the size presets. */
+.slides-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+  max-block-size: 60vh;
+  overflow: auto;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.slide-card {
+  display: grid;
+  gap: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  cursor: pointer;
+}
+
+.slide-card:has(input:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-selected);
+}
+
+.slide-card input {
+  justify-self: start;
+}
+
+.slide-thumb {
+  inline-size: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+}
+
 .custom-size {
   display: none !important;
 }
