@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultFileName, exportFileName, needsWhiteBackground } from '../src/export/export';
+import { defaultFileName, exportFileName, exportBackground } from '../src/export/export';
 import { newProject } from '../src/project/schema';
 
 describe('export settings', () => {
@@ -17,11 +17,21 @@ describe('export settings', () => {
 
   it('never exports a JPEG or PDF with a transparent (black) background (RULE-114)', () => {
     const transparent = newProject(10, 10);
-    expect(needsWhiteBackground(transparent, { format: 'jpeg', transparent: true })).toBe(true);
-    expect(needsWhiteBackground(transparent, { format: 'pdf', transparent: true })).toBe(true);
-    expect(needsWhiteBackground(transparent, { format: 'png', transparent: true })).toBe(false);
-    expect(needsWhiteBackground(transparent, { format: 'svg', transparent: false })).toBe(true);
+    const white = { kind: 'color', color: '#ffffff' };
+    expect(exportBackground(transparent, { format: 'jpeg', transparent: true })).toEqual(white);
+    expect(exportBackground(transparent, { format: 'pdf', transparent: true })).toEqual(white);
+    expect(exportBackground(transparent, { format: 'png', transparent: true })).toEqual({ kind: 'transparent' });
+    expect(exportBackground(transparent, { format: 'svg', transparent: false })).toEqual(white);
+  });
+
+  it('drops a colour or image background from PNG and SVG on request, like Canva', () => {
     const coloured = newProject(10, 10, { kind: 'color', color: '#ff0000' });
-    expect(needsWhiteBackground(coloured, { format: 'jpeg', transparent: true })).toBe(false);
+    const pictured = newProject(10, 10, { kind: 'image', src: 'repositorios/fondos/mar.png' });
+    for (const p of [coloured, pictured]) {
+      expect(exportBackground(p, { format: 'png', transparent: true })).toEqual({ kind: 'transparent' });
+      expect(exportBackground(p, { format: 'svg', transparent: true })).toEqual({ kind: 'transparent' });
+      expect(exportBackground(p, { format: 'png', transparent: false })).toEqual(p.canvas.background);
+      expect(exportBackground(p, { format: 'jpeg', transparent: true })).toEqual(p.canvas.background);
+    }
   });
 });

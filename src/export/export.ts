@@ -2,7 +2,7 @@
 // document, so the live canvas (zoom, selection) is never touched (RULE-102).
 import type { StaticCanvas } from 'fabric';
 import { renderOffscreen, type SourceResolver } from '../canvas/document';
-import type { Project } from '../project/schema';
+import type { Background, Project } from '../project/schema';
 import { exportElpx } from './elpx';
 import { jpegToPdf } from './pdf';
 
@@ -12,7 +12,7 @@ export interface ExportOptions {
   format: ExportFormat;
   scale: number;
   quality: number;
-  /** Keep a transparent background where the format allows it (PNG, SVG). */
+  /** Drop the canvas background (colour or image) where the format allows it (PNG, SVG), as Canva does. */
   transparent: boolean;
 }
 
@@ -38,14 +38,18 @@ export function defaultFileName(now = new Date()): string {
   return `tonga-${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
 }
 
-/** Formats without transparency, or a request for an opaque file, get a white background (RULE-114). */
-export function needsWhiteBackground(project: Project, opts: Pick<ExportOptions, 'format' | 'transparent'>): boolean {
-  if (project.canvas.background.kind !== 'transparent') return false;
-  return opts.format === 'jpeg' || opts.format === 'pdf' || !opts.transparent;
+/**
+ * Background actually exported: PNG and SVG drop it when asked for transparency; JPEG, PDF and opaque requests
+ * fill a transparent canvas with white, never black (RULE-114).
+ */
+export function exportBackground({ canvas: { background } }: Project, opts: Pick<ExportOptions, 'format' | 'transparent'>): Background {
+  const alpha = opts.transparent && (opts.format === 'png' || opts.format === 'svg');
+  if (alpha) return { kind: 'transparent' };
+  return background.kind === 'transparent' ? { kind: 'color', color: '#ffffff' } : background;
 }
 
 function withBackground(project: Project, opts: ExportOptions): Project {
-  return needsWhiteBackground(project, opts) ? { ...project, canvas: { ...project.canvas, background: { kind: 'color', color: '#ffffff' } } } : project;
+  return { ...project, canvas: { ...project.canvas, background: exportBackground(project, opts) } };
 }
 
 function toBlob(canvas: StaticCanvas, type: string, scale: number, quality: number): Promise<Blob> {
