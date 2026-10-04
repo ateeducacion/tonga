@@ -1,7 +1,7 @@
 // The interactive editor: a Fabric canvas plus Tonga's document rules (ids, names, lock,
 // background, snapshot history). The UI talks to this class only.
 import {
-  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, Group, Line, Path, PencilBrush, Point, Rect, Textbox, Triangle, util,
+  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, type FabricObjectProps, Group, Line, Path, PencilBrush, Point, Rect, Shadow, Textbox, Triangle, util,
 } from 'fabric';
 import { History } from '../history/history';
 import { LAYER_LABEL } from '../i18n/es';
@@ -38,13 +38,39 @@ export interface SelectionInfo {
   fill: string | null;
   stroke: string | null;
   strokeWidth: number;
-  text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; textAlign: string };
+  shadow: ShadowStyle | null;
+  text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; underline: boolean; textAlign: string };
   image?: { adjustments: ImageAdjustments; crop: ImageCrop };
 }
 
 export const DEFAULT_FILL = '#f28c28';
 export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
+
+/** A simple drop shadow, in canvas pixels. */
+export interface ShadowStyle {
+  color: string;
+  blur: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+export const DEFAULT_SHADOW: ShadowStyle = { color: '#1f2937', blur: 12, offsetX: 4, offsetY: 6 };
+
+/** New objects of each kind start with the style last chosen for that kind. */
+type StyleKind = 'shape' | 'line' | 'text';
+const STYLE_KEYS: Record<StyleKind, string[]> = {
+  shape: ['fill', 'stroke', 'strokeWidth', 'strokeDashArray', 'strokeLineCap', 'shadow'],
+  line: ['stroke', 'strokeWidth', 'strokeDashArray', 'strokeLineCap', 'shadow'],
+  text: ['fill', 'fontFamily', 'fontWeight', 'fontStyle', 'underline', 'shadow'],
+};
+
+function styleKind(o: FabricObject): StyleKind | null {
+  if (o instanceof Textbox) return 'text';
+  const type = layerType(o);
+  if (type === 'line' || (type === 'path' && !o.fill)) return 'line';
+  return type === 'image' || type === 'group' ? null : 'shape';
+}
 
 /** The pencil: colour, width, and freehand or straight lines. */
 export interface DrawStyle {
@@ -74,6 +100,7 @@ export class Editor {
   private drawStyle: DrawStyle = { color: DEFAULT_STROKE, width: 4, straight: false };
   private lineStart: Point | null = null;
   private lineDraft: Line | null = null;
+  private styles: Record<StyleKind, Record<string, unknown>> = { shape: {}, line: {}, text: {} };
 
   constructor(
     element: HTMLCanvasElement,
@@ -304,12 +331,13 @@ export class Editor {
       fill: multi ? null : colour(o.fill),
       stroke: multi ? null : colour(o.stroke),
       strokeWidth: o.strokeWidth,
+      shadow: readShadow(multi ? this.selected()[0] : o),
     };
     if (isImage(o)) info.image = { adjustments: readAdjustments(o), crop: readCrop(o) };
     if (o instanceof Textbox) {
       info.text = {
         text: o.text, fontFamily: o.fontFamily, fontSize: o.fontSize, bold: o.fontWeight === 'bold' || Number(o.fontWeight) >= 600,
-        italic: o.fontStyle === 'italic', textAlign: o.textAlign,
+        italic: o.fontStyle === 'italic', underline: o.underline, textAlign: o.textAlign,
       };
     }
     return info;
@@ -406,12 +434,13 @@ export class Editor {
 
   addText(text = 'Texto'): void {
     const size = Math.max(16, Math.round(this.unit() / 4));
-    this.place(new Textbox(text, { width: this.unit() * 2, fontSize: size, fontFamily: 'Arial', fill: DEFAULT_STROKE, textAlign: 'center' }), 'text');
+    this.place(new Textbox(text, { width: this.unit() * 2, fontSize: size, fontFamily: 'Arial', fill: DEFAULT_STROKE, textAlign: 'center', ...this.styleFor('text') }), 'text');
   }
 
   addShape(kind: ShapeKind): void {
     const u = this.unit();
-    const style = { fill: DEFAULT_FILL, stroke: DEFAULT_STROKE, strokeWidth: 2, strokeUniform: true };
+    const style = { fill: DEFAULT_FILL, stroke: DEFAULT_STROKE, strokeWidth: 2, strokeUniform: true, ...this.styleFor('shape') };
+    const lineStyle = { stroke: DEFAULT_STROKE, strokeWidth: 4, strokeUniform: true, strokeLineCap: 'round' as const, strokeLineJoin: 'round' as const, ...this.styleFor('line') };
     // kind is a ShapeKind, so it is always in the catalogue.
     const shape = SHAPES.find((x) => x.kind === kind) as ShapeDef;
     if (kind === 'rect') this.place(new Rect({ width: u, height: u, ...style }), 'rect');
@@ -419,13 +448,28 @@ export class Editor {
     else if (kind === 'ellipse') this.place(new Ellipse({ rx: u / 2, ry: u / 3, ...style }), 'ellipse');
     else if (kind === 'circle') this.place(new Ellipse({ rx: u / 2, ry: u / 2, ...style }), 'ellipse', undefined, shape.label);
     else if (kind === 'triangle') this.place(new Triangle({ width: u, height: u, ...style }), 'triangle');
-    else if (kind === 'line') this.place(new Line([-u / 2, 0, u / 2, 0], { stroke: DEFAULT_STROKE, strokeWidth: 4, strokeUniform: true }), 'line');
+    else if (kind === 'line') this.place(new Line([-u / 2, 0, u / 2, 0], lineStyle), 'line');
     else {
-      // A closed path with a fill: the inspector offers its fill colour like any other shape.
-      const path = new Path(shape.d, { ...style, scaleX: u / 100, scaleY: u / 100 });
+      // Closed shapes have a fill, like any other shape; open ones (arrow lines) are only a stroke.
+      const open = 'open' in shape && shape.open;
+      const look: Partial<FabricObjectProps> = open ? { ...lineStyle, fill: null } : style;
+      const path = new Path(shape.d, { ...look, scaleX: u / 100, scaleY: u / 100 });
       path.set({ left: this.width / 2, top: this.height / 2 });
       this.place(path, 'path', undefined, shape.label);
     }
+  }
+
+  /** The style last chosen for this kind of object, ready to give to a new one. */
+  private styleFor(kind: StyleKind): Record<string, unknown> {
+    const { shadow, ...rest } = this.styles[kind];
+    return shadow === undefined ? rest : { ...rest, shadow: shadow ? new Shadow(shadow as ShadowStyle) : null };
+  }
+
+  /** Remembers the style properties the user just set on an object, for the next of its kind. */
+  private remember(o: FabricObject, props: Record<string, unknown>): void {
+    const kind = styleKind(o);
+    if (!kind) return;
+    for (const k of STYLE_KEYS[kind]) if (k in props) this.styles[kind][k] = props[k];
   }
 
 
@@ -547,7 +591,22 @@ export class Editor {
     const targets = active instanceof ActiveSelection && !('left' in props || 'top' in props || 'angle' in props || 'scaleX' in props)
       ? active.getObjects()
       : [active];
-    for (const o of targets) o.set(props).setCoords();
+    for (const o of targets) {
+      o.set(props).setCoords();
+      this.remember(o, props);
+    }
+    this.canvas.requestRenderAll();
+    this.commit(key);
+  }
+
+  /** A drop shadow on every selected object, or none. Remembered for new objects. */
+  setShadow(shadow: ShadowStyle | null, key: string | null = null): void {
+    const targets = this.selected();
+    if (!targets.length) return;
+    for (const o of targets) {
+      o.set({ shadow: shadow ? new Shadow(shadow) : null });
+      this.remember(o, { shadow: shadow && { ...shadow } });
+    }
     this.canvas.requestRenderAll();
     this.commit(key);
   }
@@ -687,6 +746,11 @@ export class Editor {
     this.listeners.clear();
     return this.canvas.dispose();
   }
+}
+
+function readShadow(o: FabricObject | undefined): ShadowStyle | null {
+  const s = o?.shadow;
+  return s ? { color: typeof s.color === 'string' ? s.color : DEFAULT_SHADOW.color, blur: s.blur, offsetX: s.offsetX, offsetY: s.offsetY } : null;
 }
 
 /** The end point moved to the nearest 45° direction from `from`, keeping the length. */

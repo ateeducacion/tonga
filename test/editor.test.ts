@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Point } from 'fabric';
-import { Editor, snapAngle } from '../src/canvas/editor';
+import { DEFAULT_SHADOW, Editor, snapAngle } from '../src/canvas/editor';
+import { exportProject } from '../src/export/export';
 import { newProject } from '../src/project/schema';
 
 let editor: Editor;
@@ -60,6 +61,80 @@ describe('Pencil', () => {
     pointer('mouse:down', 0, 0);
     pointer('mouse:up', 0, 0);
     expect(names()).toEqual([]);
+  });
+});
+
+describe('Styles', () => {
+  const object = (i = 0) => editor.toProject().layers[i]?.object as Record<string, unknown>;
+
+  it('a new shape, line or text reuses the style last chosen for its kind', () => {
+    editor.addShape('rect');
+    editor.setProps({ fill: '#2563eb', stroke: '#16a34a', strokeWidth: 8, left: 10 });
+    editor.addShape('star');
+    expect(object(1)).toMatchObject({ fill: '#2563eb', stroke: '#16a34a', strokeWidth: 8 });
+    expect(object(1).left).not.toBe(10); // position is not a style
+
+    editor.addShape('line');
+    expect(object(2)).toMatchObject({ stroke: '#1f2937', strokeWidth: 4 }); // lines have their own style
+    editor.setProps({ stroke: '#e11d48' });
+    editor.addShape('line');
+    expect(object(3)).toMatchObject({ stroke: '#e11d48' });
+
+    editor.addText();
+    editor.setProps({ fill: '#7c3aed', fontFamily: 'Georgia', underline: true });
+    editor.addText();
+    expect(object(5)).toMatchObject({ fill: '#7c3aed', fontFamily: 'Georgia', underline: true });
+    expect(editor.inspect()?.text?.underline).toBe(true);
+    editor.addShape('ellipse');
+    expect(object(6)).toMatchObject({ fill: '#2563eb' }); // the text colour is not a shape fill
+  });
+
+  it('adds, changes and removes a shadow, kept in the project, undoable and remembered', async () => {
+    editor.addShape('rect');
+    expect(editor.inspect()?.shadow).toBeNull();
+    editor.setShadow({ color: '#e11d48', blur: 20, offsetX: -5, offsetY: 8 });
+    expect(editor.inspect()?.shadow).toEqual({ color: '#e11d48', blur: 20, offsetX: -5, offsetY: 8 });
+    await editor.open(editor.toProject());
+    expect(object()).toMatchObject({ shadow: { color: '#e11d48', blur: 20, offsetX: -5, offsetY: 8 } });
+    editor.select([editor.layers()[0]?.id ?? '']);
+    editor.addShape('triangle');
+    expect(editor.inspect()?.shadow).toMatchObject({ blur: 20 });
+    editor.setShadow(null);
+    expect(editor.inspect()?.shadow).toBeNull();
+    editor.addShape('triangle');
+    expect(editor.inspect()?.shadow).toBeNull();
+    await editor.undo();
+    await editor.undo();
+    editor.select([editor.layers()[0]?.id ?? '']);
+    expect(editor.inspect()?.shadow).toMatchObject({ blur: 20 });
+  });
+
+  it('exports the shadow to SVG as a filter', async () => {
+    editor.addShape('rect');
+    editor.setShadow({ ...DEFAULT_SHADOW });
+    const blob = await exportProject(editor.toProject(), { format: 'svg', scale: 1, quality: 1, transparent: true }, (s) => s, (s) => s);
+    expect(await blob.text()).toMatch(/<filter id="SVGID_\d+"[\s\S]*feGaussianBlur/);
+  });
+
+  it('shows the first object’s shadow for a multiple selection and sets it on all; nothing selected does nothing', () => {
+    editor.setShadow({ ...DEFAULT_SHADOW });
+    expect(editor.layers()).toEqual([]);
+    editor.addShape('rect');
+    editor.addShape('ellipse');
+    editor.selectAll();
+    editor.setShadow({ ...DEFAULT_SHADOW, blur: 3 });
+    expect(editor.inspect()?.shadow).toMatchObject({ blur: 3 });
+    expect(editor.toProject().layers.every((l) => (l.object.shadow as { blur: number }).blur === 3)).toBe(true);
+  });
+
+  it('images and groups do not change the remembered styles', () => {
+    editor.addShape('rect');
+    editor.addShape('rect');
+    editor.selectAll();
+    editor.group();
+    editor.setProps({ opacity: 0.5, fill: '#16a34a' });
+    editor.addShape('rect');
+    expect(object(1)).toMatchObject({ fill: '#f28c28' });
   });
 });
 

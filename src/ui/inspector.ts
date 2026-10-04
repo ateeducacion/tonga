@@ -1,7 +1,7 @@
 // Contextual inspector: shows only what makes sense for the selection (or the canvas when
 // nothing is selected). Rebuilt when the selection changes; otherwise only values are synced,
 // so typing in a field never loses focus.
-import type { AlignEdge, Editor, SelectionInfo } from '../canvas/editor';
+import { DEFAULT_SHADOW, type AlignEdge, type Editor, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
 import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '../canvas/image';
 import { HEX_COLOR } from '../project/schema';
 import { putAsset } from '../persistence/store';
@@ -19,6 +19,7 @@ const WIDTHS: [number, string][] = [[0, 'Ninguno'], [2, 'Fino'], [4, 'Medio'], [
 const PENCIL_WIDTHS: [number, string][] = [[2, 'Fino'], [4, 'Medio'], [8, 'Grueso'], [16, 'Muy grueso']];
 // The «Posición, tamaño y alineación» section stays as the user left it across selections.
 let placementOpen = false;
+let shadowOpen = false;
 
 export interface InspectorActions {
   resizeCanvas(width: number, height: number): void;
@@ -84,7 +85,17 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
     }
   }
   if (info) {
-    for (const group of form.querySelectorAll<HTMLElement>('[data-colour]')) syncColour(group, (group.dataset.colour === 'stroke' ? info.stroke : info.fill) ?? '');
+    const colours: Record<string, string | null> = { stroke: info.stroke, fill: info.fill, shadow: (info.shadow ?? DEFAULT_SHADOW).color };
+    for (const group of form.querySelectorAll<HTMLElement>('[data-colour]')) syncColour(group, colours[group.dataset.colour ?? ''] ?? '');
+    const shadow = info.shadow ?? DEFAULT_SHADOW;
+    const on = form.elements.namedItem('shadowOn');
+    if (on instanceof HTMLInputElement) on.checked = !!info.shadow;
+    for (const [name, v] of [['shadowBlur', shadow.blur], ['shadowX', shadow.offsetX], ['shadowY', shadow.offsetY]] as const) {
+      const el = form.elements.namedItem(name);
+      if (el instanceof HTMLInputElement && el !== document.activeElement) el.value = String(v);
+      const out = form.querySelector(`[data-output="${name}"]`);
+      if (out) out.textContent = String(v);
+    }
     for (const b of form.querySelectorAll<HTMLButtonElement>('[data-width]')) b.setAttribute('aria-pressed', String(Number(b.dataset.width) === Math.round(info.strokeWidth ?? -1)));
     const out = form.querySelector('[data-output="opacity"]');
     if (out) out.textContent = `${Math.round(info.opacity * 100)} %`;
@@ -109,6 +120,7 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
     const pressed = (sel: string, on: boolean) => form.querySelector(sel)?.setAttribute('aria-pressed', String(on));
     pressed('[data-toggle="bold"]', info.text.bold);
     pressed('[data-toggle="italic"]', info.text.italic);
+    pressed('[data-toggle="underline"]', info.text.underline);
     for (const align of ['left', 'center', 'right']) pressed(`[data-align="${align}"]`, info.text.textAlign === align);
   }
 }
@@ -245,6 +257,8 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
   }
   if (info.image) parts.push(imageFields(editor, key));
 
+  parts.push(shadowFields(editor, info, key));
+
   const opacity = slider('Opacidad (%)', 'opacity', 0, 100, ' %');
   bind(opacity, 'opacity', (v) => editor.setProps({ opacity: Math.min(100, Math.max(0, Number(v))) / 100 }, key('opacity')));
   parts.push(opacity);
@@ -297,6 +311,27 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
   return parts;
 }
 
+/** A drop shadow: on/off, colour, blur and offset. Touching any control turns it on. */
+function shadowFields(editor: Editor, info: SelectionInfo, key: (p: string) => string): HTMLElement {
+  const on = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'shadowOn' }), 'Sombra');
+  const current = (): ShadowStyle => editor.inspect()?.shadow ?? { ...DEFAULT_SHADOW };
+  const apply = (s: ShadowStyle | null) => editor.setShadow(s, key('shadow'));
+  const color = colour('Color de la sombra', 'shadow', (c) => apply({ ...current(), color: c }));
+  const box = h('details', { class: 'placement', open: shadowOpen || !!info.shadow },
+    h('summary', {}, 'Sombra'),
+    on,
+    color,
+    slider('Difuminado', 'shadowBlur', 0, 50),
+    h('div', { class: 'grid2' }, slider('Horizontal', 'shadowX', -50, 50), slider('Vertical', 'shadowY', -50, 50)));
+  box.addEventListener('toggle', () => (shadowOpen = box.open));
+  bind(box, 'shadowOn', (_v, el) => apply(el.checked ? current() : null), 'change');
+  const numeric = (name: string, prop: 'blur' | 'offsetX' | 'offsetY') => bind(box, name, (v) => apply({ ...current(), [prop]: Number(v) }));
+  numeric('shadowBlur', 'blur');
+  numeric('shadowX', 'offsetX');
+  numeric('shadowY', 'offsetY');
+  return box;
+}
+
 function textFields(editor: Editor, key: (p: string) => string): HTMLElement {
   const size = h('input', { type: 'number', name: 'fontSize', min: 4, max: 400, step: 1, inputmode: 'numeric', 'aria-label': 'Tamaño' });
   const step = (delta: number) => {
@@ -306,7 +341,7 @@ function textFields(editor: Editor, key: (p: string) => string): HTMLElement {
   };
   const minus = action('minus', 'Letra más pequeña', () => step(-4));
   const plus = action('plus', 'Letra más grande', () => step(4));
-  const toggle = (name: 'bold' | 'italic', iconName: IconName, label: string, set: (on: boolean) => Record<string, string>) => {
+  const toggle = (name: 'bold' | 'italic' | 'underline', iconName: IconName, label: string, set: (on: boolean) => Record<string, string | boolean>) => {
     const b = action(iconName, label, () => {
       const on = b.getAttribute('aria-pressed') !== 'true';
       b.setAttribute('aria-pressed', String(on));
@@ -330,7 +365,8 @@ function textFields(editor: Editor, key: (p: string) => string): HTMLElement {
     h('div', { class: 'toggles' },
       h('div', { class: 'segmented', role: 'group', 'aria-label': 'Estilo' },
         toggle('bold', 'bold', 'Negrita', (on) => ({ fontWeight: on ? 'bold' : 'normal' })),
-        toggle('italic', 'italic', 'Cursiva', (on) => ({ fontStyle: on ? 'italic' : 'normal' }))),
+        toggle('italic', 'italic', 'Cursiva', (on) => ({ fontStyle: on ? 'italic' : 'normal' })),
+        toggle('underline', 'underline', 'Subrayado', (on) => ({ underline: on }))),
       h('div', { class: 'segmented', role: 'group', 'aria-label': 'Alineación' },
         alignBtn('left', 'textAlignStart', 'Alinear el texto a la izquierda'),
         alignBtn('center', 'textAlignCenter', 'Centrar el texto'),
