@@ -13,7 +13,7 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 - **Estilo de línea**: continua, guiones o puntos, en proporción al grosor.
 - **Líneas con flecha** (una o dos puntas) y un grupo **Diagramas** en Formas: inicio o fin, documento, base de datos, llave y corchete.
 - **Distribuir** en horizontal o en vertical tres o más objetos con el mismo hueco.
-- **Ajustar a otros objetos**: al arrastrar, un borde se alinea con otro borde y el centro con otro centro (de otro objeto o del lienzo), con una guía corta entre los dos. Funciona como un imán: a menos de 8 px salta a la línea y, una vez alineado, hay que tirar más de 20 px para despegarlo, así que no tiembla con el pulso. Alt mueve libremente. Se puede desactivar en los ajustes del lienzo.
+- **Ajustar a otros objetos**: al arrastrar, un borde se alinea con otro borde y el centro con otro centro (de otro objeto o del lienzo), con una guía corta entre los dos. Funciona como un imán: a menos de 8 px salta a la línea y, una vez alineado, hay que tirar más de 20 px para despegarlo, así que no tiembla con el pulso. Alt mueve libremente. Se activa en los ajustes del lienzo (viene desactivado).
 - **Ajustar a la rejilla** (cada 40 px), en los ajustes del lienzo: atrae como un imán (el mismo que con los objetos) cuando la esquina pasa cerca de una línea, sin ir a saltos, y la rejilla se ve solo mientras se arrastra.
 - **Pegar** (Ctrl+V) una imagen o un texto copiados en otra aplicación.
 - **Conectores**: «Conectar con flecha/línea» une dos objetos seleccionados y la unión los sigue al moverlos.

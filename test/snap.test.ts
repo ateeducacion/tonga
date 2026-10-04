@@ -49,6 +49,8 @@ describe('Editor snapping while dragging', () => {
     document.body.innerHTML = '<canvas id="c"></canvas>';
     const ed = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
     await ed.open(newProject(800, 600));
+    expect(ed.snapping).toEqual({ grid: false, objects: false }); // both off until asked for
+    ed.setSnapping({ objects: true });
     ed.addShape('rect'); // 150×150 (+2 stroke) at the centre: 324..476
     ed.addShape('rect');
     const moving = ed.canvas.getActiveObject() as FabricObject;

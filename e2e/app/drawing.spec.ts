@@ -93,15 +93,15 @@ test('snapping to other objects and to the grid can be switched on and off, and 
   await newDrawing(page);
   const objects = inspector(page).getByLabel('Ajustar a otros objetos');
   const grid = inspector(page).getByLabel('Ajustar a la rejilla');
-  await expect(objects).toBeChecked();
+  await expect(objects).not.toBeChecked(); // off by default
   await expect(grid).not.toBeChecked();
   await expect(inspector(page).getByText('Mostrar rejilla')).toHaveCount(0);
-  await objects.uncheck();
+  await objects.check();
   await grid.check();
   await addShape(page, 'rectángulo');
   await drag(page, [0.5, 0.5], [0.6, 0.6]); // a drag shows the grid and snaps to it
   await page.keyboard.press('Escape');
-  await expect(inspector(page).getByLabel('Ajustar a otros objetos')).not.toBeChecked();
+  await expect(inspector(page).getByLabel('Ajustar a otros objetos')).toBeChecked();
   await expect(inspector(page).getByLabel('Ajustar a la rejilla')).toBeChecked();
 });
 

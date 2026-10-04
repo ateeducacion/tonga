@@ -164,7 +164,7 @@ export class Editor {
   private lineStart: Point | null = null;
   private lineDraft: Line | null = null;
   private styles: Record<StyleKind, Record<string, unknown>> = { shape: {}, line: {}, text: {} };
-  private snap: Snapping = { grid: false, objects: true };
+  private snap: Snapping = { grid: false, objects: false };
   private dragging = false;
   private gridStuck: Stuck = {};
   private crop: { image: FabricImage; frame: Rect } | null = null;
