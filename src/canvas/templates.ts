@@ -1,15 +1,17 @@
 // Starting points for classroom drawings («Nuevo → Plantilla»). Each template is built from the
 // same pieces the user has (shapes, text inside shapes, connectors), laid out in proportion to
 // the canvas, so everything stays editable. The result is an ordinary project.
-import { Ellipse, Line, Path, Rect, StaticCanvas, Textbox, type FabricObject } from 'fabric';
+import { Ellipse, FabricImage, Line, Path, Rect, StaticCanvas, Textbox, type FabricObject } from 'fabric';
 import type { Background, Project } from '../project/schema';
 import { readProject } from './document';
 import { makeConnector } from './links';
 import { SHAPES } from './shapes';
 
-export type TemplateKind = 'concept-map' | 'venn' | 'timeline' | 'comic' | 'storyboard' | 'axes' | 'cycle' | 'org-chart';
+export type TemplateKind = 'cover-panel' | 'cover-band' | 'concept-map' | 'venn' | 'timeline' | 'comic' | 'storyboard' | 'axes' | 'cycle' | 'org-chart';
 
 export const TEMPLATES: { kind: TemplateKind; label: string }[] = [
+  { kind: 'cover-panel', label: 'Portada de recurso (panel lateral)' },
+  { kind: 'cover-band', label: 'Portada de recurso (banda superior)' },
   { kind: 'concept-map', label: 'Mapa conceptual' },
   { kind: 'venn', label: 'Diagrama de Venn' },
   { kind: 'timeline', label: 'Línea temporal' },
@@ -29,6 +31,8 @@ const id = () => `t${Date.now().toString(36)}${(counter++).toString(36)}`;
 /** Builds the template's objects on a canvas of the given size. */
 class Builder {
   readonly objects: FabricObject[] = [];
+  /** Layers that start locked (a full-canvas background, so clicks reach what is on top). */
+  readonly locked = new Set<FabricObject>();
   readonly u: number;
 
   constructor(readonly w: number, readonly h: number) {
@@ -53,6 +57,33 @@ class Builder {
     return shape;
   }
 
+  /** A text block given by its left edge, as on a cover (left-aligned unless told otherwise). */
+  block(text: string, x: number, y: number, width: number, size: number, name: string, style: Partial<Textbox> = {}): Textbox {
+    return this.add(new Textbox(text, {
+      left: x + width / 2, top: y, width, fontSize: Math.round(size), fontFamily: 'Arial', fill: '#ffffff', textAlign: 'left', ...style,
+    }), name);
+  }
+
+  /**
+   * A library image (a 256 px Lucide icon) centred at (x, y), `size` px wide. The element is never
+   * loaded here: the project keeps its canonical path and the editor loads it when it opens.
+   */
+  image(src: string, x: number, y: number, size: number, name: string): FabricImage {
+    const el = document.createElement('img');
+    el.src = src;
+    const img = new FabricImage(el, { width: 256, height: 256, left: x, top: y, scaleX: size / 256, scaleY: size / 256 });
+    img.set({ assetSrc: src });
+    return this.add(img, name);
+  }
+
+  /** The two-diamond mark of the covers, a placeholder for the centre's or the author's logo. */
+  logo(x: number, y: number, size: number, colours: [string, string]): void {
+    const diamond = (cx: number, cy: number, r: number, fill: string, opacity = 1) =>
+      new Path(`M ${cx} ${cy - r} L ${cx + r} ${cy} L ${cx} ${cy + r} L ${cx - r} ${cy} Z`, { fill, opacity, strokeWidth: 0 });
+    this.add(diamond(x, y, size / 2, colours[0]), 'Logo');
+    this.add(diamond(x + size * 0.3, y + size * 0.15, size * 0.36, colours[1], 0.92), 'Logo (detalle)');
+  }
+
   connect(from: FabricObject, to: FabricObject, arrow = true): void {
     // Behind the shapes, like «Conectar».
     const c = makeConnector(from, to, arrow, LINE);
@@ -73,7 +104,53 @@ const rect = (x: number, y: number, w: number, h: number, fill: string, rounded 
 const ellipse = (x: number, y: number, rx: number, ry: number, fill: string) =>
   new Ellipse({ left: x, top: y, rx, ry, fill, stroke: INK, strokeWidth: 2, strokeUniform: true });
 
+const flat = (x: number, y: number, w: number, h: number, fill: string, r = 0) =>
+  new Rect({ left: x + w / 2, top: y + h / 2, width: w, height: h, rx: r, ry: r, fill, strokeWidth: 0 });
+const disc = (x: number, y: number, rx: number, ry: number, fill: string) => new Ellipse({ left: x, top: y, rx, ry, fill, strokeWidth: 0 });
+
+/** Placeholder texts of a resource cover (an eXeLearning cover page, a worksheet…). */
+const COVER = {
+  title: 'Título del recurso',
+  subtitle: 'Subtítulo o pregunta que guía el recurso',
+  details: ['Nivel educativo', 'Área o materia', 'Duración: 4 sesiones'],
+  image: 'repositorios/iconosescuela/book-open.svg',
+};
+
 const BUILD: Record<TemplateKind, (b: Builder) => void> = {
+  // A coloured side panel with the texts and an illustration on the light side (like the
+  // eXeLearning covers made with the Slide iDevice).
+  'cover-panel': (b) => {
+    const { w, h, u } = b;
+    const panel = w * 0.42;
+    const pad = w * 0.045;
+    const text = panel - pad * 2;
+    b.locked.add(b.add(flat(0, 0, w, h, '#fbf3e9'), 'Fondo'));
+    b.add(disc(w * 0.71, h * 0.42, h * 0.36, h * 0.36, '#f6e6d2'), 'Círculo de fondo');
+    b.image(COVER.image, w * 0.71, h * 0.42, h * 0.4, 'Imagen');
+    b.add(flat(0, 0, panel, h, '#12615a'), 'Panel');
+    b.add(new Path(`M ${panel} 0 L ${panel + w * 0.05} ${h / 2} L ${panel} ${h} Z`, { fill: '#17786c', strokeWidth: 0 }), 'Pico del panel');
+    b.logo(pad + u * 0.04, h * 0.12, u * 0.08, ['#f2b04e', '#7fd0c2']);
+    b.block(COVER.title, pad, h * 0.29, text, u * 0.08, 'Título', { fontWeight: 'bold' });
+    b.block(COVER.subtitle, pad, h * 0.5, text, u * 0.042, 'Subtítulo', { fontStyle: 'italic', fill: '#eaf4f1' });
+    b.add(flat(pad, h * 0.6, text * 0.55, u * 0.012, '#3e9e8d', u * 0.006), 'Separador');
+    b.block(COVER.details.join('\n\n'), pad, h * 0.79, text, u * 0.034, 'Datos del recurso', { fontWeight: 'bold' });
+  },
+  // A band across the top with the title, the illustration in the middle and a row of details.
+  'cover-band': (b) => {
+    const { w, h, u } = b;
+    const band = h * 0.4;
+    b.locked.add(b.add(flat(0, 0, w, h, '#f8fafc'), 'Fondo'));
+    b.add(flat(0, 0, w, band, '#1e3a8a'), 'Banda');
+    b.add(flat(0, band, w, u * 0.014, '#f2b04e'), 'Filete');
+    b.logo(w * 0.06, band * 0.22, u * 0.07, ['#f2b04e', '#93c5fd']);
+    b.block(COVER.title, w * 0.12, band * 0.36, w * 0.76, u * 0.085, 'Título', { fontWeight: 'bold', textAlign: 'center' });
+    b.block(COVER.subtitle, w * 0.12, band * 0.62, w * 0.76, u * 0.04, 'Subtítulo', { fontStyle: 'italic', fill: '#dbeafe', textAlign: 'center' });
+    b.add(disc(w / 2, h * 0.63, h * 0.17, h * 0.17, '#e0e7ff'), 'Círculo de fondo');
+    b.image(COVER.image, w / 2, h * 0.63, h * 0.26, 'Imagen');
+    COVER.details.forEach((t, i) => {
+      b.block(t, w * (0.06 + i * 0.31), h * 0.88, w * 0.26, u * 0.032, `Dato ${i + 1}`, { fontWeight: 'bold', fill: '#1e3a8a', textAlign: 'center' });
+    });
+  },
   'concept-map': (b) => {
     const { w, h, u } = b;
     const centre = b.box(ellipse(w / 2, h / 2, u * 0.17, u * 0.1, '#fde68a'), 'Idea principal', 'Idea principal', Math.round(u / 24));
@@ -172,6 +249,8 @@ export function buildTemplate(kind: TemplateKind, width: number, height: number,
   const canvas = new StaticCanvas(undefined, { width, height, renderOnAddRemove: false });
   canvas.add(...b.objects);
   const project = readProject(canvas, { width, height }, background, title);
+  const locked = new Set([...b.locked].map((o) => o.id));
+  for (const layer of project.layers) layer.locked = locked.has(layer.id);
   void canvas.dispose();
   return project;
 }

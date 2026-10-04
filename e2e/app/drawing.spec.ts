@@ -196,6 +196,20 @@ test('a new drawing can start from a template, all of it editable', async ({ pag
   await expect(page.getByRole('button', { name: 'Deshacer' })).toBeDisabled(); // a fresh document
 });
 
+test('a resource cover template has a title to edit and a library image', async ({ page }) => {
+  await page.goto('./');
+  const dialog = page.getByRole('dialog', { name: 'Nuevo dibujo' });
+  await dialog.getByText('Presentación 16:9').click();
+  await dialog.getByLabel('Plantilla').selectOption({ label: 'Portada de recurso (panel lateral)' });
+  await dialog.getByRole('button', { name: 'Crear' }).click();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page).filter({ hasText: /^Imagen$/ })).toHaveCount(1);
+  await page.getByRole('button', { name: /^Título/ }).first().click();
+  await page.getByRole('tab', { name: 'Propiedades' }).click();
+  await inspector(page).getByLabel('Texto', { exact: true }).fill('¿Qué es un volcán?');
+  await expect(inspector(page).getByLabel('Texto', { exact: true })).toHaveValue('¿Qué es un volcán?');
+});
+
 test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'línea con flecha');
