@@ -22,7 +22,7 @@ flowchart TD
 | Capa | Ficheros | Responsabilidad |
 |---|---|---|
 | Interfaz | `index.html`, `src/ui/*`, `src/app/app.ts`, `src/styles/*` | Barra superior, herramientas, inspector contextual, capas, diálogos nativos (`<dialog>`), avisos (`aria-live`), atajos, temas. `App` conecta la interfaz con el editor y ejecuta en serie las operaciones que cambian el documento. |
-| Imagen | `src/canvas/image.ts` | Ajustes (filtros públicos de Fabric) y recorte no destructivo (`cropX`/`cropY`), que se guardan en el `.tonga` y se exportan. |
+| Imagen | `src/canvas/image.ts` | Ajustes (filtros públicos de Fabric) y recorte no destructivo (`cropX`/`cropY`), que se guardan en el `.tonga` y se exportan. «Quitar fondo» (`clearBackground`): relleno desde los bordes con el color dominante del borde; genera un PNG nuevo que se guarda como `asset:<sha256>` (ADR 0009 para fotos). |
 | Editor | `src/canvas/editor.ts` | Reglas de Tonga sobre Fabric: ids y nombres automáticos («Texto 1»), colocación en el centro, bloqueo y visibilidad, copiar y pegar, alinear, agrupar, orden, zoom, fondo e historial. La interfaz solo habla con esta clase. |
 | Documento | `src/project/schema.ts`, `src/project/file.ts`, `src/canvas/document.ts` | El formato `.tonga` con validación y migraciones. Conversión proyecto ⇄ objetos de Fabric, compartida por el editor y por la exportación. |
 | Historial | `src/history/history.ts` | Snapshots del documento serializado, con una clave para agrupar interacciones continuas (arrastre, slider), y límites de 100 pasos y 20 MB. Ver [ADR 0007](adr/0007-snapshot-history.md). |

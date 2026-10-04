@@ -15,7 +15,7 @@ Cubren la lógica sin DOM o con un DOM mínimo:
 - **formato `.tonga`**: ida y vuelta, migraciones, ficheros malformados o con versión desconocida, orígenes de imagen no permitidos;
 - **historial**: deshacer, rehacer, agrupación de pasos, límites por número y por bytes;
 - **editor**: nombres automáticos, colocación, copiar y pegar, agrupar y desagrupar sin mover, alinear un objeto girado, bloqueo y visibilidad, fondo, tamaño exacto con trazo uniforme, revisiones;
-- **imagen**: ida y vuelta de cada ajuste, límites, recorte que no desplaza el contenido visible, persistencia en el `.tonga` y deshacer en un solo paso al arrastrar un deslizador;
+- **imagen**: ida y vuelta de cada ajuste, límites, recorte que no desplaza el contenido visible, persistencia en el `.tonga` y deshacer en un solo paso al arrastrar un deslizador; «Quitar fondo» que borra el marco liso, conserva el mismo color encerrado y no toca una imagen sin fondo uniforme;
 - **exportación**: nombres de fichero, fondo blanco en JPEG/PDF, SVG vectorial a tamaño de documento y con el texto escapado;
 - **escritor de PDF**: tabla `xref` válida, página A4 con la orientación del dibujo;
 - **importación**: tipo por bytes, límites, saneado de SVG (scripts, handlers, URL externas, entidades) y SVG de Tonga 1;
