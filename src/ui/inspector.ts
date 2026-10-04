@@ -1,7 +1,7 @@
 // Contextual inspector: shows only what makes sense for the selection (or the canvas when
 // nothing is selected). Rebuilt when the selection changes; otherwise only values are synced,
 // so typing in a field never loses focus.
-import { DEFAULT_SHADOW, type AlignEdge, type Editor, type LineStyle, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
+import { DEFAULT_SHADOW, type AlignEdge, type Editor, type GradientDirection, type LineStyle, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
 import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '../canvas/image';
 import { HEX_COLOR } from '../project/schema';
 import { putAsset } from '../persistence/store';
@@ -33,6 +33,11 @@ let signature = '';
 export function renderInspector(editor: Editor, actions: InspectorActions, force = false): void {
   const form = byId<HTMLFormElement>('inspector');
   const info = editor.inspect();
+  if (editor.isCropping) {
+    if (signature !== 'crop') form.replaceChildren(...cropFields(editor));
+    signature = 'crop';
+    return;
+  }
   const pencil = !info && editor.isDrawing;
   const eraser = !info && editor.isErasing;
   const sig = info ? `${info.type}:${info.ids.join(',')}` : pencil ? 'pencil' : eraser ? 'eraser' : `canvas:${editor.size.width}x${editor.size.height}:${JSON.stringify(editor.currentBackground)}`;
@@ -43,6 +48,17 @@ export function renderInspector(editor: Editor, actions: InspectorActions, force
   signature = sig;
   form.replaceChildren(...(info ? selectionFields(editor, info) : pencil ? pencilFields(editor) : eraser ? eraserFields() : canvasFields(editor, actions)));
   syncValues(form, info, editor);
+}
+
+function cropFields(editor: Editor): HTMLElement[] {
+  const apply = h('button', { type: 'button', class: 'btn primary' }, 'Aplicar el recorte');
+  apply.addEventListener('click', () => editor.finishCrop(true));
+  const cancel = h('button', { type: 'button', class: 'btn' }, 'Cancelar');
+  cancel.addEventListener('click', () => editor.finishCrop(false));
+  return [
+    h('p', { class: 'muted' }, 'Recortar: ajusta el marco azul con sus tiradores y pulsa «Aplicar el recorte». Escape o «Cancelar» dejan la imagen como estaba.'),
+    h('div', { class: 'dialog-actions' }, apply, cancel),
+  ];
 }
 
 function eraserFields(): HTMLElement[] {
@@ -90,7 +106,11 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
     }
   }
   if (info) {
-    const colours: Record<string, string | null> = { stroke: info.stroke, fill: info.fill, shadow: (info.shadow ?? DEFAULT_SHADOW).color };
+    const colours: Record<string, string | null> = { stroke: info.stroke, fill: info.fill, shadow: (info.shadow ?? DEFAULT_SHADOW).color, gradientTo: info.gradient?.to ?? null };
+    const gradientOn = form.elements.namedItem('gradientOn');
+    if (gradientOn instanceof HTMLInputElement) gradientOn.checked = !!info.gradient;
+    for (const el of form.querySelectorAll<HTMLElement>('[data-gradient]')) el.hidden = !info.gradient;
+    for (const b of form.querySelectorAll<HTMLButtonElement>('[data-direction]')) b.setAttribute('aria-pressed', String(b.dataset.direction === info.gradient?.direction));
     for (const group of form.querySelectorAll<HTMLElement>('[data-colour]')) syncColour(group, colours[group.dataset.colour ?? ''] ?? '');
     const shadow = info.shadow ?? DEFAULT_SHADOW;
     const on = form.elements.namedItem('shadowOn');
@@ -114,8 +134,8 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
       if (el.type === 'checkbox') el.checked = v as boolean;
       else el.value = String(v);
     };
-    for (const k of ['grayscale', 'sepia', 'invert'] as const) set(k, a[k]);
-    for (const k of ['brightness', 'contrast', 'saturation', 'blur'] as const) {
+    for (const k of ['grayscale', 'sepia', 'invert', 'vintage'] as const) set(k, a[k]);
+    for (const k of ['brightness', 'contrast', 'saturation', 'blur', 'pixelate', 'noise'] as const) {
       set(k, a[k]);
       const out = form.querySelector(`[data-output="${k}"]`);
       if (out) out.textContent = String(a[k]);
@@ -223,6 +243,37 @@ function strokeWidths(
   return h('div', { class: 'stroke-width', role: 'group', 'aria-label': title }, h('span', { class: 'field-title' }, title), chips, exact);
 }
 
+/** The fill colour, or a two-colour gradient whose first colour is the fill swatch. */
+function fillFields(editor: Editor, key: (p: string) => string): HTMLElement[] {
+  const gradient = () => editor.inspect()?.gradient ?? null;
+  const fill = colour('Relleno', 'fill', (c) => {
+    const g = gradient();
+    if (g && c !== TRANSPARENT) editor.setGradient({ ...g, from: c });
+    else editor.setProps({ fill: c }, key('fill'));
+  }, { transparent: true });
+  const on = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'gradientOn' }), 'Degradado');
+  bind(on, 'gradientOn', (_v, el) => {
+    const from = editor.inspect()?.fill;
+    editor.setGradient(el.checked ? { from: from && from !== TRANSPARENT ? from : '#f28c28', to: '#ffffff', direction: 'vertical' } : null);
+  }, 'change');
+  const directions: [GradientDirection, string][] = [['horizontal', 'Horizontal'], ['vertical', 'Vertical'], ['diagonal', 'Diagonal']];
+  const options = h('div', { class: 'gradient-options', 'data-gradient': '' },
+    colour('Segundo color', 'gradientTo', (c) => {
+      const g = gradient();
+      if (g) editor.setGradient({ ...g, to: c });
+    }),
+    h('div', { class: 'segmented', role: 'group', 'aria-label': 'Dirección del degradado' },
+      ...directions.map(([direction, text]) => {
+        const b = h('button', { type: 'button', class: 'btn', 'data-direction': direction, 'aria-pressed': 'false' }, text);
+        b.addEventListener('click', () => {
+          const g = gradient();
+          if (g) editor.setGradient({ ...g, direction });
+        });
+        return b;
+      })));
+  return [fill, on, options];
+}
+
 /** Solid, dashed or dotted, each button drawing its own line. */
 function lineStyles(editor: Editor): HTMLDivElement {
   const styles: [LineStyle, string][] = [['solid', 'Continua'], ['dashed', 'Discontinua'], ['dotted', 'Puntos']];
@@ -267,7 +318,7 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
   const shape = ['rect', 'ellipse', 'triangle', 'path', 'line'].includes(info.type);
   if (info.text) parts.push(textFields(editor, key));
   else if (shape) {
-    if (info.type !== 'line' && (info.type !== 'path' || info.fill)) parts.push(colour('Relleno', 'fill', (c) => editor.setProps({ fill: c }, key('fill')), { transparent: true }));
+    if (info.type !== 'line' && (info.type !== 'path' || info.fill)) parts.push(...fillFields(editor, key));
     parts.push(colour('Trazo', 'stroke', (c) => editor.setProps({ stroke: c }, key('stroke')), { transparent: info.type !== 'line' }));
     const widths = strokeWidths((w) => editor.setProps({ strokeWidth: w }, key('strokeWidth')));
     bind(widths, 'strokeWidth', (v) => Number(v) >= 0 && editor.setProps({ strokeWidth: Number(v) }, key('strokeWidth')));
@@ -421,7 +472,8 @@ function imageFields(editor: Editor, key: (p: string) => string): HTMLElement {
     const v = (name: string) => Number((form.querySelector<HTMLInputElement>(`[name="${name}"]`) as HTMLInputElement).value) || 0;
     const on = (name: string) => (form.querySelector<HTMLInputElement>(`[name="${name}"]`) as HTMLInputElement).checked;
     return {
-      a: { grayscale: on('grayscale'), sepia: on('sepia'), invert: on('invert'), brightness: v('brightness'), contrast: v('contrast'), saturation: v('saturation'), blur: v('blur') },
+      a: { grayscale: on('grayscale'), sepia: on('sepia'), invert: on('invert'), brightness: v('brightness'), contrast: v('contrast'), saturation: v('saturation'), blur: v('blur'),
+        vintage: on('vintage'), pixelate: v('pixelate'), noise: v('noise') },
       c: { left: v('crop-left'), top: v('crop-top'), right: v('crop-right'), bottom: v('crop-bottom') },
     };
   };
@@ -430,11 +482,14 @@ function imageFields(editor: Editor, key: (p: string) => string): HTMLElement {
     h('div', { class: 'filters' },
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'grayscale' }), 'Escala de grises'),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'sepia' }), 'Sepia'),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'invert' }), 'Negativo')),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'invert' }), 'Negativo'),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'vintage' }), 'Vintage')),
     slider('Brillo', 'brightness', -100, 100),
     slider('Contraste', 'contrast', -100, 100),
     slider('Saturación', 'saturation', -100, 100),
     slider('Desenfoque', 'blur', 0, 100),
+    slider('Pixelado', 'pixelate', 0, 100),
+    slider('Ruido', 'noise', 0, 100),
     h('details', { class: 'placement' },
       h('summary', {}, 'Recortar (% de cada lado)'),
       h('div', { class: 'grid2' }, num('Izquierda', 'crop-left', { min: 0, max: 95 }), num('Derecha', 'crop-right', { min: 0, max: 95 }), num('Arriba', 'crop-top', { min: 0, max: 95 }), num('Abajo', 'crop-bottom', { min: 0, max: 95 }))));
@@ -453,7 +508,9 @@ function imageFields(editor: Editor, key: (p: string) => string): HTMLElement {
       })
       .finally(() => (clear.disabled = false));
   });
-  box.querySelector('legend')?.after(clear);
+  const cropButton = h('button', { type: 'button', class: 'btn' }, 'Recortar con el ratón');
+  cropButton.addEventListener('click', () => editor.startCrop());
+  box.querySelector('legend')?.after(clear, cropButton);
   const reset = h('button', { type: 'button', class: 'btn' }, 'Quitar recorte y ajustes');
   reset.addEventListener('click', () => {
     editor.setImageAdjustments({ ...NO_ADJUSTMENTS });

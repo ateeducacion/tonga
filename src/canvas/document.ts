@@ -98,8 +98,9 @@ async function resolveSources(o: Record<string, unknown>, resolve: SourceResolve
 export function readProject(canvas: StaticCanvas, size: { width: number; height: number }, background: Background, title = ''): Project {
   const project = newProject(size.width, size.height, background);
   project.title = title;
+  // Helpers on the canvas (the crop frame) are not part of the document; toObject() skips them too.
   const serialized = (canvas.toObject() as { objects: Record<string, unknown>[] }).objects;
-  project.layers = canvas.getObjects().map((o, i) => toLayer(o, serialized[i]));
+  project.layers = canvas.getObjects().filter((o) => !o.excludeFromExport).map((o, i) => toLayer(o, serialized[i]));
   return project;
 }
 

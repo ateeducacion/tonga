@@ -1,6 +1,6 @@
 // Image adjustments (filters) and non-destructive crop, through Fabric's public filter and crop API.
 // Values use the units the inspector shows: percentages, 0 = unchanged.
-import { FabricImage, filters, util, type FabricObject } from 'fabric';
+import { FabricImage, filters, util, type FabricObject, type Point } from 'fabric';
 
 export interface ImageAdjustments {
   grayscale: boolean;
@@ -14,6 +14,11 @@ export interface ImageAdjustments {
   saturation: number;
   /** 0…100 */
   blur: number;
+  vintage: boolean;
+  /** 0…100 */
+  pixelate: number;
+  /** 0…100 */
+  noise: number;
 }
 
 /** Percentages of the original image removed from each side. */
@@ -24,7 +29,9 @@ export interface ImageCrop {
   bottom: number;
 }
 
-export const NO_ADJUSTMENTS: ImageAdjustments = { grayscale: false, sepia: false, invert: false, brightness: 0, contrast: 0, saturation: 0, blur: 0 };
+export const NO_ADJUSTMENTS: ImageAdjustments = {
+  grayscale: false, sepia: false, invert: false, brightness: 0, contrast: 0, saturation: 0, blur: 0, vintage: false, pixelate: 0, noise: 0,
+};
 export const NO_CROP: ImageCrop = { left: 0, top: 0, right: 0, bottom: 0 };
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, Number.isFinite(v) ? v : 0));
@@ -43,6 +50,10 @@ export function buildFilters(a: ImageAdjustments): filters.BaseFilter<string>[] 
   if (a.saturation) list.push(new filters.Saturation({ saturation: clamp(a.saturation, -100, 100) / 100 }));
   // Blur is a fraction of the image size; 100 % maps to a strong but still recognisable blur.
   if (a.blur) list.push(new filters.Blur({ blur: clamp(a.blur, 0, 100) / 200 }));
+  if (a.vintage) list.push(new filters.Vintage());
+  // 100 % pixelates in 41 px blocks; noise goes up to Fabric's strong 400.
+  if (a.pixelate) list.push(new filters.Pixelate({ blocksize: 1 + clamp(a.pixelate, 0, 100) * 0.4 }));
+  if (a.noise) list.push(new filters.Noise({ noise: clamp(a.noise, 0, 100) * 4 }));
   return list;
 }
 
@@ -58,6 +69,9 @@ export function readAdjustments(img: FabricImage): ImageAdjustments {
     else if (type === 'Contrast') a.contrast = Math.round((p.contrast ?? 0) * 100);
     else if (type === 'Saturation') a.saturation = Math.round((p.saturation ?? 0) * 100);
     else if (type === 'Blur') a.blur = Math.round((p.blur ?? 0) * 200);
+    else if (type === 'Vintage') a.vintage = true;
+    else if (type === 'Pixelate') a.pixelate = Math.round(((p.blocksize ?? 1) - 1) / 0.4);
+    else if (type === 'Noise') a.noise = Math.round((p.noise ?? 0) / 4);
   }
   return a;
 }
@@ -104,6 +118,26 @@ export function applyCrop(img: FabricImage, c: ImageCrop): void {
   const dy = (img.cropY - oldCropY) * img.scaleY;
   img.setPositionByOrigin(before.add(rotate(dx, dy, img.angle)), 'left', 'top');
   img.setCoords();
+}
+
+/**
+ * The crop (percent per side of the original) that keeps only what lies inside `corners`, a
+ * frame drawn over the image in canvas coordinates. Rotation, flips and an earlier crop are
+ * taken into account; whatever lies outside the visible part is ignored.
+ */
+export function cropFromFrame(img: FabricImage, corners: Point[]): ImageCrop {
+  const { width: w, height: h } = img.getOriginalSize();
+  const inverse = util.invertTransform(img.calcTransformMatrix());
+  // In the image's own space the visible part spans −width/2…width/2 around its centre.
+  const local = corners.map((p) => util.transformPoint(p, inverse));
+  const xs = local.map((p) => Math.min(img.width / 2, Math.max(-img.width / 2, p.x)));
+  const ys = local.map((p) => Math.min(img.height / 2, Math.max(-img.height / 2, p.y)));
+  const x0 = img.cropX + Math.min(...xs) + img.width / 2;
+  const x1 = img.cropX + Math.max(...xs) + img.width / 2;
+  const y0 = img.cropY + Math.min(...ys) + img.height / 2;
+  const y1 = img.cropY + Math.max(...ys) + img.height / 2;
+  const pct = (v: number, of: number) => Math.round((v / of) * 1000) / 10;
+  return { left: pct(x0, w), top: pct(y0, h), right: pct(w - x1, w), bottom: pct(h - y1, h) };
 }
 
 /**

@@ -1,7 +1,7 @@
 // The interactive editor: a Fabric canvas plus Tonga's document rules (ids, names, lock,
 // background, snapshot history). The UI talks to this class only.
 import {
-  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, type FabricObjectProps, Group, Line, Path, PencilBrush, Point, Rect, Shadow, Textbox, Triangle, util,
+  ActiveSelection, Canvas, Ellipse, FabricImage, FabricObject, type FabricObjectProps, Gradient, Group, Line, Path, PencilBrush, Point, Rect, Shadow, Textbox, Triangle, util,
 } from 'fabric';
 import { History } from '../history/history';
 import { LAYER_LABEL } from '../i18n/es';
@@ -12,7 +12,7 @@ import './controls';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
 import { snapToGrid, snapToObjects, type Guide, type SnapResult } from './snap';
 import { followText, isConnector, makeConnector, refreshLinks } from './links';
-import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
+import { applyAdjustments, applyCrop, cropFromFrame, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
 
 export type { ShapeKind } from './shapes';
 export type AlignEdge = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
@@ -42,6 +42,8 @@ export interface SelectionInfo {
   strokeWidth: number;
   shadow: ShadowStyle | null;
   lineStyle: LineStyle;
+  /** The fill gradient; `fill` then holds its first colour. */
+  gradient: GradientFill | null;
   connector?: { arrow: boolean };
   text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; underline: boolean; textAlign: string };
   image?: { adjustments: ImageAdjustments; crop: ImageCrop };
@@ -74,6 +76,36 @@ export function lineStyleOf(o: FabricObject): LineStyle {
   const dash = o.strokeDashArray;
   if (!dash?.length) return 'solid';
   return dash[0] === 0 ? 'dotted' : 'dashed';
+}
+
+export type GradientDirection = 'horizontal' | 'vertical' | 'diagonal';
+
+/** A two-colour linear gradient across the object's box. */
+export interface GradientFill {
+  from: string;
+  to: string;
+  direction: GradientDirection;
+}
+
+const GRADIENT_COORDS: Record<GradientDirection, { x1: number; y1: number; x2: number; y2: number }> = {
+  horizontal: { x1: 0, y1: 0, x2: 1, y2: 0 },
+  vertical: { x1: 0, y1: 0, x2: 0, y2: 1 },
+  diagonal: { x1: 0, y1: 0, x2: 1, y2: 1 },
+};
+
+export function makeGradient(g: GradientFill): Gradient<'linear'> {
+  return new Gradient({
+    type: 'linear', gradientUnits: 'percentage', coords: GRADIENT_COORDS[g.direction],
+    colorStops: [{ offset: 0, color: g.from }, { offset: 1, color: g.to }],
+  });
+}
+
+export function readGradient(fill: unknown): GradientFill | null {
+  if (!(fill instanceof Gradient) || fill.type !== 'linear' || fill.colorStops.length < 2) return null;
+  const { x1, y1, x2, y2 } = fill.coords;
+  const direction: GradientDirection = x1 === x2 ? 'vertical' : y1 === y2 ? 'horizontal' : 'diagonal';
+  const stops = [...fill.colorStops].sort((a, b) => a.offset - b.offset);
+  return { from: (stops[0] as { color: string }).color, to: (stops[stops.length - 1] as { color: string }).color, direction };
 }
 
 /** A simple drop shadow, in canvas pixels. */
@@ -134,6 +166,7 @@ export class Editor {
   private erasing = false;
   private erasePressed = false;
   private erasedSome = false;
+  private crop: { image: FabricImage; frame: Rect } | null = null;
   private guides: Guide[] = [];
 
   constructor(
@@ -142,7 +175,11 @@ export class Editor {
   ) {
     this.canvas = new Canvas(element, { preserveObjectStacking: true, selectionKey: 'shiftKey', fireRightClick: true, stopContextMenu: false });
     this.canvas.freeDrawingBrush = new PencilBrush(this.canvas);
-    const changed = () => this.emit();
+    const changed = () => {
+      // Selecting something else while cropping leaves the image as it was.
+      if (this.crop && this.canvas.getActiveObject() !== this.crop.frame) this.finishCrop(false);
+      else this.emit();
+    };
     this.canvas.on('selection:created', changed);
     this.canvas.on('selection:updated', changed);
     this.canvas.on('selection:cleared', changed);
@@ -338,6 +375,7 @@ export class Editor {
   private async load(project: Project, selectIds: string[] = []): Promise<void> {
     this.restoring = true;
     try {
+      this.crop = null; // the frame goes with the old content
       this.canvas.discardActiveObject();
       this.width = project.canvas.width;
       this.height = project.canvas.height;
@@ -420,7 +458,7 @@ export class Editor {
   /** Layers top-most first, as a layers panel lists them. */
   layers(): LayerInfo[] {
     const selected = new Set(this.selected());
-    return this.canvas.getObjects().map((o) => ({
+    return this.canvas.getObjects().filter((o) => !o.excludeFromExport).map((o) => ({
       id: o.id ?? '', type: layerType(o), name: o.name ?? '', visible: o.visible !== false, locked: o.selectable === false,
       selected: selected.has(o),
     })).reverse();
@@ -446,7 +484,8 @@ export class Editor {
       height: Math.round(o.getScaledHeight()),
       angle: Math.round(o.angle),
       opacity: o.opacity,
-      fill: multi ? null : colour(o.fill),
+      fill: multi ? null : (readGradient(o.fill)?.from ?? colour(o.fill)),
+      gradient: multi ? null : readGradient(o.fill),
       stroke: multi ? null : colour(o.stroke),
       strokeWidth: o.strokeWidth,
       shadow: readShadow(multi ? this.selected()[0] : o),
@@ -582,7 +621,22 @@ export class Editor {
   /** The style last chosen for this kind of object, ready to give to a new one. */
   private styleFor(kind: StyleKind): Record<string, unknown> {
     const { shadow, ...rest } = this.styles[kind];
+    // Each new object gets its own shadow and gradient, never one shared with another object.
+    const gradient = readGradient(rest.fill);
+    if (gradient) rest.fill = makeGradient(gradient);
     return shadow === undefined ? rest : { ...rest, shadow: shadow ? new Shadow(shadow as ShadowStyle) : null };
+  }
+
+  /** A gradient fill on every selected shape; null turns it back into its first colour. */
+  setGradient(gradient: GradientFill | null): void {
+    for (const o of this.selected()) {
+      const current = readGradient(o.fill);
+      const fill = gradient ? makeGradient(gradient) : current ? current.from : o.fill;
+      o.set({ fill });
+      this.remember(o, { fill });
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
   }
 
   /** Remembers the style properties the user just set on an object, for the next of its kind. */
@@ -887,6 +941,51 @@ export class Editor {
     this.canvas.requestRenderAll();
     this.commit();
     return true;
+  }
+
+  // ---- Visual crop ----------------------------------------------------------------------------
+
+  /**
+   * Shows a frame over the selected image to crop it with the mouse: resize the frame, then
+   * finishCrop(true). The frame is a helper, never part of the document.
+   */
+  startCrop(): boolean {
+    const img = this.canvas.getActiveObject();
+    if (!isImage(img) || this.crop) return false;
+    const c = img.getCenterPoint();
+    const frame = new Rect({
+      width: img.getScaledWidth(), height: img.getScaledHeight(), angle: img.angle,
+      // No stroke, so the frame's corners are exactly the kept area; its outline is the
+      // (always shown) selection border.
+      fill: 'rgba(37, 99, 235, 0.12)', strokeWidth: 0, borderColor: '#2563eb', borderDashArray: [6, 4], borderScaleFactor: 2,
+      lockRotation: true, excludeFromExport: true, transparentCorners: false, cornerColor: '#2563eb',
+    });
+    frame.setControlVisible('mtr', false);
+    frame.setPositionByOrigin(c, 'center', 'center');
+    this.crop = { image: img, frame };
+    this.canvas.add(frame);
+    this.canvas.setActiveObject(frame);
+    this.canvas.requestRenderAll();
+    this.emit();
+    return true;
+  }
+
+  get isCropping(): boolean {
+    return this.crop !== null;
+  }
+
+  /** Crops the image to the frame (apply) or leaves it as it was; the image ends selected. */
+  finishCrop(apply: boolean): void {
+    const crop = this.crop;
+    if (!crop) return;
+    this.crop = null;
+    const corners = crop.frame.getCoords();
+    this.canvas.remove(crop.frame);
+    if (apply) applyCrop(crop.image, cropFromFrame(crop.image, corners));
+    this.canvas.setActiveObject(crop.image);
+    this.canvas.requestRenderAll();
+    if (apply) this.commit();
+    else this.emit();
   }
 
   /** Changes size by setting the scale so the object's own box becomes width x height. */

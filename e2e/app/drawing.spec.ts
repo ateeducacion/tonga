@@ -139,6 +139,48 @@ test('the eraser removes the strokes it passes over, in one undo step', async ({
   await expect(layers(page)).toHaveText(['Trazo 2', 'Trazo 1']);
 });
 
+test('an image is cropped with the mouse, and takes the new filters', async ({ page }) => {
+  await newDrawing(page); // A4 landscape, 1123 px wide
+  await page.locator('#file-image').setInputFiles('test/fixtures/import/white-frame.png'); // 120×80, at the centre
+  const image = inspector(page).getByRole('group', { name: 'Imagen' });
+  await image.getByRole('button', { name: 'Recortar con el ratón' }).click();
+  await expect(inspector(page).getByRole('button', { name: 'Aplicar el recorte' })).toBeVisible();
+  const box = await page.locator('canvas.upper-canvas').boundingBox();
+  if (!box) throw new Error('no canvas');
+  const zoom = box.width / 1123;
+  const [cx, cy] = [box.x + box.width / 2, box.y + box.height / 2];
+  await page.mouse.move(cx + 60 * zoom, cy); // the frame's right handle
+  await page.mouse.down();
+  await page.mouse.move(cx, cy, { steps: 6 });
+  await page.mouse.up();
+  await inspector(page).getByRole('button', { name: 'Aplicar el recorte' }).click();
+  await image.getByText('Recortar (% de cada lado)').click();
+  await expect.poll(async () => Number(await image.getByLabel('Derecha').inputValue())).toBeGreaterThan(40);
+
+  await image.getByRole('button', { name: 'Recortar con el ratón' }).click();
+  await page.keyboard.press('Escape'); // cancels
+  await expect(inspector(page).getByRole('group', { name: 'Imagen' })).toBeVisible();
+
+  await image.getByLabel('Vintage').check();
+  await image.getByLabel('Pixelado').fill('30');
+  await expect(image.locator('[data-output="pixelate"]')).toHaveText('30');
+});
+
+test('a shape takes a two-colour gradient in three directions', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  const second = inspector(page).getByRole('group', { name: 'Segundo color' });
+  await expect(second).toBeHidden();
+  await inspector(page).getByLabel('Degradado', { exact: true }).check();
+  await expect(second).toBeVisible();
+  await second.getByRole('button', { name: 'Morado' }).click();
+  await inspector(page).getByRole('button', { name: 'Diagonal' }).click();
+  await expect(inspector(page).getByRole('button', { name: 'Diagonal' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(second.getByRole('button', { name: 'Morado' })).toHaveAttribute('aria-pressed', 'true');
+  await inspector(page).getByLabel('Degradado', { exact: true }).uncheck();
+  await expect(second).toBeHidden();
+});
+
 test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'línea con flecha');
