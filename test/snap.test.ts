@@ -23,8 +23,18 @@ describe('snap geometry', () => {
     expect(snapToObjects(box, [{ left: 500, top: 500, width: 10, height: 10 }], 6)).toEqual({ dx: 0, dy: 0, guides: [] });
   });
 
-  it('moves the top-left corner onto the grid', () => {
-    expect(snapToGrid(box, 20)).toEqual({ dx: -3, dy: -7 });
+  it('pulls the top-left corner onto a grid line only when it is close (a magnet, not steps)', () => {
+    expect(snapToGrid(box, 20, 5)).toEqual({ dx: -3, dy: 0 }); // 103 → 100; 47 is 7 px from 40 or 60: free
+    expect(snapToGrid({ ...box, top: 58 }, 20, 5)).toEqual({ dx: -3, dy: 2 });
+  });
+
+  it('stays on the line it snapped to until the box moves twice the threshold away', () => {
+    const other = [{ left: 0, top: 300, width: 100, height: 50 }];
+    const at = (left: number, stuck = {}) => snapToObjects({ ...box, left }, other, 6, stuck).dx;
+    expect(at(108)).toBe(0); // 8 px from the edge at 100: too far to catch…
+    expect(at(108, { x: 100 })).toBe(-8); // …but enough to hold on once caught
+    expect(at(113, { x: 100 })).toBe(0); // 13 px: let go
+    expect(at(108, { x: 999 })).toBe(0); // a line that is no longer there holds nothing
   });
 });
 
@@ -64,14 +74,16 @@ describe('Editor snapping while dragging', () => {
     const { ed, moving } = await setup();
     ed.setSnapping({ grid: true, objects: false });
     expect(ed.snapping).toEqual({ grid: true, objects: false });
-    drag(ed, moving, 733, 377);
+    drag(ed, moving, 793, 397); // corner (717, 321) near the grid crossing (720, 320)
     const r = moving.getBoundingRect();
-    expect([r.left % 20, r.top % 20].map((v) => Math.round(Math.min(v, 20 - v) * 1000) / 1000)).toEqual([0, 0]);
+    expect([r.left % 40, r.top % 40].map((v) => Math.round(Math.min(v, 40 - v) * 1000) / 1000)).toEqual([0, 0]);
     ed.canvas.renderAll(); // draws the grid
+    drag(ed, moving, 803, 407); // corner 7 and 11 px from the lines: moves freely
+    expect(moving.left).toBe(803);
     ed.canvas.fire('mouse:up', {} as never);
     ed.setSnapping({ grid: false });
-    drag(ed, moving, 733, 377);
-    expect(moving.left).toBe(733);
+    drag(ed, moving, 793, 397); // corner (717, 321) near the grid crossing (720, 320)
+    expect(moving.left).toBe(793); // both off: no snapping at all
   });
 
   it('a multiple selection snaps as one box, against the canvas edges', async () => {

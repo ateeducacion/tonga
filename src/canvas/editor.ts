@@ -56,7 +56,7 @@ const PASTE_OFFSET = 20;
 /** How close (screen pixels) an edge must come to another to snap to it. */
 const SNAP_DISTANCE = 5;
 /** Grid spacing for «Ajustar a la rejilla», in canvas pixels. */
-export const GRID_SIZE = 20;
+export const GRID_SIZE = 40;
 
 export interface Snapping {
   grid: boolean;
@@ -235,6 +235,8 @@ export class Editor {
    */
   private snapMoving(target: FabricObject, free = false): void {
     this.dragging = true;
+    // What it was snapped to on the previous move keeps it a little longer (see snap.ts).
+    const stuck = { x: this.guides.find((g) => g.axis === 'x')?.at, y: this.guides.find((g) => g.axis === 'y')?.at };
     this.guides = [];
     if (free || (!this.snap.grid && !this.snap.objects)) return;
     const box = target.getBoundingRect();
@@ -243,10 +245,10 @@ export class Editor {
       const moving = target instanceof ActiveSelection ? target.getObjects() : [target];
       const others = this.canvas.getObjects().filter((o) => !moving.includes(o) && o.visible !== false && !o.excludeFromExport).map((o) => o.getBoundingRect());
       others.push({ left: 0, top: 0, width: this.width, height: this.height });
-      result = snapToObjects(box, others, SNAP_DISTANCE / this.zoom);
+      result = snapToObjects(box, others, SNAP_DISTANCE / this.zoom, stuck);
     }
     if (this.snap.grid) {
-      const grid = snapToGrid(box, GRID_SIZE);
+      const grid = snapToGrid(box, GRID_SIZE, SNAP_DISTANCE / this.zoom);
       if (!result.guides.some((g) => g.axis === 'x')) result.dx = grid.dx;
       if (!result.guides.some((g) => g.axis === 'y')) result.dy = grid.dy;
     }

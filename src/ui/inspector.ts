@@ -1,7 +1,7 @@
 // Contextual inspector: shows only what makes sense for the selection (or the canvas when
 // nothing is selected). Rebuilt when the selection changes; otherwise only values are synced,
 // so typing in a field never loses focus.
-import { DEFAULT_SHADOW, type AlignEdge, type Editor, type GradientDirection, type LineStyle, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
+import { DEFAULT_SHADOW, GRID_SIZE, type AlignEdge, type Editor, type GradientDirection, type LineStyle, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
 import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '../canvas/image';
 import { HEX_COLOR } from '../project/schema';
 import { putAsset } from '../persistence/store';
@@ -543,7 +543,7 @@ function canvasFields(editor: Editor, actions: InspectorActions): HTMLElement[] 
     apply,
     color,
     snap('Ajustar a otros objetos', 'objects', 'Bordes y centros se alinean al arrastrar. Mantén Alt para moverlo libremente.'),
-    snap('Ajustar a la rejilla', 'grid', 'Al arrastrar, la esquina va a una rejilla de 20 px, que se ve mientras arrastras.'),
+    snap('Ajustar a la rejilla', 'grid', `Al arrastrar, la esquina se acerca a una rejilla de ${GRID_SIZE} px, que se ve mientras arrastras.`),
     h('p', { class: 'muted' }, bg.kind === 'image' ? 'El fondo es una imagen de la biblioteca.' : ''),
   ];
 }
