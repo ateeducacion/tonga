@@ -70,3 +70,10 @@ mapasislascanarias|Mapas Islas Canarias
 laberintos|Laberintos
 mandalas|Mandalas
 paisajes|Paisajes
+
+tongaappcabecera|Iconos y símbolos
+iconosescuela|Material escolar
+iconosciencia|Ciencia y naturaleza
+iconossenales|Flechas y señales
+iconosvida|Vida cotidiana
+iconostecnologia|Tecnología, música y ocio

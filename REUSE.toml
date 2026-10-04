@@ -20,6 +20,15 @@ precedence = "override"
 SPDX-FileCopyrightText = "2019 Gobierno de Canarias"
 SPDX-License-Identifier = "CC-BY-NC-SA-4.0"
 
+# «Iconos y símbolos» collections: Lucide icons (ISC), copied by scripts/import-lucide-icons.mjs
+# with their licence comment, at 256 px and in Tonga's ink colour. Credited per collection in
+# rights.json (THIRD_PARTY_NOTICES.md).
+[[annotations]]
+path = ["repositorios/iconos*/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Lucide Icons and Contributors"
+SPDX-License-Identifier = "ISC"
+
 # Files exported by the legacy app and screenshots: they contain library images.
 [[annotations]]
 path = ["test/fixtures/legacy/**", "docs/screenshots/**"]

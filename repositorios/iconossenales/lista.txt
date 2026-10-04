@@ -1,0 +1,30 @@
+arrow-right.svg|Flecha derecha
+arrow-left.svg|Flecha izquierda
+arrow-up.svg|Flecha arriba
+arrow-down.svg|Flecha abajo
+arrow-up-right.svg|Flecha diagonal
+refresh-cw.svg|Ciclo
+repeat.svg|Repetir
+check.svg|Correcto
+x.svg|Incorrecto
+plus.svg|Más
+minus.svg|Menos
+equal.svg|Igual
+percent.svg|Porcentaje
+circle-help.svg|Pregunta
+circle-alert.svg|Atención
+info.svg|Información
+triangle-alert.svg|Aviso
+star.svg|Estrella
+heart.svg|Corazón
+thumbs-up.svg|Me gusta
+thumbs-down.svg|No me gusta
+smile.svg|Contento
+frown.svg|Triste
+laugh.svg|Risa
+hand.svg|Mano
+flag.svg|Bandera
+target.svg|Diana
+trophy.svg|Trofeo
+medal.svg|Medalla
+crown.svg|Corona

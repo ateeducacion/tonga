@@ -67,6 +67,17 @@ export function buildCatalog(root = ROOT) {
     if (collections.some((c) => c.id === key)) errors.push(`${root}/lista.txt: collection "${key}" listed twice`);
     collections.push({ id: key, title: title || key, category: category.id });
     category.collections.push(key);
+    // A collection by another author says so in its rights.json (license, creator, source).
+    let rights = DEFAULT_RIGHTS;
+    if (existsSync(join(dir, 'rights.json'))) {
+      try {
+        const r = JSON.parse(readFileSync(join(dir, 'rights.json'), 'utf8'));
+        if (['license', 'creator', 'source'].every((k) => typeof r[k] === 'string' && r[k].trim())) rights = { license: r.license, creator: r.creator, source: r.source };
+        else errors.push(`${dir}/rights.json: needs non-empty "license", "creator" and "source"`);
+      } catch {
+        errors.push(`${dir}/rights.json: not valid JSON`);
+      }
+    }
 
     parseLines(readFileSync(join(dir, 'lista.txt'), 'utf8')).forEach((f, i) => {
       if (!f) return;
@@ -91,7 +102,7 @@ export function buildCatalog(root = ROOT) {
         thumbnail: thumb,
         thumbnailRevision: revision(thumb),
         background: flag === BACKGROUND,
-        ...DEFAULT_RIGHTS,
+        ...rights,
       });
     });
   }

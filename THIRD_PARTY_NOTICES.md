@@ -5,11 +5,11 @@ Componentes de terceros que **se distribuyen** con Tonga (están dentro de `dist
 | Componente | Versión | Uso | Licencia | Origen |
 |---|---|---|---|---|
 | Fabric.js | 7.4.0 | Motor del lienzo (incluido en el bundle JS) | MIT | https://github.com/fabricjs/fabric.js |
-| Lucide | 1.50.0 (lucide-static) | 50 iconos copiados como SVG en `src/ui/icons.ts` | ISC; parte derivada de Feather, MIT | https://github.com/lucide-icons/lucide |
+| Lucide | 1.50.0 (lucide-static) | Iconos de la interfaz copiados como SVG en `src/ui/icons.ts`; 143 iconos en la biblioteca «Iconos y símbolos» (`repositorios/iconos*/`, con `scripts/import-lucide-icons.mjs`: tamaño 256 px y trazo `#1f2937` en lugar de `currentColor`; cada fichero conserva su aviso de licencia) | ISC; parte derivada de Feather, MIT | https://github.com/lucide-icons/lucide |
 | Primer Octicons | 19.38.0 | Icono `mark-github` en `src/ui/icons.ts` | MIT, © GitHub Inc. | https://github.com/primer/octicons |
 | eXeLearning: `content.dtd` | commit `68d6cd5` | Copiado tal cual en `vendor/exelearning/`; va dentro de cada `.elpx` exportado | AGPL-3.0-or-later | https://github.com/exelearning/exelearning (`public/app/schemas/ode/content.dtd`) |
 | eXeLearning: estilo `base` | 20260913 (commit `68d6cd5`) | Copiado tal cual en `vendor/exelearning/theme/`; va dentro de cada `.elpx` exportado | CC BY-SA 4.0: Ignacio Gros para eXeLearning; iconos de iDevice de Francisco Javier Pulido Cuadrado. Las insignias de `img/licenses.gif` son marcas de Creative Commons | https://github.com/exelearning/exelearning (`public/files/perm/themes/base/base/`) |
-| Imágenes de `repositorios/` | — | Biblioteca de imágenes | CC BY-NC-SA 4.0, © Gobierno de Canarias | Créditos originales (rama `upstream`, `creditos.html`) |
+| Imágenes de `repositorios/` (salvo `iconos*/`) | — | Biblioteca de imágenes | CC BY-NC-SA 4.0, © Gobierno de Canarias | Créditos originales (rama `upstream`, `creditos.html`) |
 
 Ningún código de TOAST UI Image Editor, jQuery, jQuery UI, axios, FileSaver, X2JS, jsPDF ni de la extensión `customiseControls` forma parte de esta versión: se usaron solo en la versión original (rama `upstream`).
 

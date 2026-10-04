@@ -181,6 +181,31 @@ test('a shape takes a two-colour gradient in three directions', async ({ page })
   await expect(second).toBeHidden();
 });
 
+test('the library has icons and symbols, credited to Lucide', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Abrir la biblioteca de imágenes' }).click();
+  const library = page.getByRole('dialog', { name: 'Biblioteca' });
+  await library.getByLabel('Colección').selectOption({ label: 'Material escolar' });
+  await library.getByLabel('Buscar en la biblioteca').fill('colegio');
+  const option = library.locator('#library-grid').getByRole('option');
+  await expect(option).toHaveCount(1);
+  await option.first().click();
+  await expect(library).toContainText('Colegio · Material escolar · Lucide Icons and Contributors, ISC');
+  await library.getByRole('button', { name: 'Añadir al lienzo' }).click();
+  await expect(layers(page)).toHaveText(['Colegio']);
+});
+
+test('a new drawing can start from a template, all of it editable', async ({ page }) => {
+  await page.goto('./');
+  const dialog = page.getByRole('dialog', { name: 'Nuevo dibujo' });
+  await dialog.getByLabel('Plantilla').selectOption({ label: 'Mapa conceptual' });
+  await dialog.getByRole('button', { name: 'Crear' }).click();
+  await expect(page.getByText('con la plantilla «Mapa conceptual»').first()).toBeVisible();
+  await expect(layers(page).filter({ hasText: /^Idea principal$/ })).toHaveCount(1);
+  await expect(layers(page).filter({ hasText: 'Texto de Idea 1' })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Deshacer' })).toBeDisabled(); // a fresh document
+});
+
 test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'línea con flecha');

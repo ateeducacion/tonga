@@ -1,0 +1,23 @@
+computer.svg|Ordenador
+laptop.svg|Portátil
+smartphone.svg|Móvil
+tablet.svg|Tableta
+printer.svg|Impresora
+wifi.svg|Wifi
+camera.svg|Cámara
+video.svg|Vídeo
+mail.svg|Correo
+message-circle.svg|Mensaje
+phone.svg|Teléfono
+music.svg|Música
+headphones.svg|Auriculares
+mic.svg|Micrófono
+speaker.svg|Altavoz
+piano.svg|Piano
+guitar.svg|Guitarra
+drum.svg|Tambor
+gamepad-2.svg|Mando
+volleyball.svg|Pelota
+dumbbell.svg|Pesas
+tent.svg|Tienda de campaña
+ticket.svg|Entrada

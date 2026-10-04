@@ -29,6 +29,16 @@ Auditorio_fondo.png|Auditorio|tongaappfondo     ← fondo: con doble clic se usa
 
 Se toleran BOM UTF-8, finales de línea CRLF y líneas vacías.
 
+### Colecciones de otros autores (`rights.json`)
+
+Sin más, una colección es del Gobierno de Canarias con CC BY-NC-SA 4.0. Una colección de otro autor lleva en su carpeta un `rights.json` con su licencia, su autor y su fuente; la biblioteca los muestra en cada imagen:
+
+```json
+{ "license": "ISC", "creator": "Lucide Icons and Contributors", "source": "https://lucide.dev (lucide-static 1.50.0)" }
+```
+
+Además, la carpeta necesita su anotación en `REUSE.toml` y su entrada en `THIRD_PARTY_NOTICES.md`, y la licencia tiene que permitir redistribuir las imágenes. Así se añadieron los **Iconos y símbolos** (`repositorios/iconos*/`, 143 iconos de Lucide en SVG), con `scripts/import-lucide-icons.mjs`.
+
 ## Catálogo generado
 
 `scripts/build-catalog.mjs` se ejecuta en `npm run build` y `npm run dev`, y genera `public/catalog.json` (no se versiona):
@@ -56,6 +66,7 @@ Se toleran BOM UTF-8, finales de línea CRLF y líneas vacías.
 - hay un id duplicado o un nombre de fichero inválido;
 - una marca es desconocida;
 - una colección no tiene `lista.txt`;
+- un `rights.json` no es JSON o le falta la licencia, el autor o la fuente;
 - una sección está vacía.
 
 `lista.txt` sigue siendo la fuente durante la transición. La aplicación solo lee `catalog.json`.
