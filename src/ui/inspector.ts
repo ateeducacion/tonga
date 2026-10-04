@@ -1,7 +1,7 @@
 // Contextual inspector: shows only what makes sense for the selection (or the canvas when
 // nothing is selected). Rebuilt when the selection changes; otherwise only values are synced,
 // so typing in a field never loses focus.
-import { DEFAULT_SHADOW, type AlignEdge, type Editor, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
+import { DEFAULT_SHADOW, type AlignEdge, type Editor, type LineStyle, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
 import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '../canvas/image';
 import { HEX_COLOR } from '../project/schema';
 import { putAsset } from '../persistence/store';
@@ -97,6 +97,7 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
       if (out) out.textContent = String(v);
     }
     for (const b of form.querySelectorAll<HTMLButtonElement>('[data-width]')) b.setAttribute('aria-pressed', String(Number(b.dataset.width) === Math.round(info.strokeWidth ?? -1)));
+    for (const b of form.querySelectorAll<HTMLButtonElement>('[data-line]')) b.setAttribute('aria-pressed', String(b.dataset.line === info.lineStyle));
     const out = form.querySelector('[data-output="opacity"]');
     if (out) out.textContent = `${Math.round(info.opacity * 100)} %`;
   }
@@ -217,6 +218,18 @@ function strokeWidths(
   return h('div', { class: 'stroke-width', role: 'group', 'aria-label': title }, h('span', { class: 'field-title' }, title), chips, exact);
 }
 
+/** Solid, dashed or dotted, each button drawing its own line. */
+function lineStyles(editor: Editor): HTMLDivElement {
+  const styles: [LineStyle, string][] = [['solid', 'Continua'], ['dashed', 'Discontinua'], ['dotted', 'Puntos']];
+  const buttons = styles.map(([style, text]) => {
+    const line = h('span', { class: `line-sample ${style}`, 'aria-hidden': 'true' });
+    const b = h('button', { type: 'button', class: 'width', 'data-line': style, 'aria-pressed': 'false', 'aria-label': `Línea ${text.toLowerCase()}`, title: text }, line, h('span', { 'aria-hidden': 'true' }, text));
+    b.addEventListener('click', () => editor.setLineStyle(style));
+    return b;
+  });
+  return h('div', { class: 'stroke-width', role: 'group', 'aria-label': 'Estilo de línea' }, h('span', { class: 'field-title' }, 'Estilo de línea'), h('div', { class: 'widths' }, ...buttons));
+}
+
 /** A labelled slider with its value next to the label. */
 function slider(label: string, name: string, min: number, max: number, unit = ''): HTMLDivElement {
   const input = h('input', { type: 'range', name, id: `in-${name}`, min, max, step: 1 });
@@ -253,7 +266,7 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
     parts.push(colour('Trazo', 'stroke', (c) => editor.setProps({ stroke: c }, key('stroke')), { transparent: info.type !== 'line' }));
     const widths = strokeWidths((w) => editor.setProps({ strokeWidth: w }, key('strokeWidth')));
     bind(widths, 'strokeWidth', (v) => Number(v) >= 0 && editor.setProps({ strokeWidth: Number(v) }, key('strokeWidth')));
-    parts.push(widths);
+    parts.push(widths, lineStyles(editor));
   }
   if (info.image) parts.push(imageFields(editor, key));
 
@@ -303,6 +316,9 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
       align('top', 'alignVerticalJustifyStart', 'Alinear arriba'),
       align('middle', 'alignVerticalJustifyCenter', 'Centrar en vertical'),
       align('bottom', 'alignVerticalJustifyEnd', 'Alinear abajo')),
+    ...(multi ? [h('div', { class: 'actions', role: 'group', 'aria-label': 'Distribuir (tres o más objetos)' },
+      action('alignHorizontalDistributeCenter', 'Distribuir en horizontal', () => editor.distribute('x')),
+      action('alignVerticalDistributeCenter', 'Distribuir en vertical', () => editor.distribute('y')))] : []),
     h('div', { class: 'actions', role: 'group', 'aria-label': 'Orden' },
       action('arrowUp', 'Subir una capa', () => editor.order('forward')),
       action('arrowDown', 'Bajar una capa', () => editor.order('backward'))));

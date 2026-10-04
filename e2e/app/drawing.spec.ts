@@ -54,3 +54,21 @@ test('text can be underlined; shapes get a shadow; a new shape reuses the last s
   await page.getByRole('button', { name: 'Deshacer' }).click();
   await expect(layers(page)).toHaveText(['Rectángulo 1', 'Texto 1']);
 });
+
+test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'línea con flecha');
+  await expect(layers(page)).toHaveText(['Línea con flecha 1']);
+  await expect(inspector(page).getByRole('group', { name: 'Relleno' })).toHaveCount(0);
+  const dashed = inspector(page).getByRole('button', { name: 'Línea discontinua' });
+  await dashed.click();
+  await expect(dashed).toHaveAttribute('aria-pressed', 'true');
+  await addShape(page, 'base de datos');
+  await addShape(page, 'documento');
+  await page.keyboard.press('ControlOrMeta+A');
+  await inspector(page).locator('summary', { hasText: 'Posición, tamaño y alineación' }).click();
+  await inspector(page).getByRole('button', { name: 'Alinear a la izquierda' }).click();
+  await inspector(page).getByRole('button', { name: 'Distribuir en vertical' }).click();
+  await expect(page.getByRole('button', { name: 'Deshacer' })).toBeEnabled();
+  await expect(inspector(page).getByRole('button', { name: 'Distribuir en horizontal' })).toBeVisible();
+});

@@ -2,13 +2,15 @@
 // from the same SVG path data, in a 100×100 box, that the editor turns into a Fabric Path.
 // rect, roundRect, circle, ellipse, triangle and line become native Fabric objects instead.
 
-export type ShapeGroup = 'Formas' | 'Flechas' | 'Bocadillos';
+export type ShapeGroup = 'Formas' | 'Flechas' | 'Diagramas' | 'Bocadillos';
 
 export interface ShapeDef {
   kind: string;
   label: string;
   group: ShapeGroup;
   d: string;
+  /** Only a stroke, no fill (a line with arrow heads, a brace). */
+  open?: boolean;
 }
 
 const n = (v: number) => Math.round(v * 10) / 10;
@@ -44,6 +46,13 @@ export const SHAPES = [
   { kind: 'arrowLeft', label: 'Flecha a la izquierda', group: 'Flechas', d: arrow((x, y) => [100 - x, y]) },
   { kind: 'arrowUp', label: 'Flecha arriba', group: 'Flechas', d: arrow((x, y) => [y, 100 - x]) },
   { kind: 'arrowDown', label: 'Flecha abajo', group: 'Flechas', d: arrow((x, y) => [100 - y, x]) },
+  { kind: 'arrowLine', label: 'Línea con flecha', group: 'Flechas', d: 'M4 50 H96 M78 34 L96 50 L78 66', open: true },
+  { kind: 'doubleArrowLine', label: 'Línea con doble flecha', group: 'Flechas', d: 'M4 50 H96 M78 34 L96 50 L78 66 M22 34 L4 50 L22 66', open: true },
+  { kind: 'terminator', label: 'Inicio o fin', group: 'Diagramas', d: 'M30 25 H70 A25 25 0 0 1 70 75 H30 A25 25 0 0 1 30 25 Z' },
+  { kind: 'document', label: 'Documento', group: 'Diagramas', d: 'M6 8 H94 V78 C72 64 52 100 6 86 Z' },
+  { kind: 'database', label: 'Base de datos', group: 'Diagramas', d: 'M8 20 A42 12 0 0 1 92 20 V80 A42 12 0 0 1 8 80 Z M8 20 A42 12 0 0 0 92 20' },
+  { kind: 'brace', label: 'Llave', group: 'Diagramas', d: 'M70 4 C52 4 50 10 50 26 V40 C50 46 46 50 34 50 C46 50 50 54 50 60 V74 C50 90 52 96 70 96', open: true },
+  { kind: 'bracket', label: 'Corchete', group: 'Diagramas', d: 'M66 4 H38 V96 H66', open: true },
   { kind: 'speech', label: 'Bocadillo', group: 'Bocadillos', d: 'M12 6 H88 Q96 6 96 14 V58 Q96 66 88 66 H42 L20 90 L26 66 H12 Q4 66 4 58 V14 Q4 6 12 6 Z' },
   {
     kind: 'thought', label: 'Bocadillo de pensamiento', group: 'Bocadillos',

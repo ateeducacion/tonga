@@ -550,6 +550,19 @@ h3 {
   border-top: 2px dashed var(--color-muted);
 }
 
+.line-sample {
+  inline-size: 28px;
+  border-top: 3px solid var(--color-text);
+}
+
+.line-sample.dashed {
+  border-top-style: dashed;
+}
+
+.line-sample.dotted {
+  border-top-style: dotted;
+}
+
 /* Sliders: label and value on one line, the bar below. */
 .slider {
   display: grid;

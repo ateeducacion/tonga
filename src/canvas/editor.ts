@@ -39,6 +39,7 @@ export interface SelectionInfo {
   stroke: string | null;
   strokeWidth: number;
   shadow: ShadowStyle | null;
+  lineStyle: LineStyle;
   text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; underline: boolean; textAlign: string };
   image?: { adjustments: ImageAdjustments; crop: ImageCrop };
 }
@@ -46,6 +47,21 @@ export interface SelectionInfo {
 export const DEFAULT_FILL = '#f28c28';
 export const DEFAULT_STROKE = '#1f2937';
 const PASTE_OFFSET = 20;
+
+export type LineStyle = 'solid' | 'dashed' | 'dotted';
+
+/** Dashes and dots grow with the stroke, so they keep their look at any width. */
+export function dashFor(style: LineStyle, width: number): number[] | null {
+  const w = Math.max(1, width);
+  if (style === 'dashed') return [w * 4, w * 2];
+  return style === 'dotted' ? [0, w * 2.5] : null;
+}
+
+export function lineStyleOf(o: FabricObject): LineStyle {
+  const dash = o.strokeDashArray;
+  if (!dash?.length) return 'solid';
+  return dash[0] === 0 ? 'dotted' : 'dashed';
+}
 
 /** A simple drop shadow, in canvas pixels. */
 export interface ShadowStyle {
@@ -332,6 +348,7 @@ export class Editor {
       stroke: multi ? null : colour(o.stroke),
       strokeWidth: o.strokeWidth,
       shadow: readShadow(multi ? this.selected()[0] : o),
+      lineStyle: lineStyleOf(multi ? (this.selected()[0] as FabricObject) : o),
     };
     if (isImage(o)) info.image = { adjustments: readAdjustments(o), crop: readCrop(o) };
     if (o instanceof Textbox) {
@@ -451,7 +468,7 @@ export class Editor {
     else if (kind === 'line') this.place(new Line([-u / 2, 0, u / 2, 0], lineStyle), 'line');
     else {
       // Closed shapes have a fill, like any other shape; open ones (arrow lines) are only a stroke.
-      const open = 'open' in shape && shape.open;
+      const open = shape.open === true;
       const look: Partial<FabricObjectProps> = open ? { ...lineStyle, fill: null } : style;
       const path = new Path(shape.d, { ...look, scaleX: u / 100, scaleY: u / 100 });
       path.set({ left: this.width / 2, top: this.height / 2 });
@@ -593,10 +610,52 @@ export class Editor {
       : [active];
     for (const o of targets) {
       o.set(props).setCoords();
-      this.remember(o, props);
+      // A dashed or dotted stroke keeps its pattern in proportion to the new width.
+      const own = 'strokeWidth' in props && lineStyleOf(o) !== 'solid' ? { strokeDashArray: dashFor(lineStyleOf(o), o.strokeWidth) } : {};
+      o.set(own);
+      this.remember(o, { ...props, ...own });
     }
     this.canvas.requestRenderAll();
     this.commit(key);
+  }
+
+  /** Solid, dashed or dotted stroke on every selected object. Remembered for new ones. */
+  setLineStyle(style: LineStyle): void {
+    for (const o of this.selected()) {
+      const props = { strokeDashArray: dashFor(style, o.strokeWidth), strokeLineCap: style === 'dotted' || styleKind(o) === 'line' ? 'round' : 'butt' };
+      o.set(props as Partial<FabricObjectProps>);
+      this.remember(o, props);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  /**
+   * Spreads three or more selected objects evenly between the first and the last, leaving the
+   * same gap between neighbours (as in Draw and Inkscape). Fewer than three: nothing to do.
+   */
+  distribute(axis: 'x' | 'y'): void {
+    const objs = this.selected();
+    if (objs.length < 3) return;
+    this.canvas.discardActiveObject();
+    const items = objs.map((o) => {
+      const r = o.getBoundingRect();
+      return { o, start: axis === 'x' ? r.left : r.top, size: axis === 'x' ? r.width : r.height };
+    }).sort((a, b) => a.start - b.start);
+    const first = items[0] as (typeof items)[number];
+    const last = items[items.length - 1] as (typeof items)[number];
+    const used = items.reduce((sum, i) => sum + i.size, 0);
+    const gap = (last.start + last.size - first.start - used) / (items.length - 1);
+    let at = first.start;
+    for (const { o, size } of items) {
+      const c = o.getCenterPoint();
+      const centre = at + size / 2;
+      o.setPositionByOrigin(new Point(axis === 'x' ? centre : c.x, axis === 'y' ? centre : c.y), 'center', 'center');
+      o.setCoords();
+      at += size + gap;
+    }
+    this.select(objs.map((o) => o.id ?? ''));
+    this.commit();
   }
 
   /** A drop shadow on every selected object, or none. Remembered for new objects. */

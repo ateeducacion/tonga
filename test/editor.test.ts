@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Point } from 'fabric';
-import { DEFAULT_SHADOW, Editor, snapAngle } from '../src/canvas/editor';
+import { dashFor, DEFAULT_SHADOW, Editor, snapAngle } from '../src/canvas/editor';
 import { exportProject } from '../src/export/export';
 import { newProject } from '../src/project/schema';
 
@@ -135,6 +135,69 @@ describe('Styles', () => {
     editor.setProps({ opacity: 0.5, fill: '#16a34a' });
     editor.addShape('rect');
     expect(object(1)).toMatchObject({ fill: '#f28c28' });
+  });
+});
+
+describe('Line styles, arrow lines and distribution', () => {
+  const object = (i = 0) => editor.toProject().layers[i]?.object as Record<string, unknown>;
+
+  it('dashes and dots grow with the width, follow width changes and are remembered', () => {
+    expect(dashFor('solid', 4)).toBeNull();
+    expect(dashFor('dashed', 0)).toEqual([4, 2]);
+    editor.addShape('rect');
+    editor.setLineStyle('dashed');
+    expect(editor.inspect()?.lineStyle).toBe('dashed');
+    expect(object()).toMatchObject({ strokeDashArray: [8, 4], strokeLineCap: 'butt' });
+    editor.setProps({ strokeWidth: 10 });
+    expect(object()).toMatchObject({ strokeDashArray: [40, 20] });
+    editor.setLineStyle('dotted');
+    expect(object()).toMatchObject({ strokeDashArray: [0, 25], strokeLineCap: 'round' });
+    editor.addShape('hexagon');
+    expect(editor.inspect()?.lineStyle).toBe('dotted');
+    editor.setLineStyle('solid');
+    expect(object(1)).toMatchObject({ strokeDashArray: null });
+    editor.setProps({ strokeWidth: 3 }); // solid stays solid
+    expect(object(1)).toMatchObject({ strokeDashArray: null });
+  });
+
+  it('adds arrow lines and braces as strokes only, and filled diagram shapes', () => {
+    editor.addShape('arrowLine');
+    expect(object()).toMatchObject({ fill: null, stroke: '#1f2937', strokeWidth: 4, strokeLineCap: 'round' });
+    expect(editor.inspect()?.fill).toBeNull();
+    editor.setLineStyle('dashed');
+    editor.addShape('line');
+    expect(object(1)).toMatchObject({ strokeLineCap: 'round', strokeDashArray: [16, 8] });
+    for (const kind of ['doubleArrowLine', 'brace', 'bracket'] as const) {
+      editor.addShape(kind);
+      expect(editor.inspect()?.fill).toBeNull();
+    }
+    for (const kind of ['terminator', 'document', 'database'] as const) {
+      editor.addShape(kind);
+      expect(editor.inspect()?.fill).toBe('#f28c28');
+    }
+    expect(names().slice(0, 3)).toEqual(['Base de datos 1', 'Documento 1', 'Inicio o fin 1']);
+  });
+
+  it('spreads three or more objects with equal gaps, as one undo step', async () => {
+    const xs = [100, 150, 600];
+    for (const x of xs) {
+      editor.addShape('rect');
+      editor.setProps({ left: x, top: 100 + x });
+    }
+    const centres = () => editor.toProject().layers.map((l) => Math.round(l.object.left as number));
+    editor.selectAll();
+    editor.distribute('x');
+    const [a, b, c] = centres();
+    expect([a, c]).toEqual([100, 600]);
+    expect(b).toBe(350);
+    expect(editor.selected()).toHaveLength(3);
+    editor.distribute('y');
+    expect(editor.toProject().layers.map((l) => Math.round(l.object.top as number))).toEqual([200, 450, 700]);
+    await editor.undo();
+    expect(centres()).toEqual([100, 350, 600]);
+    editor.select([editor.layers()[0]?.id ?? '', editor.layers()[1]?.id ?? '']);
+    editor.distribute('x'); // two objects: nothing to spread
+    expect(centres()).toEqual([100, 350, 600]);
   });
 });
 
