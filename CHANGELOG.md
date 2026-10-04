@@ -4,6 +4,10 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Añadido
+
+- «Quitar fondo» en el panel de imagen: hace transparente el fondo liso que toca los bordes (el blanco de un logo, por ejemplo) y conserva ese mismo color dentro del dibujo. Funciona sin conexión, se puede deshacer y mantiene el recorte y los ajustes. Si la imagen no tiene un fondo liso (una foto), avisa y no la cambia. El modo con un modelo de IA para fotos queda como propuesta en el ADR 0009.
+
 ### Cambiado
 
 - Exportar con «Fondo transparente», como en Canva: en PNG y SVG quita el fondo del lienzo aunque sea un color o una imagen. La casilla aparece marcada solo si el lienzo ya es transparente.

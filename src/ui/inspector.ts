@@ -4,7 +4,8 @@
 import type { AlignEdge, Editor, SelectionInfo } from '../canvas/editor';
 import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '../canvas/image';
 import { HEX_COLOR } from '../project/schema';
-import { byId, h, iconButton } from './dom';
+import { putAsset } from '../persistence/store';
+import { announce, byId, h, iconButton, toast } from './dom';
 import type { IconName } from './icons';
 
 const FONTS = ['Arial', 'Verdana', 'Georgia', 'Times New Roman', 'Courier New', 'Trebuchet MS', 'Comic Sans MS'];
@@ -334,6 +335,22 @@ function imageFields(editor: Editor, key: (p: string) => string): HTMLElement {
     h('details', { class: 'placement' },
       h('summary', {}, 'Recortar (% de cada lado)'),
       h('div', { class: 'grid2' }, num('Izquierda', 'crop-left', { min: 0, max: 95 }), num('Derecha', 'crop-right', { min: 0, max: 95 }), num('Arriba', 'crop-top', { min: 0, max: 95 }), num('Abajo', 'crop-bottom', { min: 0, max: 95 }))));
+  const clear = h('button', { type: 'button', class: 'btn', title: 'Hace transparente el fondo liso que toca los bordes (un marco blanco, por ejemplo)' }, 'Quitar fondo');
+  clear.addEventListener('click', () => {
+    clear.disabled = true;
+    editor.removeImageBackground(putAsset)
+      .then((done) => {
+        const message = done ? 'Fondo quitado. Puedes deshacerlo.' : 'Esta imagen no tiene un fondo liso que quitar.';
+        toast(message);
+        announce(message);
+      })
+      .catch((err: unknown) => {
+        console.warn(err);
+        toast('No se ha podido quitar el fondo.', 'error');
+      })
+      .finally(() => (clear.disabled = false));
+  });
+  box.querySelector('legend')?.after(clear);
   const reset = h('button', { type: 'button', class: 'btn' }, 'Quitar recorte y ajustes');
   reset.addEventListener('click', () => {
     editor.setImageAdjustments({ ...NO_ADJUSTMENTS });

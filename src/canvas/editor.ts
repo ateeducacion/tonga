@@ -10,7 +10,7 @@ import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
-import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, type ImageAdjustments, type ImageCrop } from './image';
+import { applyAdjustments, applyCrop, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
 
 export type { ShapeKind } from './shapes';
 export type AlignEdge = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
@@ -502,6 +502,25 @@ export class Editor {
     applyCrop(o, crop);
     this.canvas.requestRenderAll();
     this.commit(key);
+  }
+
+  /**
+   * Clears the uniform background of the selected image into a new PNG, stored by `save`, which
+   * returns its canonical source. Crop, filters and placement stay. False if there was none.
+   */
+  async removeImageBackground(save: (png: Blob) => Promise<string>): Promise<boolean> {
+    const o = this.canvas.getActiveObject();
+    if (!isImage(o)) return false;
+    const png = await removeBackground(await this.resolve(o.assetSrc as string)); // every image gets one when added or read
+    if (!png) return false;
+    const canonical = await save(png);
+    // setSrc resets the size to the whole image; the pixels are the same size, so keep the crop.
+    const { width, height } = o;
+    await o.setSrc(await this.resolve(canonical));
+    o.set({ assetSrc: canonical, width, height });
+    this.canvas.requestRenderAll();
+    this.commit();
+    return true;
   }
 
   /** Changes size by setting the scale so the object's own box becomes width x height. */

@@ -318,6 +318,17 @@ test('crops and adjusts an image from the inspector, undoably', async ({ page })
   await expect(inspector(page).getByLabel('Ancho', { exact: true })).toHaveValue(String(width));
 });
 
+test('removes the white frame of an uploaded image, undoably', async ({ page }) => {
+  await newDrawing(page);
+  await page.locator('#file-image').setInputFiles('test/fixtures/import/white-frame.png');
+  await expect(layers(page)).toHaveText(['white-frame']);
+  const undo = page.getByRole('button', { name: 'Deshacer' });
+  await page.getByRole('group', { name: 'Imagen' }).getByRole('button', { name: 'Quitar fondo' }).click();
+  await expect(page.getByText('Fondo quitado. Puedes deshacerlo.').first()).toBeVisible();
+  await undo.click();
+  await expect(layers(page)).toHaveText(['white-frame']);
+});
+
 test('Info shows the source link, legal notices and a licences panel; nothing is pinned to the screen (RULE-099/111)', async ({ page }) => {
   await newDrawing(page);
   await expect(page.locator('body > footer')).toHaveCount(0);
