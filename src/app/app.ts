@@ -1,5 +1,5 @@
 // Wires the UI to the editor: tools, dialogs, shortcuts, zoom, import/export, autosave.
-import { Editor, type ShapeKind } from '../canvas/editor';
+import { Editor, GRID_SIZE, type ShapeKind } from '../canvas/editor';
 import type { CatalogAsset } from '../assets/catalog';
 import { resolveSource, resolveToDataUrl } from '../assets/sources';
 import { APP_BUILD, APP_VERSION } from '../config';
@@ -16,7 +16,7 @@ import { ContextMenu, type MenuEntry } from '../ui/context-menu';
 import { Library } from '../ui/library';
 import { setupShapesMenu } from '../ui/shapes-menu';
 import { setupTabs } from '../ui/tabs';
-import { commandFor, type Command } from '../ui/shortcuts';
+import { commandFor, isTyping, type Command } from '../ui/shortcuts';
 
 type Tool = 'select' | 'hand' | 'draw';
 const ZOOM_STEPS = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4];
@@ -34,6 +34,7 @@ export class App {
   private grid = false;
   private title = '';
   private queue: Promise<unknown> = Promise.resolve();
+  private copiedHere = false;
 
   constructor() {
     this.editor = new Editor(byId<HTMLCanvasElement>('canvas'), resolveSource);
@@ -127,6 +128,7 @@ export class App {
     const frame = byId('canvas-frame');
     frame.style.width = `${this.editor.canvas.width}px`;
     frame.style.height = `${this.editor.canvas.height}px`;
+    frame.style.setProperty('--grid-size', `${GRID_SIZE * this.editor.zoomLevel}px`); // canvas pixels, like snapping
     frame.classList.toggle('opaque', this.editor.currentBackground.kind !== 'transparent');
     document.title = `${this.dirty ? '• ' : ''}${this.title || 'Sin título'} · Tonga`;
     this.touch();
@@ -459,8 +461,8 @@ export class App {
     const isGroup = e.inspect()?.type === 'group';
     const run = (fn: () => void | Promise<void>) => () => void this.serial(fn).catch((err) => this.fail(err));
     return [
-      { label: 'Cortar', icon: 'scissors', shortcut: `${mod}X`, disabled: none, run: run(() => e.cut()) },
-      { label: 'Copiar', icon: 'copy', shortcut: `${mod}C`, disabled: none, run: run(() => e.copy()) },
+      { label: 'Cortar', icon: 'scissors', shortcut: `${mod}X`, disabled: none, run: run(() => (this.copied(), e.cut())) },
+      { label: 'Copiar', icon: 'copy', shortcut: `${mod}C`, disabled: none, run: run(() => (this.copied(), e.copy())) },
       { label: 'Pegar', icon: 'clipboardPaste', shortcut: `${mod}V`, disabled: !e.hasClipboard, run: run(() => e.paste()) },
       { label: 'Duplicar', icon: 'copyPlus', shortcut: `${mod}D`, disabled: none, run: run(() => e.duplicate()) },
       'separator',
@@ -500,6 +502,9 @@ export class App {
       }
       const cmd = commandFor(e, this.editor.isEditingText());
       if (!cmd) return;
+      // Nothing copied here since the window got focus: let the browser's paste event bring
+      // what was copied elsewhere (an image, some text). See pasteFromSystem.
+      if (cmd === 'paste' && !this.copiedHere) return;
       e.preventDefault();
       void this.serial(() => this.run(cmd)).catch((err) => this.fail(err));
     });
@@ -519,10 +524,14 @@ export class App {
       },
       cut: () => {
         const n = e.selected().length;
+        if (n) this.copied();
         e.cut();
         if (n) announce(n === 1 ? 'Objeto cortado' : `${n} objetos cortados`);
       },
-      copy: () => e.copy(),
+      copy: () => {
+        if (e.selected().length) this.copied();
+        e.copy();
+      },
       'context-menu': () => this.openMenuFromKeyboard(),
       paste: () => e.paste(),
       duplicate: () => e.duplicate(),
@@ -561,6 +570,32 @@ export class App {
       const file = e.dataTransfer?.files[0];
       if (file) void this.serial(() => this.handleFile(file));
     });
+    window.addEventListener('blur', () => (this.copiedHere = false));
+    document.addEventListener('paste', (e) => this.pasteFromSystem(e));
+  }
+
+  /** Objects copied in Tonga: Ctrl+V pastes them until the user goes to another window. */
+  private copied(): void {
+    this.copiedHere = true;
+    // Tonga's copy replaces whatever the system clipboard held, as any other app's would.
+    void navigator.clipboard?.writeText('').catch(() => undefined);
+  }
+
+  /** An image or text copied in another app becomes a new layer; otherwise Tonga's own clipboard. */
+  private pasteFromSystem(e: ClipboardEvent): void {
+    if (document.querySelector('dialog[open]') || isTyping(e.target) || this.editor.isEditingText()) return;
+    e.preventDefault();
+    const file = [...(e.clipboardData?.files ?? [])].find((f) => f.type.startsWith('image/'));
+    const text = e.clipboardData?.getData('text/plain').trim() ?? '';
+    if (file) {
+      void this.serial(() => this.handleFile(file));
+    } else if (text) {
+      this.setTool('select');
+      this.editor.addText(text.slice(0, 5000));
+      announce('Texto pegado en el centro del lienzo');
+    } else {
+      void this.serial(() => this.editor.paste()).catch((err) => this.fail(err));
+    }
   }
 
   // ---- Theme ------------------------------------------------------------------------------

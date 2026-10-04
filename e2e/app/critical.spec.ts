@@ -424,7 +424,7 @@ test('the Formas menu adds predefined shapes with a fill, and closes with Escape
   await newDrawing(page);
   await page.getByRole('button', { name: 'Añadir forma' }).click();
   const menu = page.getByRole('group', { name: 'Formas' });
-  await expect(menu.getByRole('heading')).toHaveText(['Formas', 'Flechas', 'Bocadillos']);
+  await expect(menu.getByRole('heading')).toHaveText(['Formas', 'Flechas', 'Diagramas', 'Bocadillos']);
   await expect(menu.getByRole('button', { name: 'Añadir rectángulo', exact: true })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();

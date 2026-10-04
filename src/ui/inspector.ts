@@ -463,12 +463,19 @@ function canvasFields(editor: Editor, actions: InspectorActions): HTMLElement[] 
   syncColour(color, bg.kind === 'color' ? bg.color : bg.kind === 'transparent' ? TRANSPARENT : 'image'); // an image: no swatch marked
   const grid = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'grid', checked: actions.gridOn() }), 'Mostrar rejilla');
   grid.querySelector('input')?.addEventListener('change', (e) => actions.toggleGrid((e.target as HTMLInputElement).checked));
+  const snap = (label: string, key: 'grid' | 'objects') => {
+    const box = h('label', { class: 'check' }, h('input', { type: 'checkbox', name: `snap-${key}`, checked: editor.snapping[key] }), label);
+    box.querySelector('input')?.addEventListener('change', (e) => editor.setSnapping({ [key]: (e.target as HTMLInputElement).checked }));
+    return box;
+  };
   return [
     h('p', { class: 'muted' }, 'Nada seleccionado. Ajustes del lienzo:'),
     size,
     apply,
     color,
     grid,
+    snap('Ajustar a la rejilla', 'grid'),
+    snap('Ajustar a otros objetos', 'objects'),
     h('p', { class: 'muted' }, bg.kind === 'image' ? 'El fondo es una imagen de la biblioteca.' : ''),
   ];
 }

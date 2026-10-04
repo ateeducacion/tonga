@@ -55,6 +55,52 @@ test('text can be underlined; shapes get a shadow; a new shape reuses the last s
   await expect(layers(page)).toHaveText(['Rectángulo 1', 'Texto 1']);
 });
 
+/** Fires the paste event a browser sends after Ctrl+V, with what another app copied. */
+async function pasteFromAnotherApp(page: Page, content: { png?: string; text?: string }): Promise<void> {
+  await page.evaluate(async ({ png, text }) => {
+    const data = new DataTransfer();
+    if (png) data.items.add(new File([await (await fetch(png)).blob()], 'captura.png', { type: 'image/png' }));
+    if (text) data.setData('text/plain', text);
+    // Firefox ignores clipboardData in the constructor, so it is set on the event itself.
+    const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'clipboardData', { value: data });
+    document.body.dispatchEvent(event);
+  }, content);
+}
+
+test('an image or text copied in another app is pasted onto the canvas', async ({ page }) => {
+  await newDrawing(page);
+  const png = await page.evaluate(() => {
+    const c = document.createElement('canvas');
+    c.width = 30;
+    c.height = 20;
+    (c.getContext('2d') as CanvasRenderingContext2D).fillRect(0, 0, 30, 20);
+    return c.toDataURL('image/png');
+  });
+  await pasteFromAnotherApp(page, { png });
+  await expect(layers(page)).toHaveText(['captura']);
+  await pasteFromAnotherApp(page, { text: 'Fotosíntesis' });
+  await expect(layers(page)).toHaveText(['Texto 1', 'captura']);
+  await expect(inspector(page).getByLabel('Texto', { exact: true })).toHaveValue('Fotosíntesis');
+
+  // Copied inside Tonga: Ctrl+V pastes the objects, as before.
+  await page.keyboard.press('ControlOrMeta+C');
+  await page.keyboard.press('ControlOrMeta+V');
+  await expect(layers(page)).toHaveText(['Texto 2', 'Texto 1', 'captura']);
+});
+
+test('snapping to the grid and to objects can be switched on and off', async ({ page }) => {
+  await newDrawing(page);
+  const grid = inspector(page).getByLabel('Ajustar a la rejilla');
+  const objects = inspector(page).getByLabel('Ajustar a otros objetos');
+  await expect(grid).not.toBeChecked();
+  await expect(objects).toBeChecked();
+  await grid.check();
+  await addShape(page, 'rectángulo');
+  await page.keyboard.press('Escape');
+  await expect(inspector(page).getByLabel('Ajustar a la rejilla')).toBeChecked();
+});
+
 test('arrow lines take a dashed or dotted style; three objects spread evenly', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'línea con flecha');
