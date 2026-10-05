@@ -19,8 +19,17 @@ describe('file type detection (RULE-113)', () => {
     ['an empty file', new Uint8Array(), /vacío/],
     ['a GIF', text('GIF89a'), /no admitido/],
     ['an HTML page', text('<html><body>'), /no admitido/],
-    ['a huge file', new Uint8Array(21 * 1024 * 1024), /MB/],
   ])('rejects %s', (_n, b, msg) => expect(() => sniff(b, 'x')).toThrowError(msg));
+
+  it('judges the size from the whole file, with a larger limit for eXeLearning packages', () => {
+    const png = bytes(0x89, 0x50, 0x4e, 0x47);
+    const elpx = bytes(0x50, 0x4b, 0x03, 0x04);
+    expect(sniff(png, 'foto.png', 99 * 1024 * 1024)).toBe('png');
+    expect(() => sniff(png, 'foto.png', 101 * 1024 * 1024)).toThrowError('pesa más de 100 MB');
+    expect(sniff(elpx, 'curso.elpx', 500 * 1024 * 1024)).toBe('exe');
+    expect(() => sniff(elpx, 'curso.elpx', 3 * 1024 ** 3)).toThrowError('pesa más de 2 GB');
+    expect(() => sniff(png, 'foto.png', 0)).toThrowError('vacío');
+  });
 });
 
 describe('SVG sanitizer', () => {

@@ -5,7 +5,7 @@ import { putAsset } from '../persistence/store';
 import { newProject, parseProject, type Project } from '../project/schema';
 import { findSlides, type SlideChoice } from './exe';
 import { ImportError, sniff } from './sniff';
-import { unzip } from './unzip';
+import { openZip, type ZipArchive } from './unzip';
 import { checkImageSize, sanitizeSvg } from './svg';
 
 const RASTER_MIME = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' } as const;
@@ -13,7 +13,7 @@ const RASTER_MIME = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' }
 export type ImportResult =
   | { kind: 'image' | 'svg' | 'legacy-svg'; name: string }
   | { kind: 'project'; project: Project }
-  | { kind: 'slides'; name: string; slides: SlideChoice[]; files: Map<string, Uint8Array> };
+  | { kind: 'slides'; name: string; slides: SlideChoice[]; files: ZipArchive };
 
 async function dataUrlToAsset(dataUrl: string): Promise<string> {
   return putAsset(await (await fetch(dataUrl)).blob());
@@ -32,17 +32,18 @@ async function internImages(objects: FabricObject[]): Promise<void> {
 const baseName = (name: string) => name.replace(/\.[^.]+$/, '').slice(0, 80) || 'Imagen';
 
 export async function importFile(file: File, editor: Editor): Promise<ImportResult> {
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const kind = sniff(bytes, file.name);
-
-  if (kind === 'tonga') return { kind: 'project', project: parseProject(new TextDecoder().decode(bytes)) };
+  const kind = sniff(new Uint8Array(await file.slice(0, 4096).arrayBuffer()), file.name, file.size);
 
   if (kind === 'exe') {
-    const files = await unzip(bytes);
-    const slides = findSlides(files);
+    // Not read whole: an eXeLearning project can weigh hundreds of MB.
+    const files = await openZip(file);
+    const slides = await findSlides(files);
     if (!slides.length) throw new ImportError('Este fichero de eXeLearning no tiene ninguna diapositiva (iDevice «Slide») que abrir.');
     return { kind: 'slides', name: baseName(file.name), slides, files };
   }
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (kind === 'tonga') return { kind: 'project', project: parseProject(new TextDecoder().decode(bytes)) };
 
   if (kind === 'svg') {
     const clean = sanitizeSvg(new TextDecoder().decode(bytes));

@@ -583,6 +583,16 @@ export class App {
       const file = e.dataTransfer?.files[0];
       if (file) void this.serial(() => this.handleFile(file));
     });
+    // A file dropped on «Nuevo dibujo» opens, as «Abrir un proyecto…» there would.
+    const newDlg = byId<HTMLDialogElement>('dlg-new');
+    newDlg.addEventListener('dragover', (e) => e.preventDefault());
+    newDlg.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files[0];
+      if (!file) return;
+      newDlg.close();
+      void this.serial(() => this.handleFile(file));
+    });
     window.addEventListener('blur', () => (this.copiedHere = false));
     document.addEventListener('paste', (e) => this.pasteFromSystem(e));
   }

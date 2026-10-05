@@ -16,7 +16,7 @@ En equipos compartidos, la recuperación del autoguardado **nunca es automática
 
 | Entrada | Defensa |
 |---|---|
-| Ficheros importados | El tipo se detecta por los bytes, no por la extensión. Máximo 20 MB y 8.192 px por lado. Los errores de decodificación se muestran con un mensaje legible. |
+| Ficheros importados | El tipo se detecta por los bytes, no por la extensión. Máximo 100 MB y 8.192 px por lado. Los paquetes de eXeLearning (`.elpx`, `.idevice`, `.block`) admiten hasta 2 GB porque no se cargan enteros: se lee el directorio del ZIP y solo las entradas necesarias (`content.xml` y las imágenes de la diapositiva), con un máximo de 100 MB descomprimidos por entrada y 200 MB en total. Los errores de decodificación se muestran con un mensaje legible. |
 | SVG | Saneado antes de Fabric (`src/import/svg.ts`): se rechazan DOCTYPE y entidades. Se eliminan `<script>`, `<foreignObject>`, `<iframe>`, animaciones y atributos `on*`. `href` y `url()` solo admiten `data:image/…` o `#fragmento`, así que no hay peticiones de rastreo ni lienzo contaminado. Nunca se pinta un SVG mediante `<img>`. |
 | Proyectos `.tonga` | Validación estricta (`parseProject`): versión conocida, tamaños acotados, tipos de capa conocidos, ids únicos, imágenes solo locales (`asset:`, `data:image/…` o `repositorios/…`). Cada imagen incrustada se comprueba contra su SHA-256. |
 | Catálogo de la biblioteca | Se genera y valida en el build. Los títulos se pintan con `textContent`. |

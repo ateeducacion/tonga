@@ -1,14 +1,21 @@
 // Decides what an imported file is from its bytes (not its name) and enforces size limits.
-import { MAX_IMPORT_BYTES } from '../config';
+import { MAX_IMPORT_BYTES, MAX_PACKAGE_BYTES } from '../config';
 import { UserError } from '../errors';
 
 export type ImportKind = 'png' | 'jpeg' | 'webp' | 'svg' | 'tonga' | 'exe';
 
 export class ImportError extends UserError {}
 
-export function sniff(bytes: Uint8Array, name: string): ImportKind {
-  if (bytes.length > MAX_IMPORT_BYTES) throw new ImportError(`El fichero pesa más de ${MAX_IMPORT_BYTES / 1024 / 1024} MB.`);
-  if (bytes.length === 0) throw new ImportError('El fichero está vacío.');
+/** The kind of a file from its first bytes (4 KB are enough) and its total `size`. */
+export function sniff(bytes: Uint8Array, name: string, size = bytes.length): ImportKind {
+  if (size === 0) throw new ImportError('El fichero está vacío.');
+  const kind = detect(bytes, name);
+  const max = kind === 'exe' ? MAX_PACKAGE_BYTES : MAX_IMPORT_BYTES;
+  if (size > max) throw new ImportError(`El fichero pesa más de ${max >= 1024 ** 3 ? `${max / 1024 ** 3} GB` : `${max / 1024 ** 2} MB`}.`);
+  return kind;
+}
+
+function detect(bytes: Uint8Array, name: string): ImportKind {
   const b = bytes;
   if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'png';
   if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'jpeg';
