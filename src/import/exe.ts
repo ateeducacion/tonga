@@ -4,6 +4,7 @@
 // package's files. The result goes through the .tonga validation: the input is untrusted.
 import { newProject, parseProject, type Background, type Layer, type LayerType, type Project } from '../project/schema';
 import { ImportError } from './sniff';
+import type { ZipArchive } from './unzip';
 
 /** One Slide iDevice found in the package, ready to be shown in a chooser. */
 export interface SlideChoice {
@@ -29,11 +30,18 @@ const LABELS: Record<LayerType, string> = {
 const MIME: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', svg: 'image/svg+xml' };
 
 const text = (el: Element | null | undefined, tag: string) => el?.getElementsByTagName(tag)[0]?.textContent?.trim() ?? '';
+const safeDecode = (s: string) => {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+};
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /** Every Slide iDevice in the package's content.xml, in document order. */
-export function findSlides(files: Map<string, Uint8Array>): SlideChoice[] {
-  const xml = files.get('content.xml');
+export async function findSlides(files: ZipArchive): Promise<SlideChoice[]> {
+  const xml = await files.read('content.xml');
   if (!xml) throw new ImportError('No es un fichero de eXeLearning: le falta content.xml.');
   const doc = new DOMParser().parseFromString(new TextDecoder().decode(xml), 'application/xml');
   if (doc.getElementsByTagName('parsererror').length) throw new ImportError('El content.xml de eXeLearning está dañado.');
@@ -84,7 +92,7 @@ export function findSlides(files: Map<string, Uint8Array>): SlideChoice[] {
  */
 export async function slideToProject(
   slide: SlideChoice,
-  files: Map<string, Uint8Array>,
+  files: ZipArchive,
   store: (blob: Blob) => Promise<string>,
 ): Promise<{ project: Project; missing: number }> {
   let missing = 0;
@@ -93,7 +101,7 @@ export async function slideToProject(
   const localise = async (o: Record<string, unknown>): Promise<boolean> => {
     if (typeof o.src === 'string') {
       const path = o.src.replace(CONTEXT, '').replace(/^\.?\//, '').split(/[?#]/)[0] ?? '';
-      const bytes = files.get(path) ?? files.get(decodeURIComponent(path));
+      const bytes = (await files.read(path)) ?? (await files.read(safeDecode(path)));
       if (!bytes) return false;
       if (!stored.has(path)) {
         const ext = path.split('.').pop()?.toLowerCase() ?? '';

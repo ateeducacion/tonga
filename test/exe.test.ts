@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { FabricImage, StaticCanvas, Textbox } from 'fabric';
 import { readProject } from '../src/canvas/document';
 import { Editor } from '../src/canvas/editor';
@@ -7,9 +7,17 @@ import { exportElpx } from '../src/export/elpx';
 import { zip } from '../src/export/zip';
 import { findSlides, slideToProject, type SlideChoice } from '../src/import/exe';
 import { sniff } from '../src/import/sniff';
-import { isZip, unzip } from '../src/import/unzip';
+import { isZip, openZip } from '../src/import/unzip';
 
 const fixture = (name: string) => new Uint8Array(readFileSync(`test/fixtures/import/${name}`));
+const unzip = (bytes: Uint8Array) => openZip(new Blob([bytes as BlobPart]));
+/** A real ZIP with the given files, opened. */
+const archive = (files: Record<string, string | Uint8Array>) => unzip(zip(files));
+/** Every file of an archive, read. */
+const readAll = async (bytes: Uint8Array) => {
+  const files = await unzip(bytes);
+  return new Map(await Promise.all(files.names.map(async (n) => [n, await files.read(n)] as const)));
+};
 const enc = (s: string) => new TextEncoder().encode(s);
 const STATIC = async () => ({ 'content.dtd': enc('<!ELEMENT ode ANY>'), 'theme/config.xml': enc('<theme/>') });
 /** A store that only remembers what it got and returns a fake canonical source. */
@@ -32,14 +40,14 @@ describe('unzip', () => {
     for (const name of ['portada-volcan.block', 'portada-volcan.idevice']) {
       const bytes = fixture(name);
       expect(isZip(bytes)).toBe(true);
-      const files = await unzip(bytes);
+      const files = await readAll(bytes);
       expect([...files.keys()]).toEqual(['content.xml']);
       expect(new TextDecoder().decode(files.get('content.xml')).startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
     }
   });
 
   it('reads stored entries and skips folders and unsafe paths', async () => {
-    const files = await unzip(zip({ 'a.txt': 'hola', 'dir/': '', '../evil.txt': 'x', '/abs.txt': 'y', 'c/d.png': new Uint8Array([1, 2, 3]) }));
+    const files = await readAll(zip({ 'a.txt': 'hola', 'dir/': '', '../evil.txt': 'x', '/abs.txt': 'y', 'c/d.png': new Uint8Array([1, 2, 3]) }));
     expect([...files.keys()]).toEqual(['a.txt', 'c/d.png']);
     expect(files.get('c/d.png')).toEqual(new Uint8Array([1, 2, 3]));
   });
@@ -60,20 +68,73 @@ describe('unzip', () => {
     await expect(unzip(patch(10, 9))).rejects.toThrow('compresión');
     const local = good.slice();
     local[0] = 0; // the local header signature is gone
-    await expect(unzip(local)).rejects.toThrow('no es un ZIP válido');
+    await expect((await unzip(local)).read('a.txt')).rejects.toThrow('no es un ZIP válido');
+  });
+});
+
+/** Writes a 32-bit field of the n-th central directory entry of a ZIP (a copy). */
+function patchCentral(bytes: Uint8Array, n: number, field: number, value: number): Uint8Array {
+  const b = bytes.slice();
+  const view = new DataView(b.buffer);
+  const end = b.length - 22;
+  let at = view.getUint32(end + 16, true);
+  for (let i = 0; i < n; i++) at += 46 + view.getUint16(at + 28, true) + view.getUint16(at + 30, true) + view.getUint16(at + 32, true);
+  view.setUint32(at + field, value, true);
+  return b;
+}
+
+describe('reading large ZIPs by parts', () => {
+  it('reads only the directory and the entries asked for, not the whole file', async () => {
+    const big = new Uint8Array(5 * 1024 * 1024);
+    const blob = new Blob([zip({ 'content/video.mp4': big, 'content.xml': '<ode/>' }) as BlobPart]);
+    let read = 0;
+    const slice = blob.slice.bind(blob);
+    vi.spyOn(blob, 'slice').mockImplementation((from = 0, to = blob.size) => {
+      read += Math.min(to, blob.size) - from;
+      return slice(from, to);
+    });
+    const files = await openZip(blob);
+    expect(files.names).toEqual(['content/video.mp4', 'content.xml']);
+    expect(new TextDecoder().decode(await files.read('content.xml'))).toBe('<ode/>');
+    expect(await files.read('nada.txt')).toBeUndefined();
+    expect(read).toBeLessThan(100 * 1024);
+  });
+
+  it('refuses entries, or a sum of them, too large to inflate in memory', async () => {
+    const one = await unzip(patchCentral(zip({ 'a.bin': 'x' }), 0, 24, 101 * 1024 * 1024));
+    await expect(one.read('a.bin')).rejects.toThrow('«a.bin» pesa más de 100 MB');
+    let three = zip({ a: 'x', b: 'y', c: 'z' });
+    for (const n of [0, 1, 2]) three = patchCentral(three, n, 24, 90 * 1024 * 1024);
+    const files = await unzip(three);
+    await files.read('a');
+    await files.read('b');
+    await expect(files.read('c')).rejects.toThrow('demasiado grande');
+  });
+
+  it('stops inflating an entry that grows past its declared size, and rejects a truncated one', async () => {
+    const liar = await unzip(patchCentral(fixture('portada-volcan.block'), 0, 24, 10));
+    await expect(liar.read('content.xml')).rejects.toThrow('no es un ZIP válido');
+    const truncated = await unzip(patchCentral(zip({ 'a.txt': 'hola' }), 0, 20, 1000));
+    const crowded = zip({ 'a.txt': 'hola' });
+    new DataView(crowded.buffer).setUint16(crowded.length - 12, 20001, true);
+    await expect(unzip(crowded)).rejects.toThrow('demasiados elementos');
+    const outside = zip({ 'a.txt': 'hola' });
+    new DataView(outside.buffer).setUint32(outside.length - 6, 0x7fffffff, true); // directory past the end
+    await expect(unzip(outside)).rejects.toThrow('no es un ZIP válido');
+    await expect(truncated.read('a.txt')).rejects.toThrow('no es un ZIP válido');
   });
 });
 
 describe('finding Slide iDevices', () => {
   it('finds the slide of the real cover, titled «Diapositiva» when there is no page', async () => {
-    const slides = findSlides(await unzip(fixture('portada-volcan.block')));
+    const slides = await findSlides(await unzip(fixture('portada-volcan.block')));
     expect(slides).toHaveLength(1);
     expect(slides[0]).toMatchObject({ id: 'idevice-1785308366307-7z9j80piq', title: 'Diapositiva', width: 1280, height: 720, background: '#ffffff' });
     expect(slides[0]?.objects).toHaveLength(41);
     expect(slides[0]?.svg).toMatch(/^<\?xml/);
   });
 
-  it('names slides by page, numbers several on one page and skips broken or other iDevices', () => {
+  it('names slides by page, numbers several on one page and skips broken or other iDevices', async () => {
     const xml = contentXml({ p1: 'Volcanes', p2: 'Ríos' }, [
       ['p1', 'slide', scene([])],
       ['p1', 'text', '{}'],
@@ -82,15 +143,15 @@ describe('finding Slide iDevices', () => {
       ['p2', 'slide', '{not json'],
       ['p2', 'slide', scene([], { background: 3, svg: 4 })],
     ]);
-    const slides = findSlides(new Map([['content.xml', enc(xml)]]));
+    const slides = await findSlides(await archive({ 'content.xml': xml }));
     expect(slides.map((s) => s.title)).toEqual(['Volcanes (1)', 'Volcanes (2)', 'Ríos']);
     expect(slides[1]).toMatchObject({ width: 1280, height: 720 }); // out-of-range sizes fall back
     expect(slides[2]).toMatchObject({ background: '#ffffff', svg: '' });
   });
 
-  it('explains what is wrong with a file that is not eXeLearning', () => {
-    expect(() => findSlides(new Map())).toThrow('content.xml');
-    expect(() => findSlides(new Map([['content.xml', enc('<ode><unclosed>')]]))).toThrow('dañado');
+  it('explains what is wrong with a file that is not eXeLearning', async () => {
+    await expect(findSlides(await archive({ 'a.txt': 'x' }))).rejects.toThrow('content.xml');
+    await expect(findSlides(await archive({ 'content.xml': '<ode><unclosed>' }))).rejects.toThrow('dañado');
   });
 
   it('is told apart from other files by its bytes and its name', () => {
@@ -103,8 +164,8 @@ describe('finding Slide iDevices', () => {
 
 describe('opening a slide as a project', () => {
   it('turns the real cover into editable layers that open in the editor', async () => {
-    const [slide] = findSlides(await unzip(fixture('portada-volcan.block'))) as [SlideChoice];
-    const { project, missing } = await slideToProject(slide, new Map(), memoryStore().store);
+    const [slide] = await findSlides(await unzip(fixture('portada-volcan.block'))) as [SlideChoice];
+    const { project, missing } = await slideToProject(slide, await archive({}), memoryStore().store);
     expect(missing).toBe(0);
     expect(project.canvas).toEqual({ width: 1280, height: 720, background: { kind: 'color', color: '#ffffff' } });
     expect(project.title).toBe('Diapositiva');
@@ -135,7 +196,7 @@ describe('opening a slide as a project', () => {
     const elpx = await exportElpx(original, (s) => (s === 'asset:photo' ? photo : s), STATIC);
 
     const files = await unzip(new Uint8Array(await elpx.arrayBuffer()));
-    const [slide] = findSlides(files) as [SlideChoice];
+    const [slide] = (await findSlides(files)) as [SlideChoice];
     expect(slide.title).toBe('Mi portada');
     const { blobs, store } = memoryStore();
     const { project, missing } = await slideToProject(slide, files, store);
@@ -149,18 +210,19 @@ describe('opening a slide as a project', () => {
 
   it('leaves out images that are not in the package, also inside groups, and shares one copy per file', async () => {
     const img = (src: string) => ({ type: 'Image', src, left: 0, top: 0, width: 1, height: 1 });
-    const slide = findSlides(new Map([['content.xml', enc(contentXml({}, [['p', 'slide', scene([
+    const slide = (await findSlides(await archive({ 'content.xml': contentXml({}, [['p', 'slide', scene([
       img('{{context_path}}/content/resources/a.png'),
       img('content/resources/a.png?x=1'),
+      img('content/resources/100%.png'),
       img('https://example.com/remote.png'),
       { type: 'Group', objects: [img('./content/resources/b%20c.jpg'), img('content/resources/missing.png'), { type: 'Rect' }] },
       { type: 'Polyline', points: [] },
       { type: 'Mystery', visible: false },
-    ], { background: 'transparent' })]]))]]))[0] as SlideChoice;
-    const files = new Map([['content/resources/a.png', new Uint8Array([1])], ['content/resources/b c.jpg', new Uint8Array([2])]]);
+    ], { background: 'transparent' })]]) })))[0] as SlideChoice;
+    const files = await archive({ 'content/resources/a.png': new Uint8Array([1]), 'content/resources/b c.jpg': new Uint8Array([2]) });
     const { blobs, store } = memoryStore();
     const { project, missing } = await slideToProject(slide, files, store);
-    expect(missing).toBe(2); // the remote image and the missing one in the group
+    expect(missing).toBe(3); // the remote image, a malformed path and the missing one in the group
     expect(blobs.map((b) => b.type)).toEqual(['image/png', 'image/jpeg']);
     expect(project.canvas.background).toEqual({ kind: 'transparent' });
     expect(project.layers.map((l) => l.type)).toEqual(['image', 'image', 'group', 'path', 'path']);
