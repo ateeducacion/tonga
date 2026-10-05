@@ -4,6 +4,14 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Cambiado
+
+- **Ficheros más grandes**: se pueden abrir imágenes, SVG y proyectos `.tonga` de hasta 100 MB (antes 20 MB) y paquetes de eXeLearning (`.elpx`, `.idevice`, `.block`) de hasta 2 GB. Un paquete no se carga entero: solo se lee su índice, el `content.xml` y las imágenes de la diapositiva, así que un proyecto de cientos de MB con audio o vídeo se abre en un instante.
+
+### Añadido
+
+- **Arrastrar un fichero a «Nuevo dibujo»** lo abre, como «Abrir un proyecto…».
+
 ## [2.3.4] - 2026-10-04
 
 ### Añadido
