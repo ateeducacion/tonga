@@ -250,6 +250,29 @@ test('an eXeLearning project with several slides asks which one to open', async 
   await expect(layers(page)).toHaveText(['Texto 1']);
 });
 
+test('a file dropped on «Nuevo dibujo» opens', async ({ page }) => {
+  const json = JSON.stringify({
+    engine: 'fabric', width: 800, height: 450, background: '#fde68a',
+    fabric: { objects: [{ type: 'Textbox', left: 400, top: 225, width: 300, text: 'Hola', fontSize: 40 }] },
+  });
+  const xml = `<?xml version="1.0"?><ode><odeNavStructures><odeNavStructure><odePageId>p1</odePageId><pageName>Portada</pageName></odeNavStructure></odeNavStructures><odeComponent><odePageId>p1</odePageId><odeIdeviceTypeName>slide</odeIdeviceTypeName><jsonProperties><![CDATA[${json}]]></jsonProperties></odeComponent></ode>`;
+  await page.goto('./');
+  const dialog = page.getByRole('dialog', { name: 'Nuevo dibujo' });
+  await expect(dialog).toBeVisible();
+  await page.evaluate((bytes) => {
+    const data = new DataTransfer();
+    data.items.add(new File([new Uint8Array(bytes)], 'curso.elpx', { type: 'application/zip' }));
+    const event = new DragEvent('drop', { bubbles: true, cancelable: true });
+    // Firefox ignores dataTransfer in the constructor, so it is set on the event itself.
+    Object.defineProperty(event, 'dataTransfer', { value: data });
+    document.getElementById('dlg-new')?.dispatchEvent(event);
+  }, [...zip({ 'content.xml': xml })]);
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText('Diapositiva «Portada» abierta.').first()).toBeVisible();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Texto 1']);
+});
+
 test('several layers are chosen with Ctrl or Shift + click and combined into one', async ({ page }) => {
   await newDrawing(page);
   await addShape(page, 'rectángulo');
