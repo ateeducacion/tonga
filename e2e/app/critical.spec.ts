@@ -276,6 +276,18 @@ test('phone: the top bar fits, project actions are in «Más acciones», the pan
   await expect(page.locator('#sidepanel')).toBeVisible();
 });
 
+test('phone: tapping the zoom percentage again fits the canvas back to the screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await newDrawing(page);
+  const value = page.locator('.zoom-value');
+  const fit = await value.textContent();
+  expect(fit).not.toBe('100 %');
+  await value.click();
+  await expect(value).toHaveText('100 %');
+  await value.click();
+  await expect(value).toHaveText(fit!);
+});
+
 test('status messages never cover the phone tool bar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await newDrawing(page);
