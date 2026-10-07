@@ -4,6 +4,8 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.6] - 2026-10-07
+
 ### Cambiado
 
 - **El porcentaje del zoom alterna entre 100 % y ajustar a la pantalla**: el primer toque pone el lienzo al 100 % y el segundo lo vuelve a encuadrar. En el móvil, donde no están los botones de acercar y alejar, ya no hace falta buscar el icono de encuadre para recuperar la vista.
