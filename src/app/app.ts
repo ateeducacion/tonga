@@ -351,7 +351,8 @@ export class App {
       redo: () => this.serial(() => this.editor.redo()),
       'zoom-in': () => this.zoomStep(1),
       'zoom-out': () => this.zoomStep(-1),
-      'zoom-100': () => this.editor.setZoom(1),
+      // The percentage toggles between 100 % and fit, so a second tap undoes the first (phones lack ±).
+      'zoom-toggle': () => (this.editor.zoomLevel === 1 ? this.zoomFit() : this.editor.setZoom(1)),
       'zoom-fit': () => this.zoomFit(),
       theme: () => this.toggleTheme(),
       help: () => openDialog(byId<HTMLDialogElement>('dlg-help')),
