@@ -361,6 +361,11 @@ export class App {
       export: () => this.openExport(),
       import: () => byId<HTMLInputElement>('file-image').click(),
       library: () => this.library.open(),
+      qr: () => {
+        const dialog = byId<HTMLDialogElement>('dlg-qr');
+        (dialog.querySelector('form') as HTMLFormElement).reset();
+        openDialog(dialog);
+      },
       panel: () => this.togglePanel(),
     };
     // On phones the project actions live in the «Más acciones» menu: it closes once one is chosen.
@@ -406,6 +411,17 @@ export class App {
     }));
     newDlg.querySelector('input[name="bgcolor"]')?.addEventListener('input', () => {
       (newDlg.querySelector('input[name="bg"][value="color"]') as HTMLInputElement).checked = true;
+    });
+    const qrForm = byId<HTMLDialogElement>('dlg-qr').querySelector('form') as HTMLFormElement;
+    qrForm.addEventListener('submit', (e) => {
+      if (!(e.submitter instanceof HTMLButtonElement) || e.submitter.value !== 'generate') return;
+      try {
+        this.setTool('select');
+        this.editor.addQr(String(new FormData(qrForm).get('qrtext')));
+        announce('Código QR añadido en el centro del lienzo');
+      } catch (err) {
+        this.fail(err);
+      }
     });
     const exportDlg = byId<HTMLDialogElement>('dlg-export');
     const form = exportDlg.querySelector('form') as HTMLFormElement;
