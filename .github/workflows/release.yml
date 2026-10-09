@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: write # create the GitHub release
+      packages: write # push the image to ghcr.io
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -56,3 +57,16 @@ jobs:
             ${{ env.ZIP }}
             dist/sbom.spdx.json
           generate_release_notes: true
+
+      # Plain docker CLI: no extra third-party actions to pin. The image reuses the checked dist/.
+      - name: Publish Docker image to ghcr.io
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker build --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.version=${GITHUB_REF_NAME#v}" \
+            -t "$image:${GITHUB_REF_NAME#v}" -t "$image:latest" .
+          docker push --all-tags "$image"

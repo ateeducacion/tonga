@@ -75,6 +75,19 @@ npm run build && node scripts/make-og-image.mjs
 
 Las URL de las vistas previas tienen que ser absolutas; salen de `VITE_SITE_URL` (por defecto, la demo de GitHub Pages; ver `vite.config.ts`). Para otro despliegue: `VITE_SITE_URL=https://ejemplo.org/tonga/ npm run build`. WhatsApp guarda la vista previa en caché: para comprobar un cambio, comparte la URL con un parámetro nuevo (por ejemplo `?v=2`).
 
+### Imagen Docker
+
+Cada release publica `ghcr.io/ateeducacion/tonga:<versión>` (y `latest`): nginx Alpine con `dist/`. Las URL de las vistas previas se fijan al arrancar, sin recompilar:
+
+```bash
+docker run -d -p 8080:80 \
+  -e SITE_URL=https://ejemplo.org/tonga/ \
+  -e OG_IMAGE_URL=https://ejemplo.org/tonga/og-image.jpg \
+  ghcr.io/ateeducacion/tonga:2.3.6
+```
+
+`OG_IMAGE_URL` es opcional (por defecto, `${SITE_URL}og-image.jpg`). Para construirla en local: `npm run build && docker build -t tonga .`
+
 ## Métricas
 
 - `node scripts/metrics.mjs origin/upstream HEAD`: métricas del repositorio entre dos refs.
