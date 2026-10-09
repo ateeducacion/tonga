@@ -44,6 +44,21 @@ precedence = "override"
 SPDX-FileCopyrightText = ["2019-2026 Gobierno de Canarias", "2026 Lucide Icons and Contributors", "2013-present Cole Bemis", "2026 GitHub Inc."]
 SPDX-License-Identifier = "AGPL-3.0-or-later AND ISC AND MIT"
 
+# Classroom fonts (SIL Open Font License 1.1, THIRD_PARTY_NOTICES.md). Andika and OpenDyslexic are
+# the unmodified official web fonts (Reserved Font Names); the others are Fontsource 5.3.0 latin subsets.
+[[annotations]]
+path = ["src/fonts/**"]
+precedence = "override"
+SPDX-FileCopyrightText = [
+  "2004-2022 SIL International (Reserved Font Names \"Andika\" and \"SIL\")",
+  "2020 Braille Institute of America, Inc.",
+  "2018 The Lexend Project Authors (Reserved Font Name \"RevReading Lexend\")",
+  "2019 Abbie Gonzalez (Reserved Font Name \"OpenDyslexic\")",
+  "2010-2012 Patrick Wagesreiter",
+  "2023 The Playwrite Project Authors",
+]
+SPDX-License-Identifier = "OFL-1.1"
+
 # Files copied verbatim from eXeLearning (commit 68d6cd53d) for the .elpx export (THIRD_PARTY_NOTICES.md).
 [[annotations]]
 path = ["vendor/exelearning/content.dtd"]
