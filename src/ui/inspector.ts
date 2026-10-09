@@ -83,6 +83,7 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
         name: info.name, x: String(info.x), y: String(info.y), width: String(info.width), height: String(info.height),
         angle: String(info.angle), opacity: String(Math.round(info.opacity * 100)),
         strokeWidth: String(info.strokeWidth ?? 0),
+        qrtext: info.qr?.text ?? '',
         text: info.text?.text ?? '', fontFamily: info.text?.fontFamily ?? '', fontSize: String(info.text?.fontSize ?? ''), textAlign: info.text?.textAlign ?? '',
       }
     : { cw: String(editor.size.width), ch: String(editor.size.height), pencilWidth: String(editor.pencil.width) };
@@ -99,7 +100,8 @@ function syncValues(form: HTMLFormElement, info: SelectionInfo | null, editor: E
     }
   }
   if (info) {
-    const colours: Record<string, string | null> = { stroke: info.stroke, fill: info.fill, shadow: (info.shadow ?? DEFAULT_SHADOW).color, gradientTo: info.gradient?.to ?? null };
+    const colours: Record<string, string | null> = { stroke: info.stroke, fill: info.fill, shadow: (info.shadow ?? DEFAULT_SHADOW).color, gradientTo: info.gradient?.to ?? null,
+      qrColor: info.qr?.color ?? null, qrBackground: info.qr?.background ?? null };
     const gradientOn = form.elements.namedItem('gradientOn');
     if (gradientOn instanceof HTMLInputElement) gradientOn.checked = !!info.gradient;
     for (const el of form.querySelectorAll<HTMLElement>('[data-gradient]')) el.hidden = !info.gradient;
@@ -327,6 +329,7 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
     parts.push(widths, lineStyles(editor));
   }
   if (info.image) parts.push(imageFields(editor, key));
+  if (info.qr) parts.push(...qrFields(editor));
   if (info.connector) {
     const arrow = action('arrowRight', 'Punta de flecha', () => editor.setConnectorArrow(!editor.inspect()?.connector?.arrow));
     arrow.setAttribute('aria-pressed', String(info.connector.arrow));
@@ -356,7 +359,7 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
     action('flipVertical2', 'Voltear en vertical', () => editor.flip('y')),
     action('chevronsUp', 'Traer al frente', () => editor.order('front')),
     action('chevronsDown', 'Enviar al fondo', () => editor.order('back')),
-    ...(info.type === 'group' ? [action('ungroup', 'Desagrupar', () => editor.ungroup())] : []),
+    ...(info.type === 'group' && !info.qr ? [action('ungroup', 'Desagrupar', () => editor.ungroup())] : []),
     action('trash2', 'Borrar (Supr)', () => editor.removeSelected())));
 
   const box = h('div', { class: 'grid2' }, num('X', 'x'), num('Y', 'y'), num('Ancho', 'width', { min: 1 }), num('Alto', 'height', { min: 1 }), num('Giro (°)', 'angle', { min: -360, max: 360 }));
@@ -398,6 +401,24 @@ function selectionFields(editor: Editor, info: SelectionInfo): HTMLElement[] {
   placement.addEventListener('toggle', () => (placementOpen = placement.open));
   parts.push(placement);
   return parts;
+}
+
+/** A QR code: what it encodes and its two colours. Each change draws the code again. */
+function qrFields(editor: Editor): HTMLElement[] {
+  const set = (changes: Parameters<Editor['setQr']>[0]) => {
+    try {
+      editor.setQr(changes);
+    } catch (err) {
+      toast((err as Error).message, 'error');
+    }
+  };
+  const text = h('label', {}, 'Enlace o texto', h('input', { type: 'text', name: 'qrtext', inputmode: 'url', maxlength: 1000 }));
+  bind(text, 'qrtext', (v) => set({ text: v }), 'change');
+  return [
+    text,
+    colour('Color del código', 'qrColor', (c) => set({ color: c })),
+    colour('Fondo del código', 'qrBackground', (c) => set({ background: c }), { transparent: true }),
+  ];
 }
 
 /** A drop shadow: on/off, colour, blur and offset. Touching any control turns it on. */

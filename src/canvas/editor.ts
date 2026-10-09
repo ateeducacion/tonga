@@ -10,6 +10,7 @@ import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
 import { loadFonts } from './fonts';
+import { makeQr, readQr, type QrStyle } from './qr';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
 import { snapToGrid, snapToObjects, type Guide, type SnapResult, type Stuck } from './snap';
 import { followText, isConnector, makeConnector, refreshLinks } from './links';
@@ -48,6 +49,7 @@ export interface SelectionInfo {
   connector?: { arrow: boolean };
   text?: { text: string; fontFamily: string; fontSize: number; bold: boolean; italic: boolean; underline: boolean; textAlign: string };
   image?: { adjustments: ImageAdjustments; crop: ImageCrop };
+  qr?: QrStyle;
 }
 
 export const DEFAULT_FILL = '#f28c28';
@@ -512,6 +514,8 @@ export class Editor {
     };
     if (isImage(o)) info.image = { adjustments: readAdjustments(o), crop: readCrop(o) };
     if (isConnector(o)) info.connector = { arrow: o.connectArrow === true };
+    const qr = readQr(o);
+    if (qr) info.qr = qr;
     if (o instanceof Textbox) {
       info.text = {
         text: o.text, fontFamily: o.fontFamily, fontSize: o.fontSize, bold: o.fontWeight === 'bold' || Number(o.fontWeight) >= 600,
@@ -644,6 +648,29 @@ export class Editor {
     const gradient = readGradient(rest.fill);
     if (gradient) rest.fill = makeGradient(gradient);
     return shadow === undefined ? rest : { ...rest, shadow: shadow ? new Shadow(shadow as ShadowStyle) : null };
+  }
+
+  /** A QR code for a link (or any text), dark on white, at the centre of the canvas. */
+  addQr(text: string): void {
+    this.place(makeQr({ text: text.trim(), color: DEFAULT_STROKE, background: '#ffffff' }, this.unit()), 'group', undefined, 'Código QR');
+  }
+
+  /** Regenerates the selected QR code with another text or colours, keeping its place and size. */
+  setQr(changes: Partial<QrStyle>): void {
+    const old = this.canvas.getActiveObject();
+    const current = readQr(old);
+    if (!old || !current) return;
+    const style = { ...current, ...changes, text: (changes.text ?? current.text).trim() };
+    const qr = makeQr(style, old.width);
+    const { id, name, left, top, angle, scaleX, scaleY, flipX, flipY, opacity, shadow } = old;
+    qr.set({ id, name, left, top, angle, scaleX, scaleY, flipX, flipY, opacity, shadow });
+    qr.setCoords();
+    const index = this.canvas.getObjects().indexOf(old);
+    this.canvas.remove(old);
+    this.canvas.insertAt(index, qr);
+    this.canvas.setActiveObject(qr);
+    this.canvas.requestRenderAll();
+    this.commit();
   }
 
   /** A gradient fill on every selected shape; null turns it back into its first colour. */

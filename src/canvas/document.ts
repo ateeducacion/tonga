@@ -17,6 +17,8 @@ declare module 'fabric' {
     connectArrow?: boolean;
     /** A text written inside the shape with this id (see links.ts). */
     attachedTo?: string;
+    /** The text encoded by a QR code group (see qr.ts). */
+    qr?: string;
   }
   interface SerializedObjectProps {
     id?: string;
@@ -26,11 +28,12 @@ declare module 'fabric' {
     connectTo?: string;
     connectArrow?: boolean;
     attachedTo?: string;
+    qr?: string;
   }
 }
 
 // Serialized with every object (Fabric's documented custom-property hook).
-FabricObject.customProperties = ['id', 'name', 'assetSrc', 'connectFrom', 'connectTo', 'connectArrow', 'attachedTo'];
+FabricObject.customProperties = ['id', 'name', 'assetSrc', 'connectFrom', 'connectTo', 'connectArrow', 'attachedTo', 'qr'];
 // Fabric 7 default, stated explicitly: every position in Tonga is the object's centre.
 FabricObject.ownDefaults.originX = 'center';
 FabricObject.ownDefaults.originY = 'center';

@@ -5,6 +5,7 @@ Componentes de terceros que **se distribuyen** con Tonga (están dentro de `dist
 | Componente | Versión | Uso | Licencia | Origen |
 |---|---|---|---|---|
 | Fabric.js | 7.4.0 | Motor del lienzo (incluido en el bundle JS) | MIT | https://github.com/fabricjs/fabric.js |
+| uqr | 0.1.3 | Codificación de los códigos QR (`src/canvas/qr.ts`, incluido en el bundle JS) | MIT, © Project Nayuki y Anthony Fu | https://github.com/unjs/uqr |
 | Lucide | 1.50.0 (lucide-static) | Iconos de la interfaz copiados como SVG en `src/ui/icons.ts`; 143 iconos en la biblioteca «Iconos y símbolos» (`repositorios/iconos*/`, con `scripts/import-lucide-icons.mjs`: tamaño 256 px y trazo `#1f2937` en lugar de `currentColor`; cada fichero conserva su aviso de licencia) | ISC; parte derivada de Feather, MIT | https://github.com/lucide-icons/lucide |
 | Fuentes para el aula | Andika 7.000 (SIL, oficial y sin cambios); OpenDyslexic (repositorio oficial, commit `1824da5`, sin cambios); Atkinson Hyperlegible, Lexend, Patrick Hand y Playwrite ES de Fontsource 5.3.0 (subconjunto `latin`) | Ficheros WOFF2 en `src/fonts/`; se cargan al usarlas y van incrustadas en los SVG y paquetes `.elpx` exportados | SIL Open Font License 1.1 | https://software.sil.org/andika/ · https://github.com/antijingoist/opendyslexic · https://fontsource.org |
 | Primer Octicons | 19.38.0 | Icono `mark-github` en `src/ui/icons.ts` | MIT, © GitHub Inc. | https://github.com/primer/octicons |
@@ -94,6 +95,31 @@ This license becomes null and void if any of the above conditions are not met.
 DISCLAIMER
 
 THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.
+## uqr — MIT
+
+```
+MIT License
+
+Copyright (c) Project Nayuki
+Copyright (c) 2023 Anthony Fu <https://github.com/antfu>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
 
 ## Lucide (ISC) y Feather (MIT)

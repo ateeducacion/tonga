@@ -52,6 +52,7 @@ Dentro de `layers[].object`, dos propiedades propias de Tonga atan una capa a ot
 |---|---|---|
 | `connectFrom`, `connectTo`, `connectArrow` | un trazado (`path`) | Conector entre las capas `connectFrom` y `connectTo`, con punta de flecha si `connectArrow` es `true`. Tonga lo vuelve a dibujar cuando se mueven y lo borra si falta una de las dos. |
 | `attachedTo` | un texto (`text`) | Texto escrito dentro de la forma `attachedTo`: va en su centro y desaparece con ella. |
+| `qr` | un grupo (`group`) | Código QR: el texto o enlace que codifica. El grupo tiene un rectángulo (fondo) y un trazado (módulos); Tonga lo regenera al cambiar el enlace o los colores. Una versión anterior lo muestra como un grupo normal. |
 
 Sombra (`shadow`), discontinuo (`strokeDashArray`), degradado (`fill` con un `Gradient` lineal) y subrayado (`underline`) son propiedades normales de Fabric.
 
