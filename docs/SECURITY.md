@@ -43,7 +43,7 @@ Para Apache, lo mismo con `Header always set …`. Fabric aplica estilos en lín
 
 - Una sola dependencia de runtime: `fabric` (MIT), fijada a versión exacta.
 - `npm ci` usa el lockfile. Los scripts de instalación están limitados con `allowScripts`: solo `canvas` (binario precompilado para los tests), y nunca se distribuye.
-- `npm run audit` (CI y release) falla con vulnerabilidades altas o críticas. Dependabot actualiza npm y GitHub Actions cada semana. Los cambios mayores no se fusionan de forma automática.
+- `npm run audit` (CI y release) falla con vulnerabilidades altas o críticas. Dependabot actualiza npm, GitHub Actions y la imagen base de Docker cada semana. Los cambios mayores no se fusionan de forma automática.
 - Las actions van fijadas por SHA. El CI tiene `contents: read`; solo el job de despliegue de Pages tiene `pages: write`/`id-token: write`, y solo el de release tiene `contents: write`.
 - Pages despliega únicamente después de un CI correcto en un push a `main`. Un pull request nunca publica nada.
 - Cada release lleva su SBOM SPDX (`npm sbom`).
