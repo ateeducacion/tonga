@@ -563,3 +563,17 @@ test('a real right click keeps our menu open and never shows the browser menu', 
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
 });
+
+test('classroom fonts load from the app itself and travel inside an exported SVG', async ({ page }) => {
+  await newDrawing(page, 'Cuadrado');
+  await page.getByRole('button', { name: 'Añadir texto' }).click();
+  const font = inspector(page).getByLabel('Tipografía');
+  await expect(font.locator('optgroup')).toHaveCount(2);
+  await font.selectOption('Andika');
+  await expect.poll(() => page.evaluate(() => document.fonts.check('16px Andika'))).toBe(true);
+  await expect(font).toHaveValue('Andika');
+
+  const svg = (await exportAs(page, 'SVG')).bytes.toString('utf8');
+  expect(svg).toContain('font-family="Andika"');
+  expect(svg).toMatch(/@font-face \{ font-family: 'Andika'; font-weight: 400; src: url\('data:font\/woff2;base64,/);
+});

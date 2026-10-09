@@ -4,6 +4,7 @@
 // Slide payload: public/files/perm/idevices/base/slide/src/serializer.ts in the same repository.
 import { FabricImage, Group, type FabricObject, type StaticCanvas } from 'fabric';
 import { renderOffscreen, type SourceResolver } from '../canvas/document';
+import { embedFonts, usedFonts } from '../canvas/fonts';
 import type { Project } from '../project/schema';
 import { zip } from './zip';
 
@@ -173,6 +174,7 @@ async function toSlide(project: Project, resolve: SourceResolver): Promise<Slide
         return img.filters.length ? match : `<image${attrs} xlink:href="${ref(img)}"`;
       });
     }
+    svg = await embedFonts(svg, usedFonts(visible.layers.map((l) => l.object)));
     return { width, height, background, scene, svg, resources, screenshot: await screenshot(canvas, background) };
   } finally {
     await canvas.dispose();

@@ -4,6 +4,10 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Añadido
+
+- **Fuentes para el aula**: el desplegable «Tipografía» ofrece Andika y Playwrite ES (letra escolar), Atkinson Hyperlegible y Lexend (lectura fácil), OpenDyslexic y Patrick Hand (manuscrita). Van dentro de Tonga, con licencia libre (SIL OFL), sin pedir nada a servicios externos y también sin conexión. Un SVG o un paquete de eXeLearning exportado las lleva incrustadas. Idea de Alfredo Arnaiz Yanes.
+
 ## [2.3.6] - 2026-10-07
 
 ### Cambiado

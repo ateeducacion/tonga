@@ -2,13 +2,13 @@
 // nothing is selected). Rebuilt when the selection changes; otherwise only values are synced,
 // so typing in a field never loses focus.
 import { DEFAULT_SHADOW, GRID_SIZE, type AlignEdge, type Editor, type GradientDirection, type LineStyle, type SelectionInfo, type ShadowStyle } from '../canvas/editor';
+import { CLASSROOM_FONTS, SYSTEM_FONTS } from '../canvas/fonts';
 import { NO_ADJUSTMENTS, NO_CROP, type ImageAdjustments, type ImageCrop } from '../canvas/image';
 import { HEX_COLOR } from '../project/schema';
 import { putAsset } from '../persistence/store';
 import { announce, byId, h, iconButton, toast } from './dom';
 import { icon, type IconName } from './icons';
 
-const FONTS = ['Arial', 'Verdana', 'Georgia', 'Times New Roman', 'Courier New', 'Trebuchet MS', 'Comic Sans MS'];
 /** One-tap colours; any other colour comes from the browser's picker or the HEX field. */
 const PALETTE: [string, string][] = [
   ['#1f2937', 'Negro'], ['#ffffff', 'Blanco'], ['#f28c28', 'Naranja'], ['#e11d48', 'Rojo'],
@@ -449,7 +449,9 @@ function textFields(editor: Editor, key: (p: string) => string): HTMLElement {
   const t = h('div', { class: 'inspector' },
     h('label', {}, 'Texto', h('textarea', { name: 'text', rows: 2 })),
     h('div', { class: 'font-row' },
-      h('label', {}, 'Tipografía', h('select', { name: 'fontFamily' }, ...FONTS.map((f) => h('option', { value: f }, f)))),
+      h('label', {}, 'Tipografía', h('select', { name: 'fontFamily' },
+        h('optgroup', { label: 'Para el aula' }, ...CLASSROOM_FONTS.map((f) => h('option', { value: f.family }, f.family))),
+        h('optgroup', { label: 'Del sistema' }, ...SYSTEM_FONTS.map((f) => h('option', { value: f }, f))))),
       h('div', { class: 'stepper', role: 'group', 'aria-label': 'Tamaño de la letra' }, minus, size, plus)),
     h('div', { class: 'toggles' },
       h('div', { class: 'segmented', role: 'group', 'aria-label': 'Estilo' },
@@ -462,7 +464,7 @@ function textFields(editor: Editor, key: (p: string) => string): HTMLElement {
         alignBtn('right', 'textAlignEnd', 'Alinear el texto a la derecha'))),
     colour('Color del texto', 'fill', (c) => editor.setProps({ fill: c }, key('fill'))));
   t.querySelector('textarea')?.addEventListener('input', (e) => editor.setProps({ text: (e.target as HTMLTextAreaElement).value }, key('text')));
-  bind(t, 'fontFamily', (v) => editor.setProps({ fontFamily: v }), 'change');
+  bind(t, 'fontFamily', (v) => void editor.setFont(v), 'change');
   bind(t, 'fontSize', (v) => Number(v) > 0 && editor.setProps({ fontSize: Number(v) }, key('fontSize')));
   return t;
 }
