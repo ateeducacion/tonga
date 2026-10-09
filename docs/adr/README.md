@@ -11,5 +11,6 @@
 | [0007](0007-snapshot-history.md) | Historial con snapshots del documento |
 | [0008](0008-pwa.md) | PWA con service worker propio |
 | [0009](0009-ai-background-removal.md) | Propuesta: quitar el fondo de fotos con un modelo de segmentación |
+| [0010](0010-qr-uqr.md) | Códigos QR con `uqr` |
 
 Formato: contexto, decisión, alternativas y consecuencias. Las versiones y licencias se comprobaron el 2026-10-02 en npm, en la documentación oficial, en Context7 y en GitHub Advisories.
