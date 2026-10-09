@@ -3,6 +3,7 @@
 import { FabricImage, FabricObject, StaticCanvas, util } from 'fabric';
 import type { Background, Layer, LayerType, Project } from '../project/schema';
 import { newProject } from '../project/schema';
+import { loadFonts, usedFonts } from './fonts';
 
 declare module 'fabric' {
   interface FabricObject {
@@ -109,6 +110,7 @@ export function readProject(canvas: StaticCanvas, size: { width: number; height:
 
 /** Replaces the canvas content with the project's layers and background (zoom untouched). */
 export async function writeProject(canvas: StaticCanvas, project: Project, resolve: SourceResolver): Promise<void> {
+  await loadFonts(usedFonts(project.layers.map((l) => l.object)));
   const prepared = await Promise.all(project.layers.map((l) => resolveSources(l.object, resolve)));
   const objects = await util.enlivenObjects<FabricObject>(prepared);
   canvas.remove(...canvas.getObjects());

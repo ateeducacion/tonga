@@ -13,7 +13,7 @@ Este documento separa **software**, **contenidos gráficos**, **iconos**, **fuen
 | Logo e iconos PWA (`public/favicon.svg`, `public/icons/`) | Igual que el código | Dibujados para Tonga 2.0 | — |
 | Fabric.js 7.4.0 (en el bundle) | MIT | `node_modules/fabric/LICENSE` | Atribuido en `THIRD_PARTY_NOTICES.md` |
 | Ficheros de eXeLearning (`vendor/exelearning/`) | `content.dtd`: AGPL-3.0-or-later; estilo `base`: CC BY-SA 4.0 | `LICENSE` y `config.xml` del estilo en el repositorio de eXeLearning | Copiados sin cambios para la exportación `.elpx`; atribuidos en `THIRD_PARTY_NOTICES.md` |
-| Fuentes | — | Tonga 2.0 usa fuentes del sistema; no distribuye ninguna | — |
+| Fuentes para el aula (`src/fonts/`) | SIL Open Font License 1.1 | Licencia y copyright de cada fuente en su origen oficial (Andika, OpenDyslexic) o en Fontsource 5.3.0. Andika y OpenDyslexic tienen nombres reservados, así que se distribuyen sin modificar; las demás, como subconjunto `latin`. Se sirven desde la propia app, nunca desde un servicio externo | Atribuido en `THIRD_PARTY_NOTICES.md` (con el texto de la OFL, que viaja en `dist/`) y en `REUSE.toml` |
 | Sonidos | — | Tonga 2.0 no distribuye sonidos (el `button-22.mp3` de Tonga 1 queda solo en `upstream`) | — |
 | Documentación (`*.md`, `docs/`, `analysis/`) | Igual que el código | No hay una licencia de documentación declarada | **Duda** |
 | Skills para agentes (`.agents/`, `.claude/`) | MIT o Apache-2.0 según el origen | `.agents/upstream-skills.txt`, `.agents/licenses/` | Verbatim desde su origen |

@@ -2,6 +2,7 @@
 // document, so the live canvas (zoom, selection) is never touched (RULE-102).
 import type { StaticCanvas } from 'fabric';
 import { renderOffscreen, type SourceResolver } from '../canvas/document';
+import { embedFonts, usedFonts } from '../canvas/fonts';
 import type { Background, Project } from '../project/schema';
 import { exportElpx } from './elpx';
 import { jpegToPdf } from './pdf';
@@ -70,7 +71,8 @@ export async function exportProject(project: Project, opts: ExportOptions, resol
     const canvas = await renderOffscreen(doc, resolveInline);
     try {
       const { width, height } = doc.canvas;
-      return new Blob([canvas.toSVG({ width: `${width}`, height: `${height}`, viewBox: { x: 0, y: 0, width, height } })], { type: MIME.svg });
+      const svg = canvas.toSVG({ width: `${width}`, height: `${height}`, viewBox: { x: 0, y: 0, width, height } });
+      return new Blob([await embedFonts(svg, usedFonts(doc.layers.map((l) => l.object)))], { type: MIME.svg });
     } finally {
       await canvas.dispose();
     }

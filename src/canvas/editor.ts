@@ -9,6 +9,7 @@ import type { Background, Layer, LayerType, Project } from '../project/schema';
 import { newProject, parseProject, serializeProject } from '../project/schema';
 import { applyBackground, layerType, readProject, setLocked, writeProject, type SourceResolver } from './document';
 import './controls';
+import { loadFonts } from './fonts';
 import { makeQr, readQr, type QrStyle } from './qr';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
 import { snapToGrid, snapToObjects, type Guide, type SnapResult, type Stuck } from './snap';
@@ -871,6 +872,13 @@ export class Editor {
     }
     this.canvas.requestRenderAll();
     this.commit(key);
+  }
+
+  /** A font for the selected texts, once it has loaded (classroom fonts load on first use). */
+  async setFont(family: string): Promise<void> {
+    await loadFonts([family]);
+    for (const o of this.selected()) if (o instanceof Textbox) o.initDimensions();
+    this.setProps({ fontFamily: family });
   }
 
   /** Solid, dashed or dotted stroke on every selected object. Remembered for new ones. */
