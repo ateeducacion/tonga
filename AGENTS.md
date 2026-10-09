@@ -13,7 +13,7 @@ Tonga es una aplicación de dibujo estática para el aula: TypeScript, HTML y CS
 
 ## Tecnologías permitidas
 
-TypeScript, HTML semántico, CSS con custom properties, Fabric.js (única dependencia de runtime), Vite, Vitest, Playwright y ESLint.
+TypeScript, HTML semántico, CSS con custom properties, Fabric.js y `uqr` (las únicas dependencias de runtime; ver ADR 0010), Vite, Vitest, Playwright y ESLint.
 
 No se introduce React, Vue, Angular, Svelte, Redux ni otro framework sin un ADR en `docs/adr/` que demuestre que simplifica el producto. Tampoco jQuery, axios, lodash, moment, Bootstrap JS ni fuentes de iconos completas. Una dependencia nueva tiene que quitar más complejidad de la que añade; antes de añadirla se consulta su documentación oficial (y Context7), su licencia, su mantenimiento y sus advisories.
 

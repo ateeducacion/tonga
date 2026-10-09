@@ -4,6 +4,10 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+### Añadido
+
+- **Códigos QR**: el botón «Añadir código QR» de la barra lateral pide un enlace (o cualquier texto) y pone su código QR en el centro del lienzo, listo para moverlo y escalarlo sin perder nitidez. Al seleccionarlo, el panel deja cambiar el enlace, el color del código y el fondo (también transparente). Idea de Alfredo Arnaiz Yanes.
+
 ## [2.3.6] - 2026-10-07
 
 ### Cambiado

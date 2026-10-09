@@ -563,3 +563,27 @@ test('a real right click keeps our menu open and never shows the browser menu', 
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
 });
+
+test('generates a QR code from a link, then changes its link and colours from the inspector', async ({ page }) => {
+  await newDrawing(page);
+  await page.getByRole('button', { name: 'Añadir código QR' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Generar código QR' });
+  await dialog.getByLabel('Enlace o texto').fill('https://ateeducacion.github.io/tonga/');
+  await dialog.getByRole('button', { name: 'Generar' }).click();
+  await expect(dialog).toBeHidden();
+  await page.getByRole('tab', { name: /Capas/ }).click();
+  await expect(layers(page)).toHaveText(['Código QR 1']);
+  await page.getByRole('tab', { name: 'Propiedades' }).click();
+  const link = inspector(page).getByLabel('Enlace o texto');
+  await expect(link).toHaveValue('https://ateeducacion.github.io/tonga/');
+  await expect(inspector(page).getByRole('button', { name: 'Desagrupar' })).toHaveCount(0);
+
+  await link.fill('https://www.gobiernodecanarias.org/educacion/');
+  await link.press('Enter');
+  await inspector(page).getByRole('group', { name: 'Color del código' }).getByRole('button', { name: 'Azul' }).click();
+  await inspector(page).getByRole('group', { name: 'Fondo del código' }).getByRole('button', { name: 'Transparente' }).click();
+  await expect(link).toHaveValue('https://www.gobiernodecanarias.org/educacion/');
+  await expect(inspector(page).getByRole('group', { name: 'Color del código' }).getByRole('button', { name: 'Azul' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(inspector(page).getByRole('group', { name: 'Fondo del código' }).getByRole('button', { name: 'Transparente' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#layers-count')).toHaveText('1');
+});
