@@ -83,10 +83,10 @@ Cada release publica `ghcr.io/ateeducacion/tonga:<versión>` (y `latest`): nginx
 docker run -d -p 8080:80 \
   -e SITE_URL=https://ejemplo.org/tonga/ \
   -e OG_IMAGE_URL=https://ejemplo.org/tonga/og-image.jpg \
-  ghcr.io/ateeducacion/tonga:2.3.6
+  ghcr.io/ateeducacion/tonga:latest
 ```
 
-`OG_IMAGE_URL` es opcional (por defecto, `${SITE_URL}og-image.jpg`). Para construirla en local: `npm run build && docker build -t tonga .`
+`latest` apunta a la última release; para fijar una versión, usa su número (`:2.3.6`). `OG_IMAGE_URL` es opcional (por defecto, `${SITE_URL}og-image.jpg`). La imagen sirve la app con las cabeceras de [docs/SECURITY.md](docs/SECURITY.md) (CSP estricta, `nosniff`, etc.) y caché larga solo para `assets/`. Para construirla en local: `npm run build && docker build -t tonga .`
 
 ## Métricas
 
