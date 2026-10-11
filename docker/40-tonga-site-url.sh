@@ -1,9 +1,9 @@
 #!/bin/sh
 # Rewrites the absolute URLs of the link previews (canonical, og:url, og:image) in index.html.
-#   SITE_URL      public URL of the app, ending in / (default: the GitHub Pages demo)
+#   SITE_URL      public URL of the app, ending in / (default: the Consejería deployment)
 #   OG_IMAGE_URL  preview image (default: ${SITE_URL}og-image.jpg)
 set -eu
-default='https://ateeducacion.github.io/tonga/'
+default='https://www3.gobiernodecanarias.org/medusa/apps/tongapp/'
 html=/usr/share/nginx/html/index.html
 [ -n "${SITE_URL:-}${OG_IMAGE_URL:-}" ] || exit 0
 site="${SITE_URL:-$default}"
