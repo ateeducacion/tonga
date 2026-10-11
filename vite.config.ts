@@ -23,8 +23,9 @@ function serviceWorker(): Plugin {
 }
 
 // Public URL of the deployment: link previews (WhatsApp, social networks) need absolute URLs.
+// Defaults to the Consejería deployment (the release ZIP); Pages builds with its own URL.
 // Override for other deployments: VITE_SITE_URL=https://example.org/tonga/ npm run build
-process.env.VITE_SITE_URL ??= 'https://ateeducacion.github.io/tonga/';
+process.env.VITE_SITE_URL ??= 'https://www3.gobiernodecanarias.org/medusa/apps/tongapp/';
 
 /**
  * The version shown in the app is package.json's: the release commit bumps it, so main is
