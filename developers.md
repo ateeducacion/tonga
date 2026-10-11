@@ -73,7 +73,7 @@ Con la etiqueta, `release.yml` comprueba que coincide con `package.json`, repite
 npm run build && node scripts/make-og-image.mjs
 ```
 
-Las URL de las vistas previas tienen que ser absolutas; salen de `VITE_SITE_URL` (por defecto, la demo de GitHub Pages; ver `vite.config.ts`). Para otro despliegue: `VITE_SITE_URL=https://ejemplo.org/tonga/ npm run build`. WhatsApp guarda la vista previa en caché: para comprobar un cambio, comparte la URL con un parámetro nuevo (por ejemplo `?v=2`).
+Las URL de las vistas previas tienen que ser absolutas; salen de `VITE_SITE_URL` (por defecto, el despliegue de la Consejería, <https://www3.gobiernodecanarias.org/medusa/apps/tongapp/>; GitHub Pages construye con la suya; ver `vite.config.ts`). Para otro despliegue: `VITE_SITE_URL=https://ejemplo.org/tonga/ npm run build`. WhatsApp guarda la vista previa en caché: para comprobar un cambio, comparte la URL con un parámetro nuevo (por ejemplo `?v=2`).
 
 ### Imagen Docker
 
