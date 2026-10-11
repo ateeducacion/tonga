@@ -4,6 +4,16 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.8] - 2026-10-11
+
+### Añadido
+
+- **Release en GitLab**: cada versión publicada en GitHub aparece también en la página de releases del proyecto en GitLab, con el enlace al ZIP listo para desplegar.
+
+### Cambiado
+
+- **Vista previa al compartir**: el ZIP de la release y la imagen Docker apuntan por defecto al despliegue de la Consejería (<https://www3.gobiernodecanarias.org/medusa/apps/tongapp/>), que es donde lo instala CAU_CE. GitHub Pages sigue usando su propia dirección.
+
 ## [2.3.7] - 2026-10-10
 
 ### Añadido
