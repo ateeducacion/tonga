@@ -4,6 +4,12 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.8] - 2026-10-11
+
+### Añadido
+
+- **Release en GitLab**: cada versión publicada en GitHub aparece también en la página de releases del proyecto en GitLab, con el enlace al ZIP listo para desplegar.
+
 ## [2.3.7] - 2026-10-10
 
 ### Añadido
