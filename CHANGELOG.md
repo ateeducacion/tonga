@@ -4,6 +4,12 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.9] - 2026-10-14
+
+### Añadido
+
+- **Ajustar lienzo a la selección**: nueva opción del menú contextual que recorta (o amplía) el lienzo al tamaño exacto de las capas seleccionadas; el resto conserva su posición relativa y se puede deshacer (#69).
+
 ## [2.3.8] - 2026-10-11
 
 ### Añadido
