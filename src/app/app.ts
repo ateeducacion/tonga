@@ -506,6 +506,7 @@ export class App {
         : { label: 'Agrupar', icon: 'group', disabled: selection.length < 2, run: run(() => e.group()) },
       { label: 'Bloquear', icon: 'lock', disabled: none, run: run(() => selection.forEach((o) => e.setLocked(o.id ?? '', true))) },
       { label: 'Seleccionar todo', icon: 'mousePointer2', shortcut: `${mod}A`, run: run(() => e.selectAll()) },
+      { label: 'Ajustar lienzo a la selección', icon: 'crop', disabled: none, run: run(() => e.fitCanvasToSelection().then(() => this.fitIfNeeded())) },
       'separator',
       { label: 'Borrar', icon: 'trash2', shortcut: 'Supr', danger: true, disabled: none, run: run(() => e.removeSelected()) },
     ];

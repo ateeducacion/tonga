@@ -296,6 +296,31 @@ describe('Editor', () => {
     expect(editor.size).toEqual({ width: 1000, height: 1000 });
   });
 
+  it('fits the canvas to the selection, keeping the rest in place relative to it (#69)', async () => {
+    editor.addShape('rect'); // 152 x 152 with its stroke, at the centre (400, 300)
+    editor.addShape('rect');
+    const [a, b] = editor.layers().map((l) => l.id);
+    editor.select([b ?? '']);
+    editor.setProps({ left: 600, top: 400 });
+    editor.select([a ?? '', b ?? '']);
+    await editor.fitCanvasToSelection();
+    // Bounds: 324..676 x 224..476, so 352 x 252 with the objects moved by (-324, -224).
+    expect(editor.size).toEqual({ width: 352, height: 252 });
+    expect(editor.toProject().layers.map((l) => [l.object.left, l.object.top])).toEqual([[276, 176], [76, 76]]);
+    expect(editor.selected()).toHaveLength(2);
+    await editor.undo();
+    expect(editor.size).toEqual({ width: 800, height: 600 });
+  });
+
+  it('does nothing without a selection and never shrinks the canvas below 16 px', async () => {
+    await editor.fitCanvasToSelection();
+    expect(editor.size).toEqual({ width: 800, height: 600 });
+    editor.addShape('line');
+    editor.setSize(100, 1);
+    await editor.fitCanvasToSelection();
+    expect(editor.size.height).toBe(16);
+  });
+
   it('a colour background is part of the document and undoable', async () => {
     await editor.setBackground({ kind: 'color', color: '#ffffff' });
     expect(editor.toProject().canvas.background).toEqual({ kind: 'color', color: '#ffffff' });
