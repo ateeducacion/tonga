@@ -528,6 +528,19 @@ test('right-click menu on the canvas; also with the Menu key (keyboard)', async 
   await expect(layers(page)).toHaveCount(3);
 });
 
+test('fits the canvas to the selected layer from the right-click menu (#69)', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  const width = await inspector(page).getByLabel('Ancho', { exact: true }).inputValue();
+  const height = await inspector(page).getByLabel('Alto', { exact: true }).inputValue();
+  await page.locator('body').press('Shift+F10');
+  await page.getByRole('menu', { name: 'Acciones' }).getByRole('menuitem', { name: /Ajustar lienzo a la selección/ }).click();
+  await expect(inspector(page).getByLabel('X', { exact: true })).toHaveValue(String(Math.round(Number(width) / 2)));
+  await page.keyboard.press('Escape');
+  await expect(inspector(page).getByLabel('Ancho del lienzo')).toHaveValue(width);
+  await expect(inspector(page).getByLabel('Alto del lienzo')).toHaveValue(height);
+});
+
 test('a real right click keeps our menu open and never shows the browser menu', async ({ page }) => {
   await newDrawing(page);
   await page.evaluate(() => {

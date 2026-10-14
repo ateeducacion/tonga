@@ -445,8 +445,26 @@ export class Editor {
   }
 
   async resizeCanvas(width: number, height: number): Promise<void> {
-    const dx = (width - this.width) / 2;
-    const dy = (height - this.height) / 2;
+    await this.setCanvasSize(width, height, (width - this.width) / 2, (height - this.height) / 2);
+  }
+
+  /** Crops (or grows) the canvas to the selection's bounding box; every object keeps its place relative to it. */
+  async fitCanvasToSelection(): Promise<void> {
+    const objs = this.selected();
+    if (objs.length === 0) return;
+    const ids = objs.map((o) => o.id ?? '');
+    const box = boundsOf(objs);
+    // Same limits as the inspector's size fields; a thin line stays centred in the minimum.
+    const fit = (n: number) => Math.min(8192, Math.max(16, Math.round(n)));
+    const width = fit(box.width);
+    const height = fit(box.height);
+    // Objects inside a multiple selection are positioned relative to it: release them first.
+    this.canvas.discardActiveObject();
+    await this.setCanvasSize(width, height, (width - box.width) / 2 - box.left, (height - box.height) / 2 - box.top);
+    this.select(ids);
+  }
+
+  private async setCanvasSize(width: number, height: number, dx: number, dy: number): Promise<void> {
     for (const o of this.canvas.getObjects()) o.set({ left: o.left + dx, top: o.top + dy }).setCoords();
     this.width = width;
     this.height = height;
