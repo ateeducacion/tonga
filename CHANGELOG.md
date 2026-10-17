@@ -4,6 +4,16 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.10] - 2026-10-17
+
+### Añadido
+
+- **Monitorización de errores**: la versión publicada en GitHub Pages envía a Sentry (región UE) los errores de JavaScript, sin datos personales, sin seguimiento de sesiones ni grabaciones; los sourcemaps se suben a Sentry y no se publican (#74).
+
+### Cambiado
+
+- Actualización de dependencias de GitHub Actions y de desarrollo (#72, #73).
+
 ## [2.3.9] - 2026-10-14
 
 ### Añadido
