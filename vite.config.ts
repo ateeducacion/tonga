@@ -56,6 +56,8 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     target: 'es2022',
+    // Pages deploy only: hidden maps for Sentry, uploaded and deleted before publishing.
+    sourcemap: process.env.SOURCEMAP === 'hidden' ? 'hidden' : false,
     // The eXeLearning files are fetched and zipped as they are: never inline them as data: URLs.
     assetsInlineLimit: (file) => (file.includes('/vendor/exelearning/') ? false : undefined),
   },
