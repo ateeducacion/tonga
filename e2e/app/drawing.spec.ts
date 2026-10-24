@@ -313,7 +313,7 @@ test('arrow lines take a dashed or dotted style; three objects spread evenly', a
   await addShape(page, 'línea con flecha');
   await expect(layers(page)).toHaveText(['Línea con flecha 1']);
   await expect(inspector(page).getByRole('group', { name: 'Relleno' })).toHaveCount(0);
-  const dashed = inspector(page).getByRole('button', { name: 'Línea discontinua' });
+  const dashed = inspector(page).getByRole('button', { name: 'Línea de guiones' });
   await dashed.click();
   await expect(dashed).toHaveAttribute('aria-pressed', 'true');
   await addShape(page, 'base de datos');
