@@ -4,6 +4,20 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.11] - 2026-10-26
+
+### Añadido
+
+- **Pictogramas de las aulas multisensoriales** en la biblioteca: nueva sección «Aulas multisensoriales» con los 8 pictogramas del Área de Tecnología Educativa (cañón y servidor, Button 6, tubo de burbujas, fibra óptica, Line LED, pompas de jabón, Proximity y elementos pasivos), cada uno con fondo de color y sin fondo (#78, #79).
+
+### Corregido
+
+- El nombre accesible del botón de línea de guiones incluye su texto visible («Línea de guiones»), como pide WCAG 2.5.3 (#77).
+
+### Cambiado
+
+- Actualización de dependencias de desarrollo (#76).
+
 ## [2.3.10] - 2026-10-17
 
 ### Añadido
