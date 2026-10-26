@@ -77,3 +77,6 @@ iconosciencia|Ciencia y naturaleza
 iconossenales|Flechas y señales
 iconosvida|Vida cotidiana
 iconostecnologia|Tecnología, música y ocio
+
+tongaappcabecera|Aulas multisensoriales
+aulamultisensorial|Pictogramas
