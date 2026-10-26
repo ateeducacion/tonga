@@ -56,6 +56,17 @@ describe('catalogue builder (RULE-105/044/112)', () => {
     expect(icons.find((a: { id: string }) => a.id === 'iconosescuela/school.svg')).toMatchObject({ title: 'Colegio' });
   });
 
+  it('offers the multisensory classroom pictograms, with and without background (#78)', () => {
+    const { catalog: real } = buildCatalog();
+    expect(real.categories).toContainEqual(expect.objectContaining({ id: 'aulas-multisensoriales', title: 'Aulas multisensoriales' }));
+    expect(real.collections.find((c: { id: string }) => c.id === 'aulamultisensorial')).toMatchObject({ category: 'aulas-multisensoriales' });
+    const pictos = real.assets.filter((a: { collection: string }) => a.collection === 'aulamultisensorial');
+    expect(pictos).toHaveLength(16);
+    for (const a of pictos) expect(a).toMatchObject({ background: false, license: 'CC-BY-NC-SA-4.0', creator: 'Gobierno de Canarias' });
+    expect(pictos.find((a: { id: string }) => a.id === 'aulamultisensorial/fibra_optica.png')).toMatchObject({ title: 'Fibra óptica' });
+    expect(pictos.find((a: { id: string }) => a.id === 'aulamultisensorial/fibra_optica_sin_fondo.png')).toMatchObject({ title: 'Fibra óptica (sin fondo)' });
+  });
+
   it('fails on a rights.json without licence, author or source, or that is not JSON', () => {
     const root = mkdtempSync(join(tmpdir(), 'catalog-'));
     writeFileSync(join(root, 'lista.txt'), 'tongaappcabecera|Iconos\nbad|Mal\nbroken|Roto\n');

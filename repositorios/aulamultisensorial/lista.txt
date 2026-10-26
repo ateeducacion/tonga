@@ -1,0 +1,16 @@
+canon_pc_servidor_tablet.png|Cañón, PC, servidor, tablet
+button_6.png|Button 6
+tubo_burbujas.png|Tubo de burbujas
+fibra_optica.png|Fibra óptica
+line_led.png|Line LED
+pompas_jabon.png|Pompas de jabón
+proximity.png|Proximity
+elementos_pasivos.png|Elementos pasivos
+canon_pc_servidor_tablet_sin_fondo.png|Cañón, PC, servidor, tablet (sin fondo)
+button_6_sin_fondo.png|Button 6 (sin fondo)
+tubo_burbujas_sin_fondo.png|Tubo de burbujas (sin fondo)
+fibra_optica_sin_fondo.png|Fibra óptica (sin fondo)
+line_led_sin_fondo.png|Line LED (sin fondo)
+pompas_jabon_sin_fondo.png|Pompas de jabón (sin fondo)
+proximity_sin_fondo.png|Proximity (sin fondo)
+elementos_pasivos_sin_fondo.png|Elementos pasivos (sin fondo)
