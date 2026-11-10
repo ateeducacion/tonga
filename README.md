@@ -33,6 +33,9 @@ npm run build                 # genera dist/
 cp -R dist/* /var/www/tonga/  # cualquier servidor web estático
 ```
 
+> [!WARNING]
+> Se publica **el contenido de `dist/`**, nunca el repositorio. El `index.html` de la raíz del repositorio es el de desarrollo: carga `src/main.ts`, que el navegador no ejecuta (muchos servidores lo sirven como vídeo `video/mp2t`), y no tiene al lado `theme-init.js`, `favicon.svg` ni `manifest.webmanifest`, que están en `public/`. Si en la consola aparecen 404 de esos ficheros o una petición a `src/main.ts`, se ha subido el código fuente en vez del build.
+
 Funciona en la raíz de un dominio o en un subdirectorio (todas las rutas son relativas), en GitHub Pages, Nginx o Apache. Las cabeceras de seguridad recomendadas están en [docs/SECURITY.md](docs/SECURITY.md).
 
 Cada etiqueta `v*` publica en *Releases* un ZIP de `dist/` listo para desplegar, con su SBOM SPDX.
