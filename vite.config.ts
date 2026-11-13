@@ -63,7 +63,7 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    // Let jsdom decode <img> sources (with node-canvas), so image layers can be tested.
+    // Let jsdom decode <img> sources (with @napi-rs/canvas since jsdom 31), so image layers can be tested.
     environmentOptions: { jsdom: { resources: 'usable' } },
     include: ['test/**/*.test.ts'],
     // Vitest empties CSS by default, even ?raw imports; the eXeLearning theme must arrive intact.
