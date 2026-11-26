@@ -712,11 +712,12 @@ h3 {
 
 .shapes-grid {
   display: grid;
-  grid-template-columns: repeat(4, auto);
+  grid-template-columns: repeat(3, auto);
   gap: var(--space-1);
 }
 
-.shapes-section:not(:first-child) .shapes-grid {
+/* «Flechas» and «Bocadillos» (2nd and 4th) are short: two columns. */
+.shapes-section:nth-child(2n) .shapes-grid {
   grid-template-columns: repeat(2, auto);
 }
 
@@ -730,7 +731,7 @@ h3 {
     border-left: 0;
   }
 
-  .shapes-section:not(:first-child) .shapes-grid {
+  .shapes-section:nth-child(n) .shapes-grid {
     grid-template-columns: repeat(4, auto);
   }
 }
