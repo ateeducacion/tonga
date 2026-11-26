@@ -1,6 +1,6 @@
 // «Formas» menu: a native popover with the predefined shapes, grouped as in eXeLearning. Each
 // button carries data-add, so the app wires it like any other «Añadir …» button; the ready-made
-// diagrams (Venn, timeline…), at the end of «Diagramas», carry data-diagram instead.
+// diagrams (Venn, timeline…), in their own «Esquemas» section, carry data-diagram instead.
 import { SHAPES, type ShapeGroup } from '../canvas/shapes';
 import { DIAGRAMS } from '../canvas/templates';
 import { byId, h } from './dom';
@@ -19,20 +19,17 @@ function preview(d: string): SVGSVGElement {
 export function setupShapesMenu(): void {
   const menu = byId('shapes-menu');
   const groups = [...new Set(SHAPES.map((s) => s.group))] as ShapeGroup[];
+  const section = (title: string, buttons: HTMLButtonElement[]) =>
+    h('section', { class: 'shapes-section' }, h('h3', { class: 'shapes-title' }, title), h('div', { class: 'shapes-grid' }, ...buttons));
+  const button = (data: string, kind: string, label: string, d: string) => {
+    const b = h('button', { type: 'button', class: 'tool', [data]: kind, 'aria-label': `Añadir ${label}`, title: label });
+    b.append(preview(d));
+    b.addEventListener('click', () => menu.hidePopover());
+    return b;
+  };
   menu.replaceChildren(
-    ...groups.map((group) => {
-      const title = h('h3', { class: 'shapes-title' }, group);
-      const grid = h('div', { class: 'shapes-grid' });
-      const button = (data: string, kind: string, label: string, d: string) => {
-        const b = h('button', { type: 'button', class: 'tool', [data]: kind, 'aria-label': `Añadir ${label}`, title: label });
-        b.append(preview(d));
-        b.addEventListener('click', () => menu.hidePopover());
-        grid.append(b);
-      };
-      for (const s of SHAPES.filter((x) => x.group === group)) button('data-add', s.kind, s.label.toLowerCase(), s.d);
-      if (group === 'Diagramas') for (const d of DIAGRAMS) button('data-diagram', d.kind, d.label, d.d);
-      return h('section', { class: 'shapes-section' }, title, grid);
-    }),
+    ...groups.map((group) => section(group, SHAPES.filter((x) => x.group === group).map((s) => button('data-add', s.kind, s.label.toLowerCase(), s.d)))),
+    section('Esquemas', DIAGRAMS.map((d) => button('data-diagram', d.kind, d.label, d.d))),
   );
   // Next to its button: to the right of the side toolbar, above the bottom one on small screens.
   menu.addEventListener('toggle', (e) => {
