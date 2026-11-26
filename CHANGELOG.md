@@ -4,9 +4,11 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.13] - 2026-11-26
+
 ### Cambiado
 
-- Los diagramas prediseñados (mapa conceptual, Venn, línea temporal, ejes, ciclo y organigrama) tienen su propia sección, «Esquemas», en el menú Formas; «Diagramas» se queda con las piezas sueltas (inicio o fin, documento, base de datos, llave y corchete).
+- Los diagramas prediseñados (mapa conceptual, Venn, línea temporal, ejes, ciclo y organigrama) tienen su propia sección, «Esquemas», en el menú Formas; «Diagramas» se queda con las piezas sueltas (inicio o fin, documento, base de datos, llave y corchete) (#92).
 
 ## [2.3.12] - 2026-11-26
 
