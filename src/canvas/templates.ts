@@ -1,5 +1,5 @@
 // Starting points for classroom drawings («Nuevo → Plantilla») and the ready-made diagrams of
-// «Formas → Diagramas». Each one is built from the same pieces the user has (shapes, text inside
+// «Formas → Esquemas». Each one is built from the same pieces the user has (shapes, text inside
 // shapes, connectors), laid out in proportion to its box, so everything stays editable.
 import { Ellipse, FabricImage, Line, Path, Rect, StaticCanvas, Textbox, type FabricObject } from 'fabric';
 import type { Background, Project } from '../project/schema';
