@@ -1,6 +1,6 @@
 // Wires the UI to the editor: tools, dialogs, shortcuts, zoom, import/export, autosave.
 import { Editor, type ShapeKind } from '../canvas/editor';
-import { buildTemplate, TEMPLATES } from '../canvas/templates';
+import { buildTemplate, DIAGRAMS, TEMPLATES } from '../canvas/templates';
 import type { CatalogAsset } from '../assets/catalog';
 import { resolveSource, resolveToDataUrl } from '../assets/sources';
 import { APP_BUILD, APP_VERSION } from '../config';
@@ -298,6 +298,15 @@ export class App {
         if (kind === 'text') this.editor.addText();
         else this.editor.addShape(kind);
         announce(`${b.getAttribute('aria-label')?.replace('Añadir ', '') ?? ''} añadido en el centro del lienzo`);
+      });
+    }
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-diagram]')) {
+      b.addEventListener('click', () => {
+        this.setTool('select');
+        // The buttons are made from DIAGRAMS, so the kind is always there.
+        const diagram = DIAGRAMS.find((d) => d.kind === b.dataset.diagram) as (typeof DIAGRAMS)[number];
+        this.editor.addDiagram(diagram.kind);
+        announce(`${diagram.label} añadido en el centro del lienzo`);
       });
     }
   }

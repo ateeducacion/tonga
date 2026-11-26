@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Editor } from '../src/canvas/editor';
-import { buildTemplate, TEMPLATES } from '../src/canvas/templates';
+import { buildTemplate, DIAGRAMS, TEMPLATES } from '../src/canvas/templates';
 import { parseProject, serializeProject } from '../src/project/schema';
 
 const SIZES: [number, number][] = [[1123, 794], [794, 1123], [1920, 1080]];
@@ -38,16 +38,66 @@ describe('templates', () => {
     }
   });
 
-  it('opens in the editor with its ties working, as a fresh document', async () => {
+  it('a template opens in the editor as a fresh document', async () => {
     document.body.innerHTML = '<canvas id="c"></canvas>';
     const editor = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
-    await editor.open(buildTemplate('concept-map', 1123, 794, { kind: 'transparent' }));
+    await editor.open(buildTemplate('storyboard', 1123, 794, { kind: 'transparent' }));
     expect(editor.canUndo).toBe(false);
-    const before = serializeProject(editor.toProject());
-    editor.commit(); // re-drawing the ties changes nothing: they were built in place
-    expect(serializeProject(editor.toProject())).toBe(before);
+  });
+
+  it('a diagram keeps its ties working: deleting a shape takes its connectors', async () => {
+    document.body.innerHTML = '<canvas id="c"></canvas>';
+    const editor = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
+    await editor.open(buildTemplate('comic', 1123, 794, { kind: 'transparent' }));
+    editor.addDiagram('concept-map');
+    expect(editor.layers().filter((l) => l.name === 'Conector')).toHaveLength(4);
     editor.select([editor.layers().find((l) => l.name === 'Idea principal')?.id ?? '']);
     editor.removeSelected();
-    expect(editor.layers().filter((l) => l.name === 'Conector')).toHaveLength(0); // its connectors went with it
+    expect(editor.layers().filter((l) => l.name === 'Conector')).toHaveLength(0);
+  });
+
+  it('«Nuevo» offers only the whole-page templates; the diagrams live in «Formas»', () => {
+    expect(TEMPLATES.map((t) => t.kind)).toEqual(['cover-panel', 'cover-band', 'comic', 'storyboard']);
+    expect(DIAGRAMS.map((d) => d.kind)).toEqual(['concept-map', 'venn', 'timeline', 'axes', 'cycle', 'org-chart']);
+  });
+
+  it.each(DIAGRAMS.map((d) => [d.label, d.kind] as const))('%s is added to the current drawing, selected, in one undo step', async (_label, kind) => {
+    document.body.innerHTML = '<canvas id="c"></canvas>';
+    const editor = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
+    await editor.open(buildTemplate('comic', 1123, 794, { kind: 'transparent' }));
+    const before = editor.layers().length;
+    const state = serializeProject(editor.toProject());
+
+    editor.addDiagram(kind);
+    const project = editor.toProject();
+    const added = project.layers.slice(before);
+    expect(project.layers.length).toBeGreaterThan(before + 2); // what was there stays
+    expect(editor.selected().map((o) => o.id).sort()).toEqual(added.map((l) => l.id).sort());
+    const ids = new Set(project.layers.map((l) => l.id));
+    expect(ids.size).toBe(project.layers.length);
+    for (const { object: o } of added) {
+      if (typeof o.connectFrom === 'string') expect([ids.has(o.connectFrom), ids.has(o.connectTo as string)]).toEqual([true, true]);
+      if (typeof o.attachedTo === 'string') expect(ids.has(o.attachedTo)).toBe(true);
+      // Centred on the canvas, leaving a margin around it.
+      expect(o.left as number).toBeGreaterThan(1123 * 0.1);
+      expect(o.left as number).toBeLessThan(1123 * 0.9);
+      expect(o.top as number).toBeGreaterThan(794 * 0.1);
+      expect(o.top as number).toBeLessThan(794 * 0.9);
+    }
+    const saved = serializeProject(project);
+    editor.commit(); // the ties were built in place
+    expect(serializeProject(editor.toProject())).toBe(saved);
+
+    await editor.undo();
+    expect(serializeProject(editor.toProject())).toBe(state);
+  });
+
+  it('a diagram keeps its meaningful layer names', async () => {
+    document.body.innerHTML = '<canvas id="c"></canvas>';
+    const editor = new Editor(document.getElementById('c') as HTMLCanvasElement, (s) => s);
+    await editor.open(buildTemplate('comic', 1123, 794, { kind: 'transparent' }));
+    editor.addDiagram('venn');
+    editor.addDiagram('venn');
+    expect(editor.layers().filter((l) => l.name === 'Conjunto A')).toHaveLength(2);
   });
 });

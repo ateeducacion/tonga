@@ -1,25 +1,31 @@
-// Starting points for classroom drawings («Nuevo → Plantilla»). Each template is built from the
-// same pieces the user has (shapes, text inside shapes, connectors), laid out in proportion to
-// the canvas, so everything stays editable. The result is an ordinary project.
+// Starting points for classroom drawings («Nuevo → Plantilla») and the ready-made diagrams of
+// «Formas → Diagramas». Each one is built from the same pieces the user has (shapes, text inside
+// shapes, connectors), laid out in proportion to its box, so everything stays editable.
 import { Ellipse, FabricImage, Line, Path, Rect, StaticCanvas, Textbox, type FabricObject } from 'fabric';
 import type { Background, Project } from '../project/schema';
 import { readProject } from './document';
 import { makeConnector } from './links';
 import { SHAPES } from './shapes';
 
-export type TemplateKind = 'cover-panel' | 'cover-band' | 'concept-map' | 'venn' | 'timeline' | 'comic' | 'storyboard' | 'axes' | 'cycle' | 'org-chart';
+export type TemplateKind = 'cover-panel' | 'cover-band' | 'comic' | 'storyboard';
+export type DiagramKind = 'concept-map' | 'venn' | 'timeline' | 'axes' | 'cycle' | 'org-chart';
 
+/** Whole-page starting points, offered by «Nuevo dibujo». */
 export const TEMPLATES: { kind: TemplateKind; label: string }[] = [
   { kind: 'cover-panel', label: 'Portada de recurso (panel lateral)' },
   { kind: 'cover-band', label: 'Portada de recurso (banda superior)' },
-  { kind: 'concept-map', label: 'Mapa conceptual' },
-  { kind: 'venn', label: 'Diagrama de Venn' },
-  { kind: 'timeline', label: 'Línea temporal' },
   { kind: 'comic', label: 'Cómic (4 viñetas)' },
   { kind: 'storyboard', label: 'Storyboard (6 escenas)' },
-  { kind: 'axes', label: 'Ejes cartesianos' },
-  { kind: 'cycle', label: 'Ciclo' },
-  { kind: 'org-chart', label: 'Organigrama' },
+];
+
+/** Ready-made diagrams of the «Formas» menu, added to the current drawing; `d` is the menu icon. */
+export const DIAGRAMS: { kind: DiagramKind; label: string; d: string }[] = [
+  { kind: 'concept-map', label: 'Mapa conceptual', d: 'M36 50 A14 9 0 1 0 64 50 A14 9 0 1 0 36 50 M6 12 H30 V28 H6 Z M70 12 H94 V28 H70 Z M6 72 H30 V88 H6 Z M70 72 H94 V88 H70 Z M30 28 L40 43 M70 28 L60 43 M30 72 L40 57 M70 72 L60 57' },
+  { kind: 'venn', label: 'Diagrama de Venn', d: 'M6 50 A28 28 0 1 0 62 50 A28 28 0 1 0 6 50 M38 50 A28 28 0 1 0 94 50 A28 28 0 1 0 38 50' },
+  { kind: 'timeline', label: 'Línea temporal', d: 'M4 50 H94 M86 43 L94 50 L86 57 M20 43 V57 M40 43 V57 M60 43 V57 M78 43 V57 M12 30 H28 M32 70 H48 M52 30 H68 M70 70 H86' },
+  { kind: 'axes', label: 'Ejes cartesianos', d: 'M6 50 H94 M86 43 L94 50 L86 57 M50 94 V6 M43 14 L50 6 L57 14 M26 46 V54 M74 46 V54 M46 26 H54 M46 74 H54' },
+  { kind: 'cycle', label: 'Ciclo', d: 'M50 16 A34 34 0 1 1 49.9 16 M40 16 A10 10 0 1 0 60 16 A10 10 0 1 0 40 16 M74 50 A10 10 0 1 0 94 50 A10 10 0 1 0 74 50 M40 84 A10 10 0 1 0 60 84 A10 10 0 1 0 40 84 M6 50 A10 10 0 1 0 26 50 A10 10 0 1 0 6 50' },
+  { kind: 'org-chart', label: 'Organigrama', d: 'M34 10 H66 V30 H34 Z M4 70 H30 V88 H4 Z M37 70 H63 V88 H37 Z M70 70 H96 V88 H70 Z M50 30 V50 M17 50 H83 M17 50 V70 M50 50 V70 M83 50 V70' },
 ];
 
 const INK = '#1f2937';
@@ -116,7 +122,7 @@ const COVER = {
   image: 'repositorios/iconosescuela/book-open.svg',
 };
 
-const BUILD: Record<TemplateKind, (b: Builder) => void> = {
+const BUILD: Record<TemplateKind | DiagramKind, (b: Builder) => void> = {
   // A coloured side panel with the texts and an illustration on the light side (like the
   // eXeLearning covers made with the Slide iDevice).
   'cover-panel': (b) => {
@@ -253,4 +259,11 @@ export function buildTemplate(kind: TemplateKind, width: number, height: number,
   for (const layer of project.layers) layer.locked = locked.has(layer.id);
   void canvas.dispose();
   return project;
+}
+
+/** A diagram's objects laid out in a width × height box whose top-left corner is (0, 0). */
+export function buildDiagram(kind: DiagramKind, width: number, height: number): FabricObject[] {
+  const b = new Builder(width, height);
+  BUILD[kind](b);
+  return b.objects;
 }

@@ -190,12 +190,23 @@ test('the library has icons and symbols, credited to Lucide', async ({ page }) =
 test('a new drawing can start from a template, all of it editable', async ({ page }) => {
   await page.goto('./');
   const dialog = page.getByRole('dialog', { name: 'Nuevo dibujo' });
-  await dialog.getByLabel('Plantilla').selectOption({ label: 'Mapa conceptual' });
+  await dialog.getByLabel('Plantilla').selectOption({ label: 'Cómic (4 viñetas)' });
   await dialog.getByRole('button', { name: 'Crear' }).click();
-  await expect(page.getByText('con la plantilla «Mapa conceptual»').first()).toBeVisible();
+  await expect(page.getByText('con la plantilla «Cómic (4 viñetas)»').first()).toBeVisible();
+  await expect(layers(page).filter({ hasText: /^Viñeta \d$/ })).toHaveCount(4);
+  await expect(page.getByRole('button', { name: 'Deshacer' })).toBeDisabled(); // a fresh document
+});
+
+test('a ready-made diagram from «Formas» is added on top of the drawing, in one undo step', async ({ page }) => {
+  await newDrawing(page);
+  await addShape(page, 'rectángulo');
+  await addShape(page, 'Mapa conceptual');
+  await expect(page.getByText('Mapa conceptual añadido en el centro del lienzo').first()).toBeAttached();
+  await expect(layers(page).filter({ hasText: /^Rectángulo 1$/ })).toHaveCount(1); // what was there stays
   await expect(layers(page).filter({ hasText: /^Idea principal$/ })).toHaveCount(1);
   await expect(layers(page).filter({ hasText: 'Texto de Idea 1' })).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Deshacer' })).toBeDisabled(); // a fresh document
+  await page.getByRole('button', { name: 'Deshacer' }).click();
+  await expect(layers(page)).toHaveText(['Rectángulo 1']);
 });
 
 test('a resource cover template has a title to edit and a library image', async ({ page }) => {
