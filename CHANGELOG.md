@@ -4,9 +4,14 @@ Todos los cambios relevantes se documentan aquí, con el formato de [Keep a Chan
 
 ## [Unreleased]
 
+## [2.3.12] - 2026-11-26
+
 ### Cambiado
 
 - **Diagramas en «Formas»**: el mapa conceptual, el diagrama de Venn, la línea temporal, los ejes cartesianos, el ciclo y el organigrama pasan de las plantillas de «Nuevo dibujo» a la sección «Diagramas» del menú Formas, y se añaden al dibujo actual en lugar de sustituirlo. «Nuevo dibujo» conserva como plantillas las dos portadas de recurso, el cómic y el storyboard (#89).
+- **Menú Formas** más compacto: Formas y Diagramas en tres columnas (#89).
+- La documentación de despliegue advierte de que se publica `dist/`, no el repositorio (#83).
+- Actualización de dependencias de desarrollo y de las actions (#81, #82, #84, #85, #87, #88).
 
 ## [2.3.11] - 2026-10-26
 
