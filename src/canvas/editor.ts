@@ -12,6 +12,7 @@ import './controls';
 import { loadFonts } from './fonts';
 import { makeQr, readQr, type QrStyle } from './qr';
 import { SHAPES, type ShapeDef, type ShapeKind } from './shapes';
+import { buildDiagram, type DiagramKind } from './templates';
 import { snapToGrid, snapToObjects, type Guide, type SnapResult, type Stuck } from './snap';
 import { followText, isConnector, makeConnector, refreshLinks } from './links';
 import { applyAdjustments, applyCrop, cropFromFrame, isImage, readAdjustments, readCrop, removeBackground, type ImageAdjustments, type ImageCrop } from './image';
@@ -619,6 +620,26 @@ export class Editor {
       for (const o of objects) {
         this.identify(o, layerType(o), objects.length === 1 ? name : undefined);
         o.setCoords();
+        this.canvas.add(o);
+      }
+    } finally {
+      this.restoring = false;
+    }
+    this.select(objects.map((o) => o.id ?? ''));
+    this.commit();
+  }
+
+  /**
+   * Adds a ready-made diagram (Venn, timeline…) on top of the drawing, centred on 70 % of the
+   * canvas and selected, as one undo step. Its layers keep their names («Conjunto A»…).
+   */
+  addDiagram(kind: DiagramKind): void {
+    const objects = buildDiagram(kind, this.width * 0.7, this.height * 0.7);
+    this.canvas.discardActiveObject();
+    this.restoring = true;
+    try {
+      for (const o of objects) {
+        o.set({ left: o.left + this.width * 0.15, top: o.top + this.height * 0.15 }).setCoords();
         this.canvas.add(o);
       }
     } finally {

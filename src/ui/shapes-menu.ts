@@ -1,6 +1,8 @@
 // «Formas» menu: a native popover with the predefined shapes, grouped as in eXeLearning. Each
-// button carries data-add, so the app wires it like any other «Añadir …» button.
+// button carries data-add, so the app wires it like any other «Añadir …» button; the ready-made
+// diagrams (Venn, timeline…), at the end of «Diagramas», carry data-diagram instead.
 import { SHAPES, type ShapeGroup } from '../canvas/shapes';
+import { DIAGRAMS } from '../canvas/templates';
 import { byId, h } from './dom';
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -21,12 +23,14 @@ export function setupShapesMenu(): void {
     ...groups.map((group) => {
       const title = h('h3', { class: 'shapes-title' }, group);
       const grid = h('div', { class: 'shapes-grid' });
-      for (const s of SHAPES.filter((x) => x.group === group)) {
-        const b = h('button', { type: 'button', class: 'tool', 'data-add': s.kind, 'aria-label': `Añadir ${s.label.toLowerCase()}`, title: s.label });
-        b.append(preview(s.d));
+      const button = (data: string, kind: string, label: string, d: string) => {
+        const b = h('button', { type: 'button', class: 'tool', [data]: kind, 'aria-label': `Añadir ${label}`, title: label });
+        b.append(preview(d));
         b.addEventListener('click', () => menu.hidePopover());
         grid.append(b);
-      }
+      };
+      for (const s of SHAPES.filter((x) => x.group === group)) button('data-add', s.kind, s.label.toLowerCase(), s.d);
+      if (group === 'Diagramas') for (const d of DIAGRAMS) button('data-diagram', d.kind, d.label, d.d);
       return h('section', { class: 'shapes-section' }, title, grid);
     }),
   );
